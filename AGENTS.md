@@ -11,6 +11,7 @@ Read `CONTEXT.md` first. It defines the domain language and the hard constraints
 | Why the legacy tool is slow / what patterns to avoid | `docs/legacy-analysis/overview.md` |
 | A specific legacy repo's algorithm or data format | `docs/legacy-analysis/<GAME>-ASS.md` |
 | Implementing or changing the armor search engine | `docs/specs/engine-spec.md` + the relevant `docs/legacy-analysis/<GAME>-ASS.md` |
+| Phase 0/1 implementation work (foundation, ETL, solver, UI) | `docs/specs/phase0-contracts.md` — interfaces and file ownership are settled there |
 | Adding a new game / generation | `docs/specs/data-pack-spec.md` + `docs/roadmap.md` |
 | Database schema, ETL, queries, swapping SQLite→MariaDB | `docs/specs/database-schema.md` |
 | Why a decision was made | `docs/adr/` (each ADR is self-contained) |

@@ -1,0 +1,26 @@
+set-seeker
+==========
+
+This project is inspired by and partially derived from Athena's Armor Set Search (ASS),
+published by AthenaADP under the MIT License:
+
+    Copyright (c) 2017 AthenaADP
+
+    - https://github.com/AthenaADP/MHFU-ASS
+    - https://github.com/AthenaADP/MHP3-ASS
+    - https://github.com/AthenaADP/MH3U-ASS
+    - https://github.com/AthenaADP/MH4-ASS
+    - https://github.com/AthenaADP/MH4U-ASS
+    - https://github.com/AthenaADP/MHGen-ASS
+    - https://github.com/AthenaADP/MHGU-ASS
+
+The full MIT license text ships with each vendored copy under `sources/<REPO>/LICENSE`
+and applies to the game data files derived from those repositories.
+
+set-seeker itself is licensed under the GNU Affero General Public License v3
+(see LICENSE). The MIT license of the upstream projects is permissive and compatible
+with this choice; their copyright notice is preserved here as required.
+
+Monster Hunter is a trademark of Capcom. This is an unofficial fan-made tool,
+not affiliated with or endorsed by Capcom. All game data (armor names, skills,
+statistics) remains the property of Capcom.

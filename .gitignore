@@ -1,0 +1,7 @@
+# Vendored legacy ASS repos — local reference clones, never committed (see SOURCES.md)
+sources/
+
+__pycache__/
+*.pyc
+.venv/
+data/*.db

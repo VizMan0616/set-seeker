@@ -13,6 +13,7 @@ from typing import Any
 
 from app.etl.loaders import PackData
 from app.etl.manifest import PackManifest
+from app.repository import tables as t
 from app.repository.game_data import GameDataRepository
 
 ID_STRIDE = 1_000_000  # per-game id space within each game-data table
@@ -28,40 +29,44 @@ class PackWriter:
         counts: dict[str, int] = {"games": 1}
 
         # Skill trees + threshold rows. Tree ids are needed before armor/decos.
+        # MHFU-ASS ships no Japanese names; fall back to English
+        # (data-pack-spec.md ETL rule 2).
         tree_ids: dict[str, int] = {}
-        n_skills = 0
+        tree_rows: list[dict[str, Any]] = []
+        skill_rows: list[dict[str, Any]] = []
         for ordinal, block in enumerate(data.skill_trees, start=1):
-            # MHFU-ASS ships no Japanese names; fall back to English
-            # (data-pack-spec.md ETL rule 2).
-            tree = self._repo.create_skill_tree(
-                id=base + ordinal,
-                game_id=game_id, name_en=block.name, name_ja=block.name,
-                category_tag=block.tag,
-            )
-            tree_ids[block.name] = tree["id"]
+            tree_id = base + ordinal
+            tree_ids[block.name] = tree_id
+            tree_rows.append({
+                "id": tree_id, "game_id": game_id, "name_en": block.name,
+                "name_ja": block.name, "category_tag": block.tag,
+            })
             for points, skill_name in block.thresholds:
-                n_skills += 1
-                self._repo.create_skill(
-                    id=base + n_skills,
-                    tree_id=tree["id"], name_en=skill_name, name_ja=skill_name,
-                    points=points, is_negative=points < 0,
-                )
-        counts["skill_trees"] = len(tree_ids)
-        counts["skills"] = n_skills
+                skill_rows.append({
+                    "id": base + len(skill_rows) + 1, "tree_id": tree_id,
+                    "name_en": skill_name, "name_ja": skill_name,
+                    "points": points, "is_negative": points < 0,
+                })
+        self._repo.bulk_insert(t.skill_trees, tree_rows)
+        self._repo.bulk_insert(t.skills, skill_rows)
+        counts["skill_trees"] = len(tree_rows)
+        counts["skills"] = len(skill_rows)
 
-        n_armor_skills = 0
+        armor_rows: list[dict[str, Any]] = []
+        armor_skill_rows: list[dict[str, Any]] = []
         for ordinal, row in enumerate(data.armor, start=1):
-            piece = self._repo.create_armor_piece(
-                id=base + ordinal,
-                game_id=game_id, slot=row.slot, name_en=row.name_en,
-                name_ja=row.name_en, rarity=row.rarity, slots=row.slots,
-                gender=row.gender, hunter_type=row.hunter_type,
-                hr_required=row.hr_required, village_stars=row.village_stars,
-                defense=row.defense, max_defense=row.defense,
-                res_fire=row.res_fire, res_water=row.res_water,
-                res_ice=row.res_ice, res_thunder=row.res_thunder,
-                res_dragon=row.res_dragon, torso_inc=row.torso_inc,
-            )
+            piece_id = base + ordinal
+            armor_rows.append({
+                "id": piece_id, "game_id": game_id, "slot": row.slot,
+                "name_en": row.name_en, "name_ja": row.name_en,
+                "rarity": row.rarity, "slots": row.slots,
+                "gender": row.gender, "hunter_type": row.hunter_type,
+                "hr_required": row.hr_required, "village_stars": row.village_stars,
+                "defense": row.defense, "max_defense": row.defense,
+                "res_fire": row.res_fire, "res_water": row.res_water,
+                "res_ice": row.res_ice, "res_thunder": row.res_thunder,
+                "res_dragon": row.res_dragon, "torso_inc": row.torso_inc,
+            })
             seen_trees: set[int] = set()
             for tree_name, points in row.skills:
                 tree_id = tree_ids[tree_name]
@@ -70,33 +75,39 @@ class PackWriter:
                     # first match, so keep-first (armor_skills PK is (armor, tree)).
                     continue
                 seen_trees.add(tree_id)
-                self._repo.set_armor_skill(armor_id=piece["id"], tree_id=tree_id,
-                                           points=points)
-                n_armor_skills += 1
-        counts["armor_pieces"] = len(data.armor)
-        counts["armor_skills"] = n_armor_skills
+                armor_skill_rows.append({
+                    "armor_id": piece_id, "tree_id": tree_id, "points": points,
+                })
+        self._repo.bulk_insert(t.armor_pieces, armor_rows)
+        self._repo.bulk_insert(t.armor_skills, armor_skill_rows)
+        counts["armor_pieces"] = len(armor_rows)
+        counts["armor_skills"] = len(armor_skill_rows)
 
-        n_deco_skills = 0
+        deco_rows: list[dict[str, Any]] = []
+        deco_skill_rows: list[dict[str, Any]] = []
         for ordinal, row in enumerate(data.decorations, start=1):
-            deco = self._repo.create_decoration(
-                id=base + ordinal,
-                game_id=game_id, name_en=row.name_en, name_ja=row.name_en,
-                rarity=1,  # MHFU decorations.csv has no rarity column
-                size=row.size, hr_required=row.hr_required,
-            )
+            deco_id = base + ordinal
+            deco_rows.append({
+                "id": deco_id, "game_id": game_id, "name_en": row.name_en,
+                "name_ja": row.name_en,
+                "rarity": 1,  # MHFU decorations.csv has no rarity column
+                "size": row.size, "hr_required": row.hr_required,
+            })
             for tree_name, points in row.skills:
-                self._repo.set_decoration_skill(decoration_id=deco["id"],
-                                                tree_id=tree_ids[tree_name],
-                                                points=points)
-                n_deco_skills += 1
-        counts["decorations"] = len(data.decorations)
-        counts["decoration_skills"] = n_deco_skills
+                deco_skill_rows.append({
+                    "decoration_id": deco_id, "tree_id": tree_ids[tree_name],
+                    "points": points,
+                })
+        self._repo.bulk_insert(t.decorations, deco_rows)
+        self._repo.bulk_insert(t.decoration_skills, deco_skill_rows)
+        counts["decorations"] = len(deco_rows)
+        counts["decoration_skills"] = len(deco_skill_rows)
 
         return counts
 
     def _clear_pack_data(self, manifest: PackManifest) -> int:
-        """Delete the pack's game-data children (FK-safe order) and return the
-        game id, reusing the existing `games` row when present so user-table
+        """Delete the pack's game-data children (FK-safe bulk delete) and return
+        the game id, reusing the existing `games` row when present so user-table
         references survive a rebuild."""
         repo = self._repo
         features = json.dumps(manifest.features, sort_keys=True)
@@ -106,34 +117,7 @@ class PackWriter:
                                     generation=manifest.generation,
                                     features=features)["id"]
         game_id = game["id"]
-
-        for piece in repo.list_armor_pieces(game_id, allow_event=True):
-            for skill in repo.list_armor_skills_for_piece(piece["id"]):
-                repo.delete_armor_skill(skill["armor_id"], skill["tree_id"])
-            repo.delete_armor_piece(piece["id"])
-
-        for deco in repo.list_decorations(game_id, allow_event=True):
-            for skill in repo.list_decoration_skills_for_decoration(deco["id"]):
-                repo.delete_decoration_skill(skill["decoration_id"], skill["tree_id"])
-            repo.delete_decoration(deco["id"])
-
-        for tree in repo.list_skill_trees(game_id):
-            for skill in repo.list_skills_for_tree(tree["id"]):
-                repo.delete_skill(skill["id"])
-            repo.delete_skill_tree(tree["id"])
-
-        for charm_type in repo.list_charm_types(game_id):
-            for rng in repo.list_charm_skill_ranges(charm_type["id"]):
-                repo.delete_charm_skill_range(rng["charm_type_id"], rng["tree_id"],
-                                              rng["skill_slot"])
-            for threshold in repo.list_charm_slot_thresholds(charm_type["id"]):
-                repo.delete_charm_slot_threshold(threshold["charm_type_id"],
-                                                 threshold["fulfillment"])
-            repo.delete_charm_type(charm_type["id"])
-
-        for entry in repo.list_mh3u_charm_table(game_id):
-            repo.delete_mh3u_charm_table_entry(entry["id"])
-
+        repo.delete_game_data(game_id)
         repo.update_game(game_id, name=manifest.name,
                          generation=manifest.generation, features=features)
         return game_id

@@ -62,6 +62,51 @@ class GameDataRepository:
             )
             return result.rowcount > 0
 
+    # --- bulk operations (ETL rebuild path) ---
+
+    def bulk_insert(self, table, rows: list[dict[str, Any]]) -> None:
+        """Multi-row insert in a single transaction (SQLAlchemy Core only)."""
+        if not rows:
+            return
+        with self._engine.begin() as conn:
+            conn.execute(insert(table), rows)
+
+    def delete_game_data(self, game_id: int) -> None:
+        """Delete every game-data child row for a pack in one transaction.
+
+        FK-safe order (children before parents); the `games` row itself is
+        kept so user-table references survive a rebuild. User tables
+        (`sessions`, `user_charms`, `search_states`) are never touched.
+        """
+        c = t
+        piece_ids = select(c.armor_pieces.c.id).where(c.armor_pieces.c.game_id == game_id)
+        deco_ids = select(c.decorations.c.id).where(c.decorations.c.game_id == game_id)
+        tree_ids = select(c.skill_trees.c.id).where(c.skill_trees.c.game_id == game_id)
+        charm_type_ids = select(c.charm_types.c.id).where(c.charm_types.c.game_id == game_id)
+        with self._engine.begin() as conn:
+            conn.execute(delete(c.armor_skills).where(c.armor_skills.c.armor_id.in_(piece_ids)))
+            conn.execute(
+                delete(c.decoration_skills).where(c.decoration_skills.c.decoration_id.in_(deco_ids))
+            )
+            conn.execute(
+                delete(c.charm_skill_ranges).where(
+                    c.charm_skill_ranges.c.charm_type_id.in_(charm_type_ids)
+                )
+            )
+            conn.execute(
+                delete(c.charm_slot_thresholds).where(
+                    c.charm_slot_thresholds.c.charm_type_id.in_(charm_type_ids)
+                )
+            )
+            conn.execute(
+                delete(c.mh3u_charm_tables).where(c.mh3u_charm_tables.c.game_id == game_id)
+            )
+            conn.execute(delete(c.skills).where(c.skills.c.tree_id.in_(tree_ids)))
+            conn.execute(delete(c.armor_pieces).where(c.armor_pieces.c.game_id == game_id))
+            conn.execute(delete(c.decorations).where(c.decorations.c.game_id == game_id))
+            conn.execute(delete(c.skill_trees).where(c.skill_trees.c.game_id == game_id))
+            conn.execute(delete(c.charm_types).where(c.charm_types.c.game_id == game_id))
+
     # --- games ---
 
     def create_game(self, *, code: str, name: str, generation: int, features: str,

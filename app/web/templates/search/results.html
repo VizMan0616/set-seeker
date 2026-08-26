@@ -1,0 +1,11 @@
+<div id="results-list">
+  {% for result in results %}
+  {% include "search/_result_card.html" %}
+  {% else %}
+  <p class="ss-empty">No sets activate those skills under these filters. Loosen a filter or drop a skill.</p>
+  {% endfor %}
+</div>
+{% if partial %}
+<p class="ss-partial">Search hit its time budget — more sets may exist than shown.</p>
+{% endif %}
+{% include "search/_load_more.html" %}

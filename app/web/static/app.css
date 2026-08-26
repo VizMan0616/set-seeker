@@ -1,0 +1,297 @@
+/* set-seeker theme — "guild ledger": pine, brass, parchment.
+   Bootstrap 5.3 is the only framework; these are variable overrides plus a
+   small set of component classes (ss-*). No utility-framework classes. */
+
+:root {
+  --ss-pine: #20342a;
+  --ss-pine-deep: #16241d;
+  --ss-moss: #4a6b57;
+  --ss-brass: #b08d2f;
+  --ss-brass-bright: #d4ac45;
+  --ss-paper: #f3f1e8;
+  --ss-card: #fbfaf4;
+  --ss-ink: #232a24;
+  --ss-blood: #9a3b2e;
+
+  --bs-body-bg: var(--ss-paper);
+  --bs-body-color: var(--ss-ink);
+  --bs-body-font-family: "Source Sans 3", system-ui, -apple-system, sans-serif;
+  --bs-border-color: rgba(32, 52, 42, 0.18);
+}
+
+body {
+  font-family: var(--bs-body-font-family);
+}
+
+h1, h2, h3, .ss-card-title {
+  font-family: "Alegreya", Georgia, serif;
+}
+
+/* --- navbar / brand --- */
+
+.ss-navbar {
+  background: var(--ss-pine);
+  border-bottom: 3px solid var(--ss-brass);
+}
+
+.ss-brand {
+  font-family: "Alegreya", Georgia, serif;
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: var(--ss-paper) !important;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The crest: five sockets for the five armor slots, center one (body) largest. */
+.ss-crest {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 0.55rem;
+}
+
+.ss-crest i {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ss-brass);
+}
+
+.ss-crest i:nth-child(3) {
+  width: 12px;
+  height: 12px;
+  background: var(--ss-brass-bright);
+}
+
+.ss-navbar-note {
+  color: rgba(243, 241, 232, 0.65);
+  font-size: 0.85rem;
+}
+
+/* --- hero --- */
+
+.ss-eyebrow {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: 0.14em;
+  color: var(--ss-moss);
+  margin-bottom: 0.25rem;
+}
+
+.ss-title {
+  font-weight: 800;
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
+  color: var(--ss-pine-deep);
+}
+
+.ss-lede {
+  max-width: 42rem;
+  color: rgba(35, 42, 36, 0.8);
+}
+
+/* --- form --- */
+
+.ss-form {
+  background: var(--ss-card);
+  border: 1px solid var(--bs-border-color);
+  border-top: 4px solid var(--ss-pine);
+}
+
+.ss-legend {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ss-pine);
+  float: none;
+  width: auto;
+  margin-bottom: 0.75rem;
+}
+
+.ss-legend-note {
+  font-family: var(--bs-body-font-family);
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(35, 42, 36, 0.55);
+  margin-left: 0.35rem;
+}
+
+.ss-label {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ss-moss);
+  margin-bottom: 0.2rem;
+}
+
+.ss-hint {
+  font-size: 0.85rem;
+  color: rgba(35, 42, 36, 0.6);
+  margin-bottom: 0;
+}
+
+.ss-btn-brass {
+  --bs-btn-font-weight: 600;
+  --bs-btn-color: var(--ss-pine-deep);
+  --bs-btn-bg: var(--ss-brass);
+  --bs-btn-border-color: var(--ss-brass);
+  --bs-btn-hover-color: var(--ss-pine-deep);
+  --bs-btn-hover-bg: var(--ss-brass-bright);
+  --bs-btn-hover-border-color: var(--ss-brass-bright);
+  --bs-btn-active-color: var(--ss-pine-deep);
+  --bs-btn-active-bg: var(--ss-brass-bright);
+  --bs-btn-active-border-color: var(--ss-brass-bright);
+  --bs-btn-disabled-color: rgba(35, 42, 36, 0.5);
+  --bs-btn-disabled-bg: rgba(176, 141, 47, 0.5);
+  --bs-btn-disabled-border-color: transparent;
+}
+
+/* --- result cards --- */
+
+.ss-result {
+  background: var(--ss-card);
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid var(--ss-brass);
+}
+
+.ss-result .card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.ss-card-title {
+  font-weight: 700;
+  color: var(--ss-pine-deep);
+}
+
+.ss-defense {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-stat-label {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ss-moss);
+  margin-right: 0.35rem;
+}
+
+.ss-piece {
+  background: transparent;
+}
+
+.ss-slot-label {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ss-moss);
+  text-transform: lowercase;
+  letter-spacing: 0.08em;
+  display: inline-block;
+  min-width: 3.2rem;
+}
+
+.ss-piece-name {
+  font-weight: 600;
+}
+
+.ss-piece-meta {
+  font-size: 0.85rem;
+  color: rgba(35, 42, 36, 0.6);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ss-alts summary {
+  font-size: 0.85rem;
+  color: var(--ss-moss);
+  cursor: pointer;
+}
+
+.ss-skill-badge {
+  background: var(--ss-pine);
+  color: var(--ss-paper);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.45em 0.7em;
+  margin-right: 0.35rem;
+}
+
+.ss-deco {
+  font-size: 0.9rem;
+  margin-right: 0.6rem;
+}
+
+/* The signature element: decoration sockets as Monster Hunter "O--" pips.
+   Pip diameter scales with the decoration size the slot accepts. */
+.ss-pip {
+  display: inline-block;
+  border: 2px solid var(--ss-brass);
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.ss-pip-1 { width: 10px; height: 10px; }
+.ss-pip-2 { width: 14px; height: 14px; }
+.ss-pip-3 { width: 18px; height: 18px; }
+
+.ss-no-spare {
+  color: rgba(35, 42, 36, 0.45);
+}
+
+/* --- states --- */
+
+.ss-load-more {
+  text-align: center;
+  padding: 0.5rem 0 1.5rem;
+}
+
+.ss-exhausted {
+  color: rgba(35, 42, 36, 0.6);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.ss-partial {
+  color: var(--ss-blood);
+  font-size: 0.9rem;
+}
+
+.ss-empty {
+  color: rgba(35, 42, 36, 0.7);
+  padding: 1rem 0;
+}
+
+.ss-working {
+  color: var(--ss-moss);
+  font-size: 0.9rem;
+}
+
+.ss-footer {
+  font-size: 0.8rem;
+  color: rgba(35, 42, 36, 0.5);
+  border-top: 1px solid var(--bs-border-color);
+  padding-top: 1rem;
+}
+
+/* htmx indicator pattern (htmx ships no CSS of its own) */
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .htmx-indicator {
+    transition: none;
+  }
+}

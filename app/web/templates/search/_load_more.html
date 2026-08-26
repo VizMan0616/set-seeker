@@ -1,0 +1,15 @@
+<div id="load-more" class="ss-load-more"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if exhausted %}
+  <p class="ss-exhausted">All sets found — nothing more to load.</p>
+  {% else %}
+  <button type="button"
+          class="btn ss-btn-brass"
+          hx-post="/search/{{ search_id }}/more"
+          hx-target="#results-list"
+          hx-swap="beforeend"
+          hx-indicator="#load-more-working">Load more sets</button>
+  <span id="load-more-working" class="htmx-indicator ss-working">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  </span>
+  {% endif %}
+</div>

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}set-seeker — armor set search{% endblock %}
+{% block content %}
+<header class="ss-hero mb-4">
+  <p class="ss-eyebrow">Guild workshop</p>
+  <h1 class="ss-title">What should this set do?</h1>
+  <p class="ss-lede">
+    Pick the skills you want active. set-seeker finds complete armor sets —
+    pieces, decorations, and spare slots — that activate them.
+  </p>
+</header>
+
+<form class="card ss-form mb-4"
+      x-data="{ game: '{{ games[0].code if games else 'mhfu' }}' }"
+      action="/games/{{ games[0].code if games else 'mhfu' }}/search"
+      method="post"
+      hx-post="/games/{{ games[0].code if games else 'mhfu' }}/search"
+      :hx-post="'/games/' + game + '/search'"
+      hx-target="#results"
+      hx-swap="innerHTML"
+      hx-indicator="#search-working">
+
+  <div class="card-body">
+    <label class="form-label ss-label" for="game">Game</label>
+    <select id="game" class="form-select" x-model="game">
+      {% for g in games %}
+      <option value="{{ g.code }}">{{ g.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <fieldset class="card-body border-top">
+    <legend class="ss-legend">Desired skills <span class="ss-legend-note">pick 1–{{ max_skill_picks }}</span></legend>
+    {% for i in range(max_skill_picks) %}
+    <div class="row g-2 mb-2">
+      <div class="col-7 col-md-8">
+        <label class="visually-hidden" for="skill-tree-{{ i }}">Skill {{ i + 1 }}</label>
+        <select id="skill-tree-{{ i }}" class="form-select" name="skill_tree">
+          <option value="">—</option>
+          {% for tree in skill_trees %}
+          <option value="{{ tree.id }}">{{ tree.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-5 col-md-4">
+        <label class="visually-hidden" for="skill-points-{{ i }}">Minimum points for skill {{ i + 1 }}</label>
+        <input id="skill-points-{{ i }}" class="form-control" type="number"
+               name="skill_points" min="1" max="99" placeholder="points ≥">
+      </div>
+    </div>
+    {% endfor %}
+    <p class="ss-hint">Points needed to activate the skill — Attack Up (S) needs 10.</p>
+  </fieldset>
+
+  <fieldset class="card-body border-top">
+    <legend class="ss-legend">Hunter</legend>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="weapon-slots">Weapon slots</label>
+        <select id="weapon-slots" class="form-select" name="weapon_slots">
+          <option value="0">None</option>
+          <option value="1">O--</option>
+          <option value="2">OO-</option>
+          <option value="3">OOO</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="gender">Gender</label>
+        <select id="gender" class="form-select" name="gender">
+          <option value="m">Male</option>
+          <option value="f">Female</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label ss-label" for="hunter-type">Hunter type</label>
+        <select id="hunter-type" class="form-select" name="hunter_type">
+          <option value="blademaster">Blademaster</option>
+          <option value="gunner">Gunner</option>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="card-body border-top">
+    <legend class="ss-legend">Progression <span class="ss-legend-note">leave blank for uncapped</span></legend>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="hr">HR up to</label>
+        <input id="hr" class="form-control" type="number" name="hr" min="1" max="999" placeholder="Uncapped">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="village-stars">Village ★ up to</label>
+        <input id="village-stars" class="form-control" type="number" name="village_stars" min="1" max="99" placeholder="Uncapped">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label ss-label" for="sort">Rank results by</label>
+        <select id="sort" class="form-select" name="sort">
+          <option value="defense">Defense</option>
+          <option value="slots">Spare slots</option>
+          <option value="rarity">Rarity</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="allow-event" name="allow_event">
+          <label class="form-check-label" for="allow-event">Include event gear</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="allow-bad-skills" name="allow_bad_skills">
+          <label class="form-check-label" for="allow-bad-skills">Allow sets with negative skills</label>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="card-body border-top d-flex align-items-center gap-3">
+    <button type="submit" class="btn ss-btn-brass btn-lg">Find sets</button>
+    <span id="search-working" class="htmx-indicator ss-working">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Searching…
+    </span>
+  </div>
+</form>
+
+<div id="results" aria-live="polite"></div>
+{% endblock %}

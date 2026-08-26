@@ -1,0 +1,58 @@
+<div class="card ss-result mb-3">
+  <div class="card-header d-flex justify-content-between align-items-baseline">
+    <span class="ss-card-title">Armor set</span>
+    <span class="ss-defense"><span class="ss-stat-label">Def</span> {{ result.defense }}</span>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for piece in result.pieces %}
+    <li class="list-group-item ss-piece">
+      <div class="d-flex justify-content-between align-items-baseline gap-2">
+        <div>
+          <span class="ss-slot-label">{{ piece.slot }}</span>
+          <span class="ss-piece-name">{{ piece.name }}</span>
+        </div>
+        <span class="ss-piece-meta">R{{ piece.rarity }} · {{ piece.defense }} def</span>
+      </div>
+      {% if piece.alternates | length > 1 %}
+      <details class="ss-alts">
+        <summary>+{{ piece.alternates | length - 1 }} equivalent piece{{ "s" if piece.alternates | length > 2 }}</summary>
+        <ul class="mb-0">
+          {% for alt in piece.alternates %}
+          {% if alt.name != piece.name %}<li>{{ alt.name }}</li>{% endif %}
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <div class="card-body">
+    <div class="ss-skills mb-2">
+      {% for skill in result.active_skills %}
+      <span class="badge ss-skill-badge">{{ skill.name }} · {{ skill.points }}</span>
+      {% endfor %}
+    </div>
+    {% if result.charm %}
+    <p class="ss-charm mb-2"><span class="ss-stat-label">Talisman</span> {{ result.charm }}</p>
+    {% endif %}
+    {% if result.decorations %}
+    <div class="ss-decos mb-2">
+      <span class="ss-stat-label">Decorations</span>
+      {% for deco in result.decorations %}
+      <span class="ss-deco">{{ deco.name }} ×{{ deco.count }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="ss-spare">
+      <span class="ss-stat-label">Spare slots</span>
+      {% set ns = namespace(total=0) %}
+      {% for size in [1, 2, 3] %}
+      {% set ns.total = ns.total + result.spare_slots[size - 1] %}
+      {% for _ in range(result.spare_slots[size - 1]) %}
+      <span class="ss-pip ss-pip-{{ size }}" title="size-{{ size }} slot"></span>
+      {% endfor %}
+      {% endfor %}
+      {% if ns.total == 0 %}<span class="ss-no-spare">—</span>{% endif %}
+    </div>
+  </div>
+</div>

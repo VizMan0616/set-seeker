@@ -1,0 +1,24 @@
+# VCS / local environments
+.git
+.venv
+.cursor
+
+# Python noise
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+
+# Local runtime database (built fresh inside the image)
+data
+
+# Tests and docs are not needed to build or run the app
+tests
+docs
+
+# Legacy source clones: only the MHFU pack data is needed at build time
+# (phase 0). Their .git dirs never enter the build context.
+sources/*/.git
+sources/*
+!sources/MHFU-ASS

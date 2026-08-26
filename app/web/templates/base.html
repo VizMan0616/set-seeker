@@ -7,10 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700;800&family=Alegreya+SC:wght@700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', path='/vendor/bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}">
-  <script src="{{ url_for('static', path='/vendor/htmx.min.js') }}"></script>
-  <script defer src="{{ url_for('static', path='/vendor/alpine.min.js') }}"></script>
+  <!-- Root-relative paths: absolute url_for URLs would inherit the scheme uvicorn
+       sees (plain http behind a TLS-terminating proxy) and get mixed-content blocked. -->
+  <link rel="stylesheet" href="/static/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/vendor/htmx.min.js"></script>
+  <script defer src="/static/vendor/alpine.min.js"></script>
 </head>
 <body>
   <nav class="navbar ss-navbar">
@@ -28,6 +30,6 @@
   <footer class="container pb-4">
     <p class="ss-footer">Open source (AGPLv3) · game data derived from Athena's ASS (MIT) · see NOTICE</p>
   </footer>
-  <script src="{{ url_for('static', path='/vendor/bootstrap.bundle.min.js') }}"></script>
+  <script src="/static/vendor/bootstrap.bundle.min.js"></script>
 </body>
 </html>

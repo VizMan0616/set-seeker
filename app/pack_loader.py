@@ -73,6 +73,7 @@ class PackLoader:
                 ),
                 rarity=d["rarity"],
                 hr_required=d["hr_required"],
+                village_stars=d["village_stars"],
                 is_event=bool(d["is_event"]),
             )
             for d in self._repo.list_decorations(game_id, allow_event=True)

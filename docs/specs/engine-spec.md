@@ -38,6 +38,10 @@ Port of the legacy `GetRelevantData` idea, without its O(n²) implementation:
    requested tree *and* have below-maximum slot counts. (A piece with 3 slots is always
    relevant: slots are generic currency.)
 2. **Hard filters** — gender, hunter type, HR/village★ ceiling, event-gear flag, per-game
+   mechanics. The progression ceiling is **OR-availability**: a piece or jewel is excluded only
+   when it exceeds *both* caps (legacy `Armor.cpp:102`); the stored per-path value is the
+   `max(available, required)` collapse of the legacy `A!B` level syntax, where 10 is the
+   sentinel for "not obtainable via this path" (both caps max at 9). A blank cap is uncapped.
    exclusions from the query.
 3. **Dominance prune** — piece A dominates piece B (same slot) if A ≥ B on every requested
    tree and on slot count, with at least one strict. Dominated pieces leave the domain.

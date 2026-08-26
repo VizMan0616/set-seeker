@@ -92,6 +92,7 @@ class PackWriter:
                 "name_ja": row.name_en,
                 "rarity": 1,  # MHFU decorations.csv has no rarity column
                 "size": row.size, "hr_required": row.hr_required,
+                "village_stars": row.village_stars,
             })
             for tree_name, points in row.skills:
                 deco_skill_rows.append({

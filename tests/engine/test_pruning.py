@@ -89,6 +89,80 @@ def test_prune_hard_filters_gender_and_event(tiny_pack_data):
     assert {90, 91} <= legs_member_ids
 
 
+def _pack_with_extra_pieces(tiny_pack_data, extra):
+    return tiny_pack_data.__class__(
+        game=tiny_pack_data.game,
+        game_id=tiny_pack_data.game_id,
+        pieces=tuple(list(tiny_pack_data.pieces) + extra),
+        decorations=tiny_pack_data.decorations,
+        skills=tiny_pack_data.skills,
+        talismans=tiny_pack_data.talismans,
+    )
+
+
+def test_progression_caps_use_or_availability(tiny_pack_data):
+    """Legacy Armor.cpp:102: excluded only when BOTH progression caps are exceeded.
+
+    10 is the sentinel for "not obtainable via this path" (both caps max at 9),
+    so G-rank pieces carry village_stars=10 and village pieces hr_required=10.
+    """
+    pack = _pack_with_extra_pieces(tiny_pack_data, [
+        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),   # HR path
+        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),  # village path
+        _piece(94, LEGS, slots=3, attack=5, hr_required=10, village_stars=10), # neither
+    ])
+    pruned = prune(pack, make_query(min_points=10, hr=9, village_stars=9))
+
+    legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
+    assert 92 in legs_member_ids      # reachable via HR
+    assert 93 in legs_member_ids      # reachable via village
+    assert 94 not in legs_member_ids  # exceeds both caps
+
+
+def test_progression_caps_close_the_other_path(tiny_pack_data):
+    pack = _pack_with_extra_pieces(tiny_pack_data, [
+        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
+        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
+    ])
+    pruned = prune(pack, make_query(min_points=10, hr=9, village_stars=3))
+
+    legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
+    assert 92 in legs_member_ids       # HR path still open
+    assert 93 not in legs_member_ids   # village 4 > cap 3, HR sentinel 10 > 9
+
+
+def test_uncapped_progression_paths_admit_everything(tiny_pack_data):
+    pack = _pack_with_extra_pieces(tiny_pack_data, [
+        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
+        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
+    ])
+    pruned = prune(pack, make_query(min_points=10))  # both caps None = uncapped
+
+    legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
+    assert {92, 93} <= legs_member_ids
+
+
+def test_village_only_decoration_survives_hr_cap(tiny_pack_data):
+    """Village-path jewels (hr sentinel 10) must not vanish from capped searches."""
+    from app.engine.data import Decoration
+
+    pack = tiny_pack_data.__class__(
+        game=tiny_pack_data.game,
+        game_id=tiny_pack_data.game_id,
+        pieces=tiny_pack_data.pieces,
+        decorations=tiny_pack_data.decorations
+        + (Decoration(id=199, size=1, skills=((ATTACK_TREE, 1),),
+                      hr_required=10, village_stars=4),),
+        skills=tiny_pack_data.skills,
+        talismans=tiny_pack_data.talismans,
+    )
+    pruned = prune(pack, make_query(min_points=10, hr=9, village_stars=9))
+    assert 199 in {d.id for d in pruned.decorations}
+
+    pruned_low = prune(pack, make_query(min_points=10, hr=1, village_stars=1))
+    assert 199 not in {d.id for d in pruned_low.decorations}
+
+
 def test_prune_bad_skill_thresholds_follow_allow_bad_skills(tiny_pack_data):
     from app.engine.data import SkillThreshold
 

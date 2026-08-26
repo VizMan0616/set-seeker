@@ -211,9 +211,13 @@ class GameDataRepository:
             criteria.append(c.hunter_type.in_([hunter_type, 2]))  # 2 = both
         if gender is not None:
             criteria.append(c.gender.in_([gender, 2]))
-        if max_hr is not None:
+        # OR-availability (legacy Armor.cpp:102): a piece is excluded only when
+        # it exceeds BOTH progression caps; a None cap leaves that path open.
+        if max_hr is not None and max_village_stars is not None:
+            criteria.append((c.hr_required <= max_hr) | (c.village_stars <= max_village_stars))
+        elif max_hr is not None:
             criteria.append(c.hr_required <= max_hr)
-        if max_village_stars is not None:
+        elif max_village_stars is not None:
             criteria.append(c.village_stars <= max_village_stars)
         if not allow_event:
             criteria.append(c.is_event.is_(False))
@@ -251,11 +255,13 @@ class GameDataRepository:
 
     def create_decoration(self, *, game_id: int, name_en: str, rarity: int, size: int,
                           name_ja: str | None = None, hr_required: int = 0,
-                          is_event: bool = False, **extra) -> dict[str, Any]:
+                          village_stars: int = 0, is_event: bool = False,
+                          **extra) -> dict[str, Any]:
         return self._create(t.decorations, dict(game_id=game_id, name_en=name_en,
                                                 name_ja=name_ja, rarity=rarity, size=size,
-                                                hr_required=hr_required, is_event=is_event,
-                                                **extra))
+                                                hr_required=hr_required,
+                                                village_stars=village_stars,
+                                                is_event=is_event, **extra))
 
     def get_decoration(self, decoration_id: int) -> dict[str, Any] | None:
         return self._get(t.decorations, id=decoration_id)
@@ -266,14 +272,20 @@ class GameDataRepository:
         *,
         size: int | None = None,
         max_hr: int | None = None,
+        max_village_stars: int | None = None,
         allow_event: bool = False,
     ) -> list[dict[str, Any]]:
         c = t.decorations.c
         criteria = [c.game_id == game_id]
         if size is not None:
             criteria.append(c.size == size)
-        if max_hr is not None:
+        # OR-availability, same semantics as list_armor_pieces.
+        if max_hr is not None and max_village_stars is not None:
+            criteria.append((c.hr_required <= max_hr) | (c.village_stars <= max_village_stars))
+        elif max_hr is not None:
             criteria.append(c.hr_required <= max_hr)
+        elif max_village_stars is not None:
+            criteria.append(c.village_stars <= max_village_stars)
         if not allow_event:
             criteria.append(c.is_event.is_(False))
         return self._list(t.decorations, *criteria, order_by=c.id)

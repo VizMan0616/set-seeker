@@ -100,6 +100,7 @@ decorations = Table(
     Column("rarity", Integer, nullable=False),
     Column("size", Integer, nullable=False),
     Column("hr_required", Integer, nullable=False, default=0),
+    Column("village_stars", Integer, nullable=False, default=0),
     Column("is_event", Boolean, nullable=False, default=False),
     Index("ix_decorations_game_size", "game_id", "size"),
 )

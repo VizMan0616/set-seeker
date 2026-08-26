@@ -37,7 +37,7 @@ DECORATION = {
     # 1 = price, not stored
     "slots": 2,          # same O-- notation; count = decoration size 1..3
     "hr": 3,
-    "village": 4,        # elder-star req; the decorations table has no column for it
+    "village": 4,        # elder-star req (decorations.village_stars, migration 0002)
     "skill1_points": 5,  # NOTE: points first, then tree name (inverse of armor)
     "skill1_tree": 6,
     "skill2_points": 7,

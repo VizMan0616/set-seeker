@@ -91,6 +91,7 @@ queries:
     expect:
       size: 1                 # "O--"
       hr_required: 1
+      village_stars: 1
       skills: { "Attack": 1 }
 
   - name: "Fierce Jewel dual-skill spot check"
@@ -99,7 +100,19 @@ queries:
     expect:
       size: 2                 # "OO-"
       hr_required: 1
+      village_stars: 1
       skills: { "Attack": 3, "Defence": -1 }
+
+  # Sentinel regression: Artisan Jewel is village-only (HR column 10 = "not via
+  # HR"; both progression caps max at 9). The village path must survive the ETL.
+  - name: "Artisan Jewel keeps its village path (decorations.csv)"
+    type: decoration
+    name_en: "Artisan Jewel"
+    expect:
+      size: 1
+      hr_required: 10
+      village_stars: 4
+      skills: { "Artisan": 1, "Potential": -1 }
 
   # Data-feasibility properties for classic queries: per requested tree, the
   # best achievable points (sum of per-slot armor maximums + a conservative
@@ -112,18 +125,21 @@ queries:
     village_stars: null
     trees: { "Attack": 20, "Sharpness": 10 }
 
+  # Rank-capped checks close the other path with 0: availability is an OR over
+  # the two progression paths (legacy Armor.cpp:102), so a null cap would let
+  # every row through and the check would not be rank-specific.
   - name: "Attack Up (M) blademaster, HR4-capped"
     type: tree_coverage
     hunter_type: blademaster
     gender: m
     hr: 4
-    village_stars: null
+    village_stars: 0
     trees: { "Attack": 15 }
 
   - name: "Reckless Abandon+1 gunner, village 6-star-capped"
     type: tree_coverage
     hunter_type: gunner
     gender: f
-    hr: null
+    hr: 0
     village_stars: 6
     trees: { "Expert": 10 }

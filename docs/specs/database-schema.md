@@ -83,6 +83,7 @@ decorations (
   rarity        Integer NOT NULL,
   size          Integer NOT NULL,                 -- 1..3 slots consumed
   hr_required   Integer NOT NULL DEFAULT 0,
+  village_stars Integer NOT NULL DEFAULT 0,       -- second progression path (migration 0002)
   is_event      Boolean NOT NULL DEFAULT 0
 );
 

@@ -43,6 +43,7 @@ class Decoration:
     skills: tuple[tuple[int, int], ...] = ()   # (tree_id, signed points)
     rarity: int = 1
     hr_required: int = 0
+    village_stars: int = 0
     is_event: bool = False
 
 

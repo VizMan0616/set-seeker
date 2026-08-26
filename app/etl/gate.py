@@ -129,7 +129,9 @@ class Gate:
             self._game_id, hunter_type=hunter_type, gender=gender,
             max_hr=query.get("hr"), max_village_stars=query.get("village_stars"))
         piece_by_id = {p["id"]: p for p in pieces}
-        decos = self._repo.list_decorations(self._game_id, max_hr=query.get("hr"))
+        decos = self._repo.list_decorations(
+            self._game_id, max_hr=query.get("hr"),
+            max_village_stars=query.get("village_stars"))
         deco_ids = {d["id"] for d in decos}
 
         problems = []

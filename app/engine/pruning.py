@@ -32,14 +32,26 @@ class PrunedPack:
     skills: tuple[SkillThreshold, ...]   # all pack thresholds, for result reporting
 
 
+def _within_progression_caps(hr_required: int, village_stars: int, query: Query) -> bool:
+    """OR-availability: excluded only when BOTH progression paths exceed the caps.
+
+    Legacy semantics (`MHFU-ASS/MH Armor/Armor.cpp:102`): a piece is available
+    when reachable via HR *or* via village. The stored values are the per-path
+    max(available, required) collapse (ETL column map); 10 is the sentinel for
+    "not obtainable via this path" (both caps max at 9). A None cap means that
+    path is uncapped, so it always satisfies the OR.
+    """
+    hr_ok = query.hr is None or hr_required <= query.hr
+    village_ok = query.village_stars is None or village_stars <= query.village_stars
+    return hr_ok or village_ok
+
+
 def _passes_hard_filters(piece: ArmorPiece, query: Query) -> bool:
     if piece.gender not in (_GENDER_CODE[query.gender], 2):
         return False
     if piece.hunter_type not in (_HUNTER_TYPE_CODE[query.hunter_type], 2):
         return False
-    if query.hr is not None and piece.hr_required > query.hr:
-        return False
-    if query.village_stars is not None and piece.village_stars > query.village_stars:
+    if not _within_progression_caps(piece.hr_required, piece.village_stars, query):
         return False
     return not (piece.is_event and not query.allow_event)
 
@@ -76,7 +88,7 @@ def relevance_filter_decorations(
         d
         for d in decorations
         if any(pts != 0 and t in trees for t, pts in d.skills)
-        and (query.hr is None or d.hr_required <= query.hr)
+        and _within_progression_caps(d.hr_required, d.village_stars, query)
         and (query.allow_event or not d.is_event)
     ]
 

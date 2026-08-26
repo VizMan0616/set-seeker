@@ -47,4 +47,6 @@ RUN chown -R setseeker:setseeker /data
 USER setseeker
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+# --proxy-headers: trust X-Forwarded-Proto/For from a local reverse proxy
+# (e.g. cloudflared) so request.url_for and redirects keep the https scheme.
+CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

@@ -49,6 +49,7 @@ class DecorationRow:
     name_en: str
     size: int
     hr_required: int
+    village_stars: int
     skills: tuple[tuple[str, int], ...]  # (tree name, points), negative allowed
 
 
@@ -179,6 +180,7 @@ def load_decorations(path: Path, cmap) -> list[DecorationRow]:
                 name_en=fields[cols["name"]].strip(),
                 size=cmap.parse_slots(fields[cols["slots"]]),
                 hr_required=cmap.parse_level_requirement(fields[cols["hr"]]),
+                village_stars=cmap.parse_level_requirement(fields[cols["village"]]),
                 skills=tuple(skills),
             ))
     return rows

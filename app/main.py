@@ -52,6 +52,7 @@ def create_app() -> FastAPI:
         user_data,
         pack_loader,
         time_limit_ms=settings.SOLVER_TIME_LIMIT_MS,
+        num_workers=settings.SOLVER_NUM_WORKERS,
     )
     app.state.catalog = RepositoryCatalog(game_data)
     app.state.name_resolver = RepositoryNameResolver(game_data)

@@ -58,13 +58,17 @@ class CpSatSearchService:
         *,
         time_limit_ms: int = 2000,
         page_size: int = PAGE_SIZE,
+        num_workers: int = 8,
     ) -> None:
-        # time_limit_ms is passed in by the web layer from
-        # app.config SOLVER_TIME_LIMIT_MS; the engine does not import config.
+        # time_limit_ms / num_workers are passed in by the web layer from
+        # app.config; the engine does not import config. Single-threaded
+        # CP-SAT spends whole budgets *proving* optimality/infeasibility on
+        # real packs; a parallel portfolio turns pages into sub-second solves.
         self._user_data = user_data
         self._pack_loader = pack_loader
         self._time_limit_ms = time_limit_ms
         self._page_size = page_size
+        self._num_workers = num_workers
 
     def start_search(self, session_id: str, query: Query) -> SearchPage:
         self._user_data.get_or_create_session(session_id)
@@ -122,6 +126,7 @@ class CpSatSearchService:
                 query=query,
                 exclusions=working,
                 time_limit_ms=self._time_limit_ms,
+                num_workers=self._num_workers,
             )
             if outcome.status == "infeasible":
                 exhausted = True

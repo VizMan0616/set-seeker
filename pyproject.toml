@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "set-seeker"
+version = "0.1.0"
+description = "Web-based armor set search for classic Monster Hunter games"
+requires-python = ">=3.12"
+license = { text = "AGPL-3.0-only" }
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "jinja2",
+    "sqlalchemy>=2",
+    "alembic",
+    "ortools",
+    "pydantic-settings",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint.per-file-ignores]
+# app/domain/models.py is copied verbatim from docs/specs/phase0-contracts.md §3;
+# do not reformat it.
+"app/domain/models.py" = ["I001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

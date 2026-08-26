@@ -1,0 +1,129 @@
+# MHFU known-query validation suite (data-pack-spec.md, phase0-contracts.md §9).
+#
+# The gate is property-based until real legacy reference sets are captured with the
+# user: exact spot checks against the legacy source files, exact row counts, and
+# data-feasibility checks for classic queries (the data must be able to activate
+# the requested skills). Solver-level replay queries are added once the engine
+# lands (see docs/specs/engine-spec.md §7).
+pack: mhfu
+
+row_counts:
+  skill_trees: 99
+  skills: 216
+  armor_pieces: 2080        # 426+419+410+408+418 raw rows, minus 1 legacy (name, gender) dupe
+  armor_skills: 7142        # excludes Torso Inc marker rows, 0-point rows, dupe piece
+  decorations: 168
+  decoration_skills: 281
+
+queries:
+  - name: "Attack tree thresholds"
+    type: skill_threshold
+    tree: "Attack"
+    skill: "Attack Up (Large)"
+    expect: { points: 20, is_negative: false }
+
+  - name: "Attack negative threshold"
+    type: skill_threshold
+    tree: "Attack"
+    skill: "Attack Dwn (Large)"
+    expect: { points: -20, is_negative: true }
+
+  - name: "Sharpness tree threshold"
+    type: skill_threshold
+    tree: "Sharpness"
+    skill: "Sharp Sword"
+    expect: { points: 10, is_negative: false }
+
+  - name: "Chain Helm spot check (head.csv row 4)"
+    type: armor_piece
+    slot: head
+    name_en: "Chain Helm"
+    expect:
+      rarity: 1
+      slots: 1                # "O--"
+      defense: 4
+      gender: both
+      hunter_type: both
+      hr_required: 1
+      village_stars: 1
+      res_fire: 2
+      res_water: 2
+      res_ice: 1
+      res_thunder: -2
+      res_dragon: 0
+      torso_inc: false
+      skills: { "Paralysis": -1, "Health": 2, "Backpackng": 2, "Map": 2, "Whim": 2 }
+
+  - name: "Black Belt Helm is Torso Inc with no skill rows"
+    type: armor_piece
+    slot: head
+    name_en: "Black Belt Helm"
+    expect:
+      rarity: 5
+      slots: 0                # "---"
+      defense: 20
+      hr_required: 8
+      village_stars: 4
+      torso_inc: true
+      skills: { }
+
+  - name: "Kaiser Crown spot check (head.csv row 136)"
+    type: armor_piece
+    slot: head
+    name_en: "Kaiser Crown"
+    expect:
+      rarity: 5
+      slots: 1
+      defense: 48
+      hr_required: 3
+      village_stars: 6
+      res_fire: 5
+      res_water: -1
+      res_ice: 0
+      res_thunder: 0
+      res_dragon: -2
+      torso_inc: false
+      skills: { "Expert": 3, "Cold Res": -3, "Fatigue": 3 }
+
+  - name: "Attack Jewel spot check (decorations.csv row 1)"
+    type: decoration
+    name_en: "Attack Jewel"
+    expect:
+      size: 1                 # "O--"
+      hr_required: 1
+      skills: { "Attack": 1 }
+
+  - name: "Fierce Jewel dual-skill spot check"
+    type: decoration
+    name_en: "Fierce Jewel"
+    expect:
+      size: 2                 # "OO-"
+      hr_required: 1
+      skills: { "Attack": 3, "Defence": -1 }
+
+  # Data-feasibility properties for classic queries: per requested tree, the
+  # best achievable points (sum of per-slot armor maximums + a conservative
+  # 5-slot decoration budget at the best jewel) must reach the threshold.
+  - name: "Classic Attack Up (L) + Sharp Sword blademaster, uncapped"
+    type: tree_coverage
+    hunter_type: blademaster
+    gender: m
+    hr: null
+    village_stars: null
+    trees: { "Attack": 20, "Sharpness": 10 }
+
+  - name: "Attack Up (M) blademaster, HR4-capped"
+    type: tree_coverage
+    hunter_type: blademaster
+    gender: m
+    hr: 4
+    village_stars: null
+    trees: { "Attack": 15 }
+
+  - name: "Reckless Abandon+1 gunner, village 6-star-capped"
+    type: tree_coverage
+    hunter_type: gunner
+    gender: f
+    hr: null
+    village_stars: 6
+    trees: { "Expert": 10 }

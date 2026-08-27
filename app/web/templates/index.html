@@ -93,12 +93,19 @@
         <input id="village-stars" class="form-control" type="number" name="village_stars" min="1" max="99" placeholder="Uncapped">
       </div>
       <div class="col-12 col-md-6">
-        <label class="form-label ss-label" for="sort">Rank results by</label>
-        <select id="sort" class="form-select" name="sort">
-          <option value="defense">Defense</option>
-          <option value="slots">Spare slots</option>
-          <option value="rarity">Rarity</option>
+        <label class="form-label ss-label" for="sort">Tie-break by</label>
+        <select id="sort" class="form-select" name="sort" aria-describedby="sort-help">
+          <option value="defense">None</option>
+          <option value="rarity">Rarity (easier to craft first)</option>
+          <option value="res_fire">Fire resistance</option>
+          <option value="res_water">Water resistance</option>
+          <option value="res_ice">Ice resistance</option>
+          <option value="res_thunder">Thunder resistance</option>
+          <option value="res_dragon">Dragon resistance</option>
         </select>
+        <div id="sort-help" class="form-text ss-legend-note">
+          Sets are always ranked by spare slots, then defense (best first) — this only breaks ties.
+        </div>
       </div>
       <div class="col-12">
         <div class="form-check">

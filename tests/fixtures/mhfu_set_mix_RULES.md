@@ -26,28 +26,26 @@ Regenerate: `python tests/fixtures/build_mhfu_set_mix.py`
 `[No gems]` and `[Gem …: Empty slot]` are not jewels.
 
 Gender duals (`Obituary/Butterfly Anca`) expand to both names; the fixture
-keeps the first mapped CSV name as `name_en` and extras in
+keeps the first mapped official-English name as `name_en` and extras in
 `alternates_name_en`.
 
 ## Alias strategy (mapping confidence)
 
-Canonical `name_en` is the **Athena CSV** name (what ETL stores). This is
-already TeamHGG-style for most rows. A mapped `name_en` **must exist in
-that slot’s CSV** — aliases that point at a name Athena does not ship
-are rejected (not silently kept).
+Canonical `name_en` is the **official English MHFU overlay** (what ETL stores),
+not the TeamHGG-style CSV strings. A mapped `name_en` **must exist in that
+slot’s loaded pack**.
 
 | Source | Role | Confidence |
 |---|---|---|
-| Exact CSV `name_en` | identity | high |
+| Exact official `name_en` | identity | high |
 | `Languages/TeamHGG MHP2ndG/*` positional overlay | P2G fan names | high |
-| `Languages/English MHFU/*` positional overlay | official-English | high |
+| CSV `name` columns | TeamHGG-style strings | high |
 | `packs/mhfu/name_aliases.yaml` | typos, “Shin”=True G-rank, forum names | high unless noted medium |
 | `Narga` ↔ `Naruga` | mechanical extra | high |
 
-Overlays are aligned on identical-name anchors (head lists omit Felyne
-Piercing; do not naïvely zip English vs CSV). Overlay names that already
-exist as CSV names are **not** remapped (avoids the StrongWall/Rigid Wall
-swap).
+Overlays are zipped to ETL rows (head CSV duplicate `Felyne Piercing` is
+dropped first, matching overlay length). Overlay names that already exist
+as official names are identity maps.
 
 `fully_mapped` means: every piece/jewel/skill name maps **and** Pass A
 succeeds (sockets + positive skill points vs the pack). Name-mapped but
@@ -57,9 +55,9 @@ infeasible rows are listed under `meta.mapping.dump_illegal` and skipped.
 
 | Mix name | Why |
 |---|---|
-| `Kirin Hoop Z` | No such piece. CSV/overlays stop at Kirin Hoop / S / X. |
+| `Kirin Hoop Z` | No such piece. Overlay/CSV stop at Kirin Hoop / S / X. |
 | `Guardian Spirit Raiment X` | No X piece. G-rank is `TruGuardnSpritRaiment` (English Shin), HR is `GuardianSpritRaiment`. Do not guess. |
-| `Rapid Fire Jewel` | Not in CSV/overlays. Do not alias to SpeedFire (AutoReload) or SpeedCharge (Focus). |
+| `Rapid Fire Jewel` | Not in overlay/CSV. Do not alias to Cont. Fire Jewel (AutoReload) or RapidChargeJewel (Focus). |
 
 **Dump-illegal (names map; combo is not legal in Athena):** see
 `meta.mapping.dump_illegal` after a rebuild. Typical causes: 3-slot

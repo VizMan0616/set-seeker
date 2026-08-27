@@ -1,0 +1,30 @@
+<ul class="nav nav-tabs ss-exclude-tabs mb-3" role="tablist">
+  {% for tab in advanced_columns %}
+  <li class="nav-item" role="presentation">
+    <button type="button" class="nav-link{% if loop.first %} active{% endif %}"
+            data-adv-tab="{{ tab.key }}">{{ tab.label }}</button>
+  </li>
+  {% endfor %}
+</ul>
+{% for tab in advanced_columns %}
+<div class="ss-adv-panel" data-adv-panel="{{ tab.key }}"
+     {% if not loop.first %}hidden{% endif %}>
+  <div class="d-flex gap-2 mb-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-adv-default>Default</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-adv-none>None</button>
+  </div>
+  {% for item in tab.rows %}
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox"
+           id="adv-{{ tab.key }}-{{ item.id }}"
+           name="{{ tab.input_name }}" value="{{ item.id }}"
+           data-skyline="{{ '1' if item.skyline else '0' }}"
+           {% if item.checked %}checked{% endif %}>
+    <label class="form-check-label{% if item.skyline %} ss-skyline{% endif %}"
+           for="adv-{{ tab.key }}-{{ item.id }}">{{ item.name }}</label>
+  </div>
+  {% else %}
+  <p class="ss-hint mb-0">Nothing relevant in this slot.</p>
+  {% endfor %}
+</div>
+{% endfor %}

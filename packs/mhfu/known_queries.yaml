@@ -25,7 +25,7 @@ queries:
   - name: "Attack negative threshold"
     type: skill_threshold
     tree: "Attack"
-    skill: "Attack Dwn (Large)"
+    skill: "Attack Down (Large)"
     expect: { points: -20, is_negative: true }
 
   - name: "Sharpness tree threshold"
@@ -101,7 +101,7 @@ queries:
       size: 2                 # "OO-"
       hr_required: 1
       village_stars: 1
-      skills: { "Attack": 3, "Defence": -1 }
+      skills: { "Attack": 3, "Defense": -1 }
 
   # Sentinel regression: Artisan Jewel is village-only (HR column 10 = "not via
   # HR"; both progression caps max at 9). The village path must survive the ETL.

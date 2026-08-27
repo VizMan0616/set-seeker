@@ -1,0 +1,13 @@
+<span id="advanced-open-wrap" hx-swap-oob="true">
+  <button type="button" id="advanced-open" class="btn btn-outline-secondary"
+          data-bs-toggle="modal" data-bs-target="#advanced-modal">
+    Advanced Search
+    <span class="badge ss-exclude-count" x-text="excludeCount || ''" x-show="excludeCount"></span>
+  </button>
+</span>
+<span id="advanced-domain-slot" hx-swap-oob="true">
+  <input type="hidden" name="advanced_domain" value="1">
+</span>
+<div id="advanced-modal-body" hx-swap-oob="true">
+  {% include "search/_advanced_modal_body.html" %}
+</div>

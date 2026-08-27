@@ -2,7 +2,8 @@
 # Overlay aliases are generated at fixture-build time from
 # sources/MHFU-ASS/Run/Data/Languages/{TeamHGG MHP2ndG,English MHFU}/.
 # Keys: names as they appear in `mhfu set mix.txt`.
-# Values: Athena CSV `name_en` (what ETL stores).
+# Values: official English MHFU names (what ETL stores). CSV/TeamHGG
+# targets are remapped onto the overlay at build time.
 #
 # confidence:
 #   high   — typo, spacing, punctuation, obvious G-rank "Shin" = True

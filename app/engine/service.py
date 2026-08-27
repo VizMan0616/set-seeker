@@ -14,7 +14,7 @@ from app.domain.models import PAGE_SIZE, ArmorSetResult, Query, SearchPage, Skil
 # Only representative ids are walked; cards stay page-sized (ADR 0005).
 _CENSUS_CAP = 500
 from app.engine.data import PackData
-from app.engine.pruning import PrunedPack, prune
+from app.engine.pruning import PrunedPack, domain_snapshot, prune
 from app.engine.solver import solve_one
 from app.repository.user_data import UserDataRepository
 
@@ -35,6 +35,8 @@ def _query_to_json(query: Query) -> str:
             "allow_dummy": query.allow_dummy,
             "excluded_piece_ids": list(query.excluded_piece_ids),
             "excluded_decoration_ids": list(query.excluded_decoration_ids),
+            "forced_piece_ids": list(query.forced_piece_ids),
+            "forced_decoration_ids": list(query.forced_decoration_ids),
             "sort": query.sort,
         }
     )
@@ -67,8 +69,21 @@ def _query_from_json(payload: str) -> Query:
         allow_dummy=d.get("allow_dummy", False),
         excluded_piece_ids=tuple(d.get("excluded_piece_ids") or ()),
         excluded_decoration_ids=tuple(d.get("excluded_decoration_ids") or ()),
+        forced_piece_ids=tuple(d.get("forced_piece_ids") or ()),
+        forced_decoration_ids=tuple(d.get("forced_decoration_ids") or ()),
         sort=d["sort"],
     )
+
+
+def query_from_json(payload: str) -> Query:
+    """Public loader for search_states.query_json (ignores snapshot extras)."""
+    return _query_from_json(payload)
+
+
+def _with_domain_snapshot(query_json: str, snapshot: dict) -> str:
+    payload = json.loads(query_json)
+    payload["domain_snapshot"] = snapshot
+    return json.dumps(payload)
 
 
 class CpSatSearchService:
@@ -97,10 +112,14 @@ class CpSatSearchService:
         self._user_data.get_or_create_session(session_id)
         # A new search from the same session invalidates its prior states.
         self._user_data.delete_search_states_for_session(session_id)
+        pack = self._pack_loader(query.game)
+        pruned = prune(pack, query)
         state = self._user_data.create_search_state(
             session_id=session_id,
-            game_id=self._pack_loader(query.game).game_id,
-            query_json=_query_to_json(query),
+            game_id=pack.game_id,
+            query_json=_with_domain_snapshot(
+                _query_to_json(query), domain_snapshot(pack, pruned)
+            ),
         )
         results, new_exclusions, partial, exhausted = self._solve_page(query, [])
         if new_exclusions:
@@ -133,6 +152,12 @@ class CpSatSearchService:
             shown_count=shown,
             remaining_count=remaining,
         )
+
+    def get_search_query(self, session_id: str, search_id: str) -> Query | None:
+        state = self._user_data.get_search_state(search_id)
+        if state is None or state["session_id"] != session_id:
+            return None
+        return _query_from_json(state["query_json"])
 
     def load_more(self, session_id: str, search_id: str) -> SearchPage:
         state = self._user_data.get_search_state(search_id)

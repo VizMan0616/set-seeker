@@ -42,16 +42,23 @@ Port of the legacy `GetRelevantData` idea, without its O(n²) implementation:
    when it exceeds *both* caps (legacy `Armor.cpp:102`); the stored per-path value is the
    `max(available, required)` collapse of the legacy `A!B` level syntax, where 10 is the
    sentinel for "not obtainable via this path" (both caps max at 9). A blank cap is uncapped.
-   exclusions from the query.
-3. **Dominance prune** — piece A dominates piece B (same slot) if A ≥ B on every requested
-   tree and on slot count, with at least one strict. Dominated pieces leave the domain.
-   Implement with sorted scans or a skyline pass, not pairwise O(n²) list scans.
-4. **Equivalence collapse** (from MHFU) — pieces identical on (slot count, vector of requested
+3. **Keep `inf`** — the post-hard-filter, post-relevance set per slot kind. This is the Advanced
+   Search list (legacy `query->inf_*`). It is **not** the full catalog.
+4. **Dominance prune → `rel` / skyline** — piece A dominates piece B (same slot) if A ≥ B on
+   every requested tree and on slot count, with at least one strict. The skyline is the default
+   solver domain (legacy `rel_*`). Dominated pieces stay on `inf` so Advanced Search can force
+   them back. Implement with sorted scans or a skyline pass, not pairwise O(n²) list scans.
+5. **Advanced domain edits** — uncheck an `inf` row → `excluded_*` (drop from `rel`). Check a
+   dominated `inf` row → `forced_*` (union into `rel`). Snapshot `{ inf_ids, rel_ids }` is keyed
+   by slot kind: always `head`…`legs` + `decorations`; add `charms` when `features.talismans`,
+   `weapons` when `features.weapon_search`. No per-game Advanced branch (ADR 0001).
+6. **Equivalence collapse** (from MHFU) — pieces identical on (slot count, vector of requested
    tree points, torso-Inc flag) collapse to one **representative**; the full member list is
    kept for result expansion. This shrinks solver domains without losing any distinct result.
+   Collapse runs on **solver `rel`**, after excluded/forced.
 
-Pruning must be **pure and cached per (game, query-skill-set, filters)** — the same skill
-combination re-pruned on every request is wasted work.
+Pruning must be **pure and cached per (pack, query)** — excluded/forced ids are part of
+the query. `inf` and the skyline do not depend on those ids; only solver `rel` does.
 
 ### 2. CP-SAT model
 

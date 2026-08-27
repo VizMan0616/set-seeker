@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 HEAD, BODY, ARMS, WAIST, LEGS = range(5)
 SLOT_COUNT = 5
+ARMOR_SLOT_KINDS = ("head", "body", "arms", "waist", "legs")
 
 
 @dataclass(frozen=True)
@@ -64,3 +65,4 @@ class PackData:
     decorations: tuple[Decoration, ...] = ()
     skills: tuple[SkillThreshold, ...] = ()
     talismans: bool = False              # pack flag; False for mhfu
+    weapon_search: bool = False          # pack flag; weapons as a 6th search dimension

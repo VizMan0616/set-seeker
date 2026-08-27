@@ -5,14 +5,17 @@ with urllib.parse — python-multipart is deliberately not a dependency
 (phase0-contracts §2), and Starlette's request.form() would require it.
 """
 
+from collections.abc import Callable
 from urllib.parse import parse_qsl
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from app.domain.models import Query, SkillRequest
+from app.engine.data import PackData
+from app.engine.pruning import apply_rel_checks, prune
 from app.repository.game_data import GameDataRepository
-from app.web.present import page_context
+from app.web.present import advanced_columns, page_context
 from app.web.render import templates
 
 router = APIRouter()
@@ -53,7 +56,12 @@ def _int_ids(fields: FormFields, key: str) -> tuple[int, ...]:
     return tuple(sorted(seen))
 
 
-def _parse_query(game: str, fields: FormFields, repo: GameDataRepository) -> Query:
+def _parse_query(
+    game: str,
+    fields: FormFields,
+    repo: GameDataRepository,
+    pack_loader: Callable[[str], PackData] | None = None,
+) -> Query:
     game_row = repo.get_game_by_code(game)
     if game_row is None:
         raise HTTPException(status_code=422, detail="Unknown game.")
@@ -100,7 +108,7 @@ def _parse_query(game: str, fields: FormFields, repo: GameDataRepository) -> Que
     if gender not in ("m", "f") or hunter_type not in ("blademaster", "gunner"):
         raise HTTPException(status_code=422, detail="Invalid hunter filters.")
 
-    return Query(
+    query = Query(
         game=game,
         skills=tuple(skills),
         weapon_slots=weapon_slots,
@@ -114,16 +122,42 @@ def _parse_query(game: str, fields: FormFields, repo: GameDataRepository) -> Que
         allow_dummy=_first(fields, "allow_dummy") == "on",
         excluded_piece_ids=_int_ids(fields, "excluded_piece_id"),
         excluded_decoration_ids=_int_ids(fields, "excluded_decoration_id"),
+        forced_piece_ids=_int_ids(fields, "forced_piece_id"),
+        forced_decoration_ids=_int_ids(fields, "forced_decoration_id"),
         sort=_first(fields, "sort", "defense"),
+    )
+    if pack_loader is not None and _first(fields, "advanced_domain") == "1":
+        query = apply_rel_checks(
+            query,
+            pack_loader(game),
+            _int_ids(fields, "rel_piece_id"),
+            _int_ids(fields, "rel_decoration_id"),
+        )
+    return query
+
+
+def _search_page_context(request: Request, game: str, query: Query, page) -> dict:
+    pack = request.app.state.pack_loader(game)
+    pruned = prune(pack, query)
+    return page_context(
+        page,
+        request.app.state.name_resolver,
+        advanced=advanced_columns(pack, pruned, query, request.app.state.name_resolver),
     )
 
 
 @router.post("/games/{game}/search", response_class=HTMLResponse)
 async def start_search(request: Request, game: str) -> HTMLResponse:
-    query = _parse_query(game, await _read_form(request), request.app.state.game_data)
+    query = _parse_query(
+        game,
+        await _read_form(request),
+        request.app.state.game_data,
+        request.app.state.pack_loader,
+    )
     page = request.app.state.search_service.start_search(request.state.session_id, query)
-    context = page_context(page, request.app.state.name_resolver)
-    return templates.TemplateResponse(request, "search/results.html", context)
+    return templates.TemplateResponse(
+        request, "search/results.html", _search_page_context(request, game, query, page)
+    )
 
 
 @router.post("/search/{search_id}/more", response_class=HTMLResponse)
@@ -131,3 +165,22 @@ async def load_more(request: Request, search_id: str) -> HTMLResponse:
     page = request.app.state.search_service.load_more(request.state.session_id, search_id)
     context = page_context(page, request.app.state.name_resolver)
     return templates.TemplateResponse(request, "search/more.html", context)
+
+
+@router.get("/search/{search_id}/advanced", response_class=HTMLResponse)
+async def advanced_domain(request: Request, search_id: str) -> HTMLResponse:
+    service = request.app.state.search_service
+    query = service.get_search_query(request.state.session_id, search_id)
+    if query is None:
+        raise HTTPException(status_code=404, detail="Unknown search.")
+    pack = request.app.state.pack_loader(query.game)
+    pruned = prune(pack, query)
+    return templates.TemplateResponse(
+        request,
+        "search/_advanced_modal_body.html",
+        {
+            "advanced_columns": advanced_columns(
+                pack, pruned, query, request.app.state.name_resolver
+            )
+        },
+    )

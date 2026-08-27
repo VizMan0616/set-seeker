@@ -98,6 +98,8 @@ class Query:
     allow_dummy: bool = False
     excluded_piece_ids: tuple[int, ...] = ()
     excluded_decoration_ids: tuple[int, ...] = ()
+    forced_piece_ids: tuple[int, ...] = ()
+    forced_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
 
 @dataclass(frozen=True)
@@ -140,9 +142,13 @@ class SearchService(Protocol):
 
 Semantics:
 
-- `start_search` prunes (cached per `(game, skills, filters)`), builds the CP-SAT model,
-  solves up to `PAGE_SIZE` times with iterate-and-exclude, persists exclusions in
-  `search_states`, returns page 1.
+- `start_search` prunes (cached per `(pack, query)`), persists a pack-standard
+  `domain_snapshot` (`inf_ids` / `rel_ids` per slot kind) on `search_states.query_json`,
+  builds the CP-SAT model, solves up to `PAGE_SIZE` times with iterate-and-exclude, persists
+  solution exclusions in `search_states`, returns page 1.
+- Advanced Search is **post-first-search**: the opener stays disabled until
+  `POST /games/{game}/search` returns. The modal lists `inf`; default-checked = skyline `rel`.
+  Apply maps checks to `excluded_*` / `forced_*` and re-POSTs.
 - `load_more` re-loads state, re-solves with stored exclusions, appends new ones.
 - Every solve respects `SOLVER_TIME_LIMIT_MS` (default **2000**, from config). On timeout,
   return what exists with `partial=True`. Never raise for infeasible — return
@@ -157,8 +163,9 @@ Routes:
 | Route | Purpose | Response |
 |---|---|---|
 | `GET /` | game picker + search form | `index.html` full page |
-| `POST /games/{game}/search` | start search | `search/results.html` partial (page 1 + load-more button) |
+| `POST /games/{game}/search` | start search | `search/results.html` partial (page 1 + load-more + Advanced OOB) |
 | `POST /search/{search_id}/more` | next page | fragment: result cards + updated button (out-of-band) |
+| `GET /search/{search_id}/advanced` | Advanced domain lists | `search/_advanced_modal_body.html` |
 
 Template context for `search/results.html` and the `/more` fragment — the web layer resolves
 ids to names via `repository.game_data` before rendering:

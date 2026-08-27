@@ -80,8 +80,8 @@ def test_negative_skills_flagged(etl_db):
     by_name = {s["name_en"]: s for s in repo.list_skills_for_tree(attack["id"])}
     assert by_name["Attack Up (Large)"]["points"] == 20
     assert by_name["Attack Up (Large)"]["is_negative"] in (False, 0)
-    assert by_name["Attack Dwn (Large)"]["points"] == -20
-    assert by_name["Attack Dwn (Large)"]["is_negative"] in (True, 1)
+    assert by_name["Attack Down (Large)"]["points"] == -20
+    assert by_name["Attack Down (Large)"]["is_negative"] in (True, 1)
 
 
 def test_rebuild_is_idempotent_and_preserves_user_data(etl_db, manifest, pack_data):

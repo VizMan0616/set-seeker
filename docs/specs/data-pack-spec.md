@@ -102,8 +102,11 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 
 - `components.txt` — material names (crafting info display).
 - `tags.txt` — skill filter categories.
-- `Languages/*/` — localized name overlays; we store `name_en`/`name_ja` columns natively and
-  treat other locales as future overlays.
+- `Languages/*/` — localized name overlays applied at ETL. For MHFU, **`name_en` is the
+  official Freedom Unite English pack** (`Languages/English MHFU/`), not the CSV strings
+  (those match TeamHGG's P2G fan translation: "Speed Fire", "All Shots Up", "SpeedFire Jewel").
+  Japanese and other locales remain future overlays. Dummy pieces are flagged from overlay
+  names that contain `(dummy)`; the marker is not stored in `name_en`.
 - `mycharms.txt` — **not** ETL'd; it is user data. Our equivalent lives in the `user_charms`
   table (same logical shape: `slots, skill1, points1, skill2, points2`).
 
@@ -111,9 +114,10 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 
 1. **Per-pack column maps.** Never share positional parsing across packs; each manifest
    declares its format quirks (header lines, index columns, slot notation).
-2. **Names are bilingual from day one** (`name_en`, `name_ja`). Missing translations fall back
-   to the other language with a `translation: fan` marker where applicable (MHP3 English names
-   are fan translations — see `docs/adr/0009`).
+2. **Names are bilingual from day one** (`name_en`, `name_ja`). For MHFU, `name_en` comes
+   from `Languages/English MHFU` (official localization). Missing translations fall back
+   to the other language with a `translation: fan` marker where applicable (MHP3 English
+   names are fan translations — see `docs/adr/0009`).
 3. **Skill trees are normalized** into `skill_trees` + `skills` (threshold rows) +
    `armor_skills` / `decoration_skills` junction rows. Never store skill points as packed
    columns in relational tables.
@@ -124,6 +128,13 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
    (`sessions`, `user_charms`) are never touched by ETL.
 7. **Validation gate**: after load, run the pack's known-query suite
    (`docs/specs/engine-spec.md` §7) before the image is considered built.
+8. **Advanced Search columns** = armor slots + decorations + any true feature flags
+   (`talismans` → charms, `weapon_search` → weapons). The ETL must not drop gender-split
+   rows or dominated-but-relevant pieces; the engine lists them under `inf`. Advanced does
+   not need extra tables — fill `armor_pieces` / `decorations` (and later charm/weapon
+   tables) with gender, hunter type, progression, skills, slots, torso Inc, dummy/event.
+   If this generation's `MatchesQuery` adds a filter we lack, that is a Query hard-filter
+   flag, documented in `docs/legacy-analysis/<GAME>-ASS.md`.
 
 ## Known-query validation suite (per pack, to be filled during implementation)
 

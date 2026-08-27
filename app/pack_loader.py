@@ -97,4 +97,5 @@ class PackLoader:
             decorations=decorations,
             skills=skills,
             talismans=bool(features.get("talismans", False)),
+            weapon_search=bool(features.get("weapon_search", False)),
         )

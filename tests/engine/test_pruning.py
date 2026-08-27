@@ -5,9 +5,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from app.engine.data import ARMS, HEAD, LEGS, ArmorPiece
+from app.engine.data import ARMS, HEAD, LEGS, WAIST, ArmorPiece
 from app.engine.pruning import (
+    apply_rel_checks,
     dominance_prune,
+    domain_snapshot,
     equivalence_collapse,
     prune,
 )
@@ -142,7 +144,7 @@ def test_uncapped_progression_paths_admit_everything(tiny_pack_data):
     assert {92, 93} <= legs_member_ids
 
 
-def test_excluded_ids_leave_the_pruned_domains(tiny_pack_data):
+def test_excluded_ids_leave_the_solver_rel_but_stay_on_inf(tiny_pack_data):
     pruned = prune(
         tiny_pack_data,
         make_query(min_points=10, excluded_piece_ids=(1, 7), excluded_decoration_ids=(101,)),
@@ -151,6 +153,9 @@ def test_excluded_ids_leave_the_pruned_domains(tiny_pack_data):
     assert 1 not in kept
     assert 7 not in kept
     assert {d.id for d in pruned.decorations} == {102}
+    inf_pieces = {pid for slot in pruned.inf_piece_ids for pid in slot}
+    assert {1, 7} <= inf_pieces
+    assert 101 in pruned.inf_decoration_ids
 
 
 def test_torso_inc_and_dummy_hard_filters(tiny_pack_data):
@@ -207,3 +212,59 @@ def test_prune_bad_skill_thresholds_follow_allow_bad_skills(tiny_pack_data):
     assert (
         prune(pack, make_query(min_points=10, allow_bad_skills=True)).bad_tree_thresholds == ()
     )
+
+
+def test_dominated_piece_stays_on_inf_not_skyline(tiny_pack_data):
+    """Waist 11 (1 atk, 1 slot) is dominated by 10 (2 atk, 1 slot)."""
+    pruned = prune(tiny_pack_data, make_query(min_points=10))
+    assert 11 in pruned.inf_piece_ids[WAIST]
+    assert 11 not in pruned.skyline_piece_ids[WAIST]
+    waist = {m.id for c in pruned.classes[WAIST] for m in c.members}
+    assert 11 not in waist
+    assert 10 in waist
+
+
+def test_forced_piece_returns_dominated_id_to_solver_rel(tiny_pack_data):
+    pruned = prune(
+        tiny_pack_data, make_query(min_points=10, forced_piece_ids=(11,))
+    )
+    waist = {m.id for c in pruned.classes[WAIST] for m in c.members}
+    assert 11 in waist
+
+
+def test_apply_rel_checks_maps_inf_ticks_to_excluded_and_forced(tiny_pack_data):
+    query = make_query(min_points=10)
+    pruned = prune(tiny_pack_data, query)
+    skyline_pieces = tuple(pid for slot in pruned.skyline_piece_ids for pid in slot)
+    edited = apply_rel_checks(
+        query,
+        tiny_pack_data,
+        checked_piece_ids=skyline_pieces + (11,),
+        checked_decoration_ids=pruned.skyline_decoration_ids,
+    )
+    assert 11 in edited.forced_piece_ids
+    assert 11 not in edited.excluded_piece_ids
+    none = apply_rel_checks(query, tiny_pack_data, (), ())
+    assert 10 in none.excluded_piece_ids
+    assert 101 in none.excluded_decoration_ids
+
+
+def test_domain_snapshot_adds_kinds_from_pack_flags(tiny_pack_data):
+    pruned = prune(tiny_pack_data, make_query(min_points=10))
+    mhfu = domain_snapshot(tiny_pack_data, pruned)
+    assert set(mhfu["kinds"]) == {
+        "head", "body", "arms", "waist", "legs", "decorations",
+    }
+    later = tiny_pack_data.__class__(
+        game=tiny_pack_data.game,
+        game_id=tiny_pack_data.game_id,
+        pieces=tiny_pack_data.pieces,
+        decorations=tiny_pack_data.decorations,
+        skills=tiny_pack_data.skills,
+        talismans=True,
+        weapon_search=True,
+    )
+    kinds = domain_snapshot(later, pruned)["kinds"]
+    assert "charms" in kinds
+    assert "weapons" in kinds
+    assert kinds["charms"] == {"inf_ids": [], "rel_ids": []}

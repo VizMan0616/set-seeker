@@ -62,7 +62,7 @@ Loaded by `LoadedData::ImportTextFiles` (`LoadedData.cpp:15-30`).
 | `decorations.csv` | **No header.** Name, Price, Slots, HR, Elder★, pts1, Ability1, pts2, Ability2, 4×(qty,mat) + 4× alt craft | `Decoration::Load` (`Decoration.cpp:55-108`) |
 | `skills.txt` | Ability blocks: `"Ability"` + optional `tag="…"`, then `points "Skill Name"` lines, blank-line separated | `Skill::Load` (`Skill.cpp:64+`) |
 | `components.txt` | One material name per line | `Material::LoadMaterials` |
-| `Languages/*/` | Localized name lists + `strings.txt` | `LoadedData::LoadLanguage` |
+| `Languages/*/` | Localized name lists + `strings.txt` | `LoadedData::LoadLanguage`. CSV names are TeamHGG-style; set-seeker ETL stores **English MHFU** (official) as `name_en`. |
 
 Approx sizes: ~410–428 armor rows per slot, ~167 decorations, ~514 skill lines.
 

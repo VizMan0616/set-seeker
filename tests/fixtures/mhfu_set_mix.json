@@ -3,7 +3,7 @@
     "source_file": "mhfu set mix.txt",
     "athena_commit": "134acee87dd0105f3b03dcebe78c5ea9227dafb5",
     "mapping": {
-      "strategy": "Athena CSV name_en is canonical (ETL). Aliases from positional TeamHGG MHP2ndG and English MHFU language overlays, plus packs/mhfu/name_aliases.yaml for typos/forum names. Narga/Naruga is applied as a mechanical extra. name_en must exist in that slot's CSV. fully_mapped also requires Pass A (sockets + positive skill points).",
+      "strategy": "Official English MHFU overlay is canonical (ETL name_en). CSV/TeamHGG strings alias onto that overlay, plus packs/mhfu/name_aliases.yaml for typos/forum names. Narga/Naruga is applied as a mechanical extra. name_en must exist in the loaded pack. fully_mapped also requires Pass A (sockets + positive skill points).",
       "unmapped_armor": [
         "Guardian Spirit Raiment X",
         "Kirin Hoop Z"
@@ -46,7 +46,7 @@
         {
           "id": "blademaster-027-deadly-nightshade",
           "title": "Deadly Nightshade",
-          "reason": "dump_illegal_points:Evade Distance Up Evade Inc 9<10; Trap Expert Set Trap 8<10"
+          "reason": "dump_illegal_points:Evade Distance Up Evade Dist 9<10; Trap Master SpeedSetup 8<10"
         },
         {
           "id": "gunner-042-ninja-bug",
@@ -75,7 +75,7 @@
       "pieces": {
         "head": {
           "source_name": "Chaoshroom",
-          "name_en": "Chaos Shroom",
+          "name_en": "Chaoshroom",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": []
@@ -110,13 +110,13 @@
         },
         "waist": {
           "source_name": "Silver Sol Coil Z",
-          "name_en": "Silver Sol Tasset Z",
+          "name_en": "Silver Sol Coil Z",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Strongest Jewel",
-              "name_en": "Merciless Jewel",
+              "name_en": "Strongest Jewel",
               "count": 1,
               "mapped": true
             }
@@ -166,7 +166,7 @@
         },
         {
           "source_name": "Strongest Jewel",
-          "name_en": "Merciless Jewel",
+          "name_en": "Strongest Jewel",
           "count": 1,
           "mapped": true
         }
@@ -210,7 +210,7 @@
       "pieces": {
         "head": {
           "source_name": "Mizuha Cap Shin",
-          "name_en": "True Mizuha Cap",
+          "name_en": "Mizuha Cap Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -237,13 +237,13 @@
         },
         "arms": {
           "source_name": "Golden Kote Shin",
-          "name_en": "True Golden Kote",
+          "name_en": "Golden Kote Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Pinch Jewel",
-              "name_en": "Calamity Jewel",
+              "name_en": "Pinch Jewel",
               "count": 1,
               "mapped": true
             }
@@ -257,7 +257,7 @@
           "jewels": [
             {
               "source_name": "Pinch Jewel",
-              "name_en": "Calamity Jewel",
+              "name_en": "Pinch Jewel",
               "count": 1,
               "mapped": true
             }
@@ -271,7 +271,7 @@
           "jewels": [
             {
               "source_name": "Pinch Jewel",
-              "name_en": "Calamity Jewel",
+              "name_en": "Pinch Jewel",
               "count": 1,
               "mapped": true
             }
@@ -307,7 +307,7 @@
         },
         {
           "source_name": "Pinch Jewel",
-          "name_en": "Calamity Jewel",
+          "name_en": "Pinch Jewel",
           "count": 3,
           "mapped": true
         }
@@ -351,7 +351,7 @@
       "pieces": {
         "head": {
           "source_name": "Narga Cap X",
-          "name_en": "Naruga Cap X",
+          "name_en": "Narga Cap X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -365,7 +365,7 @@
         },
         "body": {
           "source_name": "Narga Mail X",
-          "name_en": "Naruga Mail X",
+          "name_en": "Narga Mail X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -379,7 +379,7 @@
         },
         "arms": {
           "source_name": "Golden Kote Shin",
-          "name_en": "True Golden Kote",
+          "name_en": "Golden Kote Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -393,7 +393,7 @@
         },
         "waist": {
           "source_name": "Narga Tasset X",
-          "name_en": "Naruga Tasset X",
+          "name_en": "Narga Tasset X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -407,7 +407,7 @@
         },
         "legs": {
           "source_name": "Golden Hakama Shin",
-          "name_en": "True Golden Hakama",
+          "name_en": "Golden Hakama Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -527,7 +527,7 @@
           "jewels": [
             {
               "source_name": "Pinch Jewel",
-              "name_en": "Calamity Jewel",
+              "name_en": "Pinch Jewel",
               "count": 1,
               "mapped": true
             }
@@ -541,7 +541,7 @@
           "jewels": [
             {
               "source_name": "Pinch Jewel",
-              "name_en": "Calamity Jewel",
+              "name_en": "Pinch Jewel",
               "count": 1,
               "mapped": true
             }
@@ -591,7 +591,7 @@
         },
         {
           "source_name": "Pinch Jewel",
-          "name_en": "Calamity Jewel",
+          "name_en": "Pinch Jewel",
           "count": 2,
           "mapped": true
         },
@@ -612,7 +612,7 @@
         },
         {
           "source_name": "Element Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -778,7 +778,7 @@
           "jewels": [
             {
               "source_name": "Iron Curtain Jewel",
-              "name_en": "Iron Curtain Jewel",
+              "name_en": "IronCurtainJewel",
               "count": 1,
               "mapped": true
             }
@@ -792,7 +792,7 @@
           "jewels": [
             {
               "source_name": "Iron Curtain Jewel",
-              "name_en": "Iron Curtain Jewel",
+              "name_en": "IronCurtainJewel",
               "count": 1,
               "mapped": true
             }
@@ -830,7 +830,7 @@
       "weapon_jewels": [
         {
           "source_name": "Iron Curtain Jewel",
-          "name_en": "Iron Curtain Jewel",
+          "name_en": "IronCurtainJewel",
           "count": 1,
           "mapped": true
         }
@@ -838,7 +838,7 @@
       "jewels": [
         {
           "source_name": "Iron Curtain Jewel",
-          "name_en": "Iron Curtain Jewel",
+          "name_en": "IronCurtainJewel",
           "count": 3,
           "mapped": true
         },
@@ -1003,7 +1003,7 @@
         },
         {
           "source_name": "Element Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -1062,7 +1062,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -1177,7 +1177,7 @@
         },
         "body": {
           "source_name": "Narge Mail X",
-          "name_en": "Naruga Mail X",
+          "name_en": "Narga Mail X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -1191,7 +1191,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -1205,10 +1205,10 @@
         },
         "waist": {
           "source_name": "Obituary/Butterfly Anca",
-          "name_en": "Obituary Anka",
+          "name_en": "Obituary Anca",
           "mapped": true,
           "alternates_name_en": [
-            "Butterfly Anka"
+            "Butterfly Anca"
           ],
           "jewels": [
             {
@@ -1433,7 +1433,7 @@
       "skills": [
         {
           "source_name": "Divine Whim",
-          "skill_name_en": "Divine Whim",
+          "skill_name_en": "Spirit's Whim",
           "tree_name": "Whim",
           "min_points": 10,
           "mapped": true
@@ -1608,7 +1608,7 @@
         },
         {
           "source_name": "Element Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -1622,8 +1622,8 @@
         },
         {
           "source_name": "-30 Defense",
-          "skill_name_en": "Defence -30",
-          "tree_name": "Defence",
+          "skill_name_en": "Defense -30",
+          "tree_name": "Defense",
           "min_points": -15,
           "mapped": true
         }
@@ -1650,7 +1650,7 @@
           "jewels": [
             {
               "source_name": "Short Charge Jewel",
-              "name_en": "QuickCharge Jewel",
+              "name_en": "ShortChargeJewel",
               "count": 2,
               "mapped": true
             }
@@ -1658,7 +1658,7 @@
         },
         "body": {
           "source_name": "Hypno Mail S",
-          "name_en": "Hypnoc Mail S",
+          "name_en": "Hypno Mail S",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -1710,7 +1710,7 @@
       "jewels": [
         {
           "source_name": "Short Charge Jewel",
-          "name_en": "QuickCharge Jewel",
+          "name_en": "ShortChargeJewel",
           "count": 2,
           "mapped": true
         },
@@ -1743,8 +1743,8 @@
         },
         {
           "source_name": "Focus",
-          "skill_name_en": "Concentration",
-          "tree_name": "Fast Chrge",
+          "skill_name_en": "Focus",
+          "tree_name": "ShortCharg",
           "min_points": 10,
           "mapped": true
         }
@@ -1897,7 +1897,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -2040,7 +2040,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -2080,7 +2080,7 @@
             },
             {
               "source_name": "Divine Protection Jewel",
-              "name_en": "DivinePrtctionJewel",
+              "name_en": "DivineProtectJwl",
               "count": 1,
               "mapped": true
             }
@@ -2128,7 +2128,7 @@
         },
         {
           "source_name": "Divine Protection Jewel",
-          "name_en": "DivinePrtctionJewel",
+          "name_en": "DivineProtectJwl",
           "count": 1,
           "mapped": true
         }
@@ -2213,7 +2213,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -2348,7 +2348,7 @@
         },
         "arms": {
           "source_name": "Rathalos Soul Vambraces Z",
-          "name_en": "Rthlos Soul Braces Z",
+          "name_en": "RathSoulVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -2476,7 +2476,7 @@
         },
         "arms": {
           "source_name": "Dark Ukanlos Claw",
-          "name_en": "Ucamulbas Claw",
+          "name_en": "Dark Ukanlos Claw",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -2490,13 +2490,13 @@
         },
         "waist": {
           "source_name": "Silver Sol Coil Z",
-          "name_en": "Silver Sol Tasset Z",
+          "name_en": "Silver Sol Coil Z",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Strongest Jewel",
-              "name_en": "Merciless Jewel",
+              "name_en": "Strongest Jewel",
               "count": 1,
               "mapped": true
             }
@@ -2527,7 +2527,7 @@
         },
         {
           "source_name": "Strongest Jewel",
-          "name_en": "Merciless Jewel",
+          "name_en": "Strongest Jewel",
           "count": 1,
           "mapped": true
         },
@@ -3207,7 +3207,7 @@
         },
         "arms": {
           "source_name": "Golden Moon Vambraces Z",
-          "name_en": "Golden Moon Braces Z",
+          "name_en": "GoldenMoonVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3227,7 +3227,7 @@
           "jewels": [
             {
               "source_name": "Trapmaster Jewel",
-              "name_en": "TrapMaster Jewel",
+              "name_en": "TrapMasterJewel",
               "count": 2,
               "mapped": true
             }
@@ -3235,13 +3235,13 @@
         },
         "legs": {
           "source_name": "Golden Moon Z Greaves",
-          "name_en": "GoldenMoon Greaves Z",
+          "name_en": "GoldenMoonGreavesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Trapmaster Jewel",
-              "name_en": "TrapMaster Jewel",
+              "name_en": "TrapMasterJewel",
               "count": 2,
               "mapped": true
             }
@@ -3251,7 +3251,7 @@
       "weapon_jewels": [
         {
           "source_name": "Trapmaster Jewel",
-          "name_en": "TrapMaster Jewel",
+          "name_en": "TrapMasterJewel",
           "count": 1,
           "mapped": true
         }
@@ -3259,7 +3259,7 @@
       "jewels": [
         {
           "source_name": "Trapmaster Jewel",
-          "name_en": "TrapMaster Jewel",
+          "name_en": "TrapMasterJewel",
           "count": 5,
           "mapped": true
         },
@@ -3279,22 +3279,22 @@
       "skills": [
         {
           "source_name": "Trapmaster",
-          "skill_name_en": "Trap Expert",
-          "tree_name": "Set Trap",
+          "skill_name_en": "Trap Master",
+          "tree_name": "SpeedSetup",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Tranquilizing Guru",
-          "skill_name_en": "Eagle Eye",
-          "tree_name": "Observance",
+          "skill_name_en": "Tranquilizing Guru",
+          "tree_name": "Perceive",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Tranquilizing Celebrity",
-          "skill_name_en": "Reward Celebrity",
-          "tree_name": "Trapper",
+          "skill_name_en": "Tranquilizing Celeb",
+          "tree_name": "Tranquilzr",
           "min_points": 15,
           "mapped": true
         },
@@ -3350,7 +3350,7 @@
         },
         "arms": {
           "source_name": "Golden Moon Vambraces Z",
-          "name_en": "Golden Moon Braces Z",
+          "name_en": "GoldenMoonVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3378,7 +3378,7 @@
         },
         "legs": {
           "source_name": "Golden Moon Z Greaves",
-          "name_en": "GoldenMoon Greaves Z",
+          "name_en": "GoldenMoonGreavesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3416,15 +3416,15 @@
         },
         {
           "source_name": "Tranquilizing Guru",
-          "skill_name_en": "Eagle Eye",
-          "tree_name": "Observance",
+          "skill_name_en": "Tranquilizing Guru",
+          "tree_name": "Perceive",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Tranquilizing Celebrity",
-          "skill_name_en": "Reward Celebrity",
-          "tree_name": "Trapper",
+          "skill_name_en": "Tranquilizing Celeb",
+          "tree_name": "Tranquilzr",
           "min_points": 15,
           "mapped": true
         },
@@ -3474,7 +3474,7 @@
           "jewels": [
             {
               "source_name": "Unsheathing jewel",
-              "name_en": "Unsheathe Jewel",
+              "name_en": "UnsheathingJewel",
               "count": 1,
               "mapped": true
             }
@@ -3546,7 +3546,7 @@
         },
         {
           "source_name": "Unsheathing jewel",
-          "name_en": "Unsheathe Jewel",
+          "name_en": "UnsheathingJewel",
           "count": 1,
           "mapped": true
         },
@@ -3567,8 +3567,8 @@
         },
         {
           "source_name": "Art of Unsheathing",
-          "skill_name_en": "Unsheathed Atk Crit",
-          "tree_name": "Drawn Crit",
+          "skill_name_en": "Art of Unsheathing",
+          "tree_name": "Sword Draw",
           "min_points": 10,
           "mapped": true
         },
@@ -3598,19 +3598,19 @@
       "pieces": {
         "head": {
           "source_name": "Narga Helm X",
-          "name_en": "Naruga Helm X",
+          "name_en": "Narga Helm X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Jumping Jewel",
-              "name_en": "Jump Jewel",
+              "name_en": "Jumping Jewel",
               "count": 1,
               "mapped": true
             },
             {
               "source_name": "DivineProtectJwl",
-              "name_en": "DivinePrtctionJewel",
+              "name_en": "DivineProtectJwl",
               "count": 1,
               "mapped": true
             }
@@ -3618,13 +3618,13 @@
         },
         "body": {
           "source_name": "Narga Mail X",
-          "name_en": "Naruga Mail X",
+          "name_en": "Narga Mail X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "DivineProtectJwl",
-              "name_en": "DivinePrtctionJewel",
+              "name_en": "DivineProtectJwl",
               "count": 2,
               "mapped": true
             }
@@ -3632,13 +3632,13 @@
         },
         "arms": {
           "source_name": "Narga Guards X",
-          "name_en": "Naruga Guards X",
+          "name_en": "Narga Guards X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "DivineProtectJwl",
-              "name_en": "DivinePrtctionJewel",
+              "name_en": "DivineProtectJwl",
               "count": 2,
               "mapped": true
             }
@@ -3646,7 +3646,7 @@
         },
         "waist": {
           "source_name": "Narga Tasset X",
-          "name_en": "Naruga Tasset X",
+          "name_en": "Narga Tasset X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3676,7 +3676,7 @@
       "weapon_jewels": [
         {
           "source_name": "TrapMaster Jewel",
-          "name_en": "TrapMaster Jewel",
+          "name_en": "TrapMasterJewel",
           "count": 3,
           "mapped": true
         }
@@ -3684,19 +3684,19 @@
       "jewels": [
         {
           "source_name": "TrapMaster Jewel",
-          "name_en": "TrapMaster Jewel",
+          "name_en": "TrapMasterJewel",
           "count": 3,
           "mapped": true
         },
         {
           "source_name": "Jumping Jewel",
-          "name_en": "Jump Jewel",
+          "name_en": "Jumping Jewel",
           "count": 1,
           "mapped": true
         },
         {
           "source_name": "DivineProtectJwl",
-          "name_en": "DivinePrtctionJewel",
+          "name_en": "DivineProtectJwl",
           "count": 5,
           "mapped": true
         },
@@ -3718,14 +3718,14 @@
         {
           "source_name": "EvadeDistanceUp",
           "skill_name_en": "Evade Distance Up",
-          "tree_name": "Evade Inc",
+          "tree_name": "Evade Dist",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Trap Master",
-          "skill_name_en": "Trap Expert",
-          "tree_name": "Set Trap",
+          "skill_name_en": "Trap Master",
+          "tree_name": "SpeedSetup",
           "min_points": 10,
           "mapped": true
         },
@@ -3746,7 +3746,7 @@
       ],
       "fully_mapped": false,
       "skip_reasons": [
-        "dump_illegal_points:Evade Distance Up Evade Inc 9<10; Trap Expert Set Trap 8<10"
+        "dump_illegal_points:Evade Distance Up Evade Dist 9<10; Trap Master SpeedSetup 8<10"
       ],
       "raw": "Deadly Nightshade - HR9\nPost by Ravenous_2k10\n\n3-slot weapon\n[Gem 1: TrapMaster Jewel]\n[Gem 2: TrapMaster Jewel]\n[Gem 3: TrapMaster Jewel]\n\nNarga Helm X\n[Gem 1: Jumping Jewel]\n[Gem 2: DivineProtectJwl]\n\nNarga Mail X\n[Gem 1: DivineProtectJwl]\n[Gem 2: DivineProtectJwl]\n\nNarga Guards X\n[Gem 1: DivineProtectJwl]\n[Gem 2: DivineProtectJwl]\n\nNarga Tasset X\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nObituary Gamba X\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n[Gem 3: Grinder Jewel]\n\nEvade +2\nEvadeDistanceUp\nTrap Master\nDivine Protection\nSwdSharpSklInc"
     },
@@ -3878,7 +3878,7 @@
       "pieces": {
         "head": {
           "source_name": "Shinobi Mask(Heaven)",
-          "name_en": "Shinobi Mask (Heaven)",
+          "name_en": "Shinobi Mask(Heaven)",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3926,7 +3926,7 @@
         },
         "waist": {
           "source_name": "Butterfly Anca X",
-          "name_en": "Butterfly Anka X",
+          "name_en": "Butterfly Anca X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -3997,7 +3997,7 @@
         },
         {
           "source_name": "Elemental Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -4047,7 +4047,7 @@
         },
         "body": {
           "source_name": "Dark Uknlos Aegis",
-          "name_en": "Ucamulbas Aegis",
+          "name_en": "Dark Ukanlos Aegis",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4061,7 +4061,7 @@
         },
         "arms": {
           "source_name": "SilverSolVambrancesZ",
-          "name_en": "Silver Sol Braces Z",
+          "name_en": "SilverSolVambracesZ",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4075,7 +4075,7 @@
         },
         "waist": {
           "source_name": "DarkUknlosCincture",
-          "name_en": "Ucamulbas Cincture",
+          "name_en": "DarkUkanlosCincture",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4175,7 +4175,7 @@
           "jewels": [
             {
               "source_name": "IronCurtainJewel",
-              "name_en": "Iron Curtain Jewel",
+              "name_en": "IronCurtainJewel",
               "count": 1,
               "mapped": true
             }
@@ -4183,13 +4183,13 @@
         },
         "body": {
           "source_name": "Narga Mail X",
-          "name_en": "Naruga Mail X",
+          "name_en": "Narga Mail X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "IronCurtainJewel",
-              "name_en": "Iron Curtain Jewel",
+              "name_en": "IronCurtainJewel",
               "count": 1,
               "mapped": true
             }
@@ -4211,7 +4211,7 @@
         },
         "waist": {
           "source_name": "Obituary Anca X",
-          "name_en": "Obituary Anka X",
+          "name_en": "Obituary Anca X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4231,7 +4231,7 @@
           "jewels": [
             {
               "source_name": "IronCurtainJewel",
-              "name_en": "Iron Curtain Jewel",
+              "name_en": "IronCurtainJewel",
               "count": 1,
               "mapped": true
             },
@@ -4248,7 +4248,7 @@
       "jewels": [
         {
           "source_name": "IronCurtainJewel",
-          "name_en": "Iron Curtain Jewel",
+          "name_en": "IronCurtainJewel",
           "count": 3,
           "mapped": true
         },
@@ -4685,7 +4685,7 @@
       "pieces": {
         "head": {
           "source_name": "Steadfast Helm Shin",
-          "name_en": "True Steadfast Helm",
+          "name_en": "Steadfast Helm Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4713,7 +4713,7 @@
         },
         "arms": {
           "source_name": "Kushala Embrace X",
-          "name_en": "Kushala Grasp X",
+          "name_en": "Kushala Embrace X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4727,7 +4727,7 @@
         },
         "waist": {
           "source_name": "Steadfast Coat Shin",
-          "name_en": "True Steadfast Coat",
+          "name_en": "Steadfast Coat Shin",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -4793,7 +4793,7 @@
         {
           "source_name": "Reloading Speed +1",
           "skill_name_en": "Reloading Speed +1",
-          "tree_name": "Load",
+          "tree_name": "Reload",
           "min_points": 10,
           "mapped": true
         }
@@ -4942,7 +4942,7 @@
           "jewels": [
             {
               "source_name": "Cont. Fire Jewel",
-              "name_en": "SpeedFire Jewel",
+              "name_en": "Cont. Fire Jewel",
               "count": 2,
               "mapped": true
             }
@@ -4950,7 +4950,7 @@
         },
         "body": {
           "source_name": "Narge Vest X",
-          "name_en": "Naruga Vest X",
+          "name_en": "Narga Vest X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -5009,7 +5009,7 @@
       "jewels": [
         {
           "source_name": "Cont. Fire Jewel",
-          "name_en": "SpeedFire Jewel",
+          "name_en": "Cont. Fire Jewel",
           "count": 2,
           "mapped": true
         },
@@ -5036,15 +5036,15 @@
         },
         {
           "source_name": "Element Atk Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "AutoReload",
-          "skill_name_en": "Speed Fire",
-          "tree_name": "Speed Fire",
+          "skill_name_en": "AutoReload",
+          "tree_name": "AutoReload",
           "min_points": 10,
           "mapped": true
         }
@@ -5200,7 +5200,7 @@
       "pieces": {
         "head": {
           "source_name": "Chaoshroom",
-          "name_en": "Chaos Shroom",
+          "name_en": "Chaoshroom",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": []
@@ -5293,7 +5293,7 @@
         },
         {
           "source_name": "Element Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -5428,14 +5428,14 @@
       "skills": [
         {
           "source_name": "Autoreload",
-          "skill_name_en": "Speed Fire",
-          "tree_name": "Speed Fire",
+          "skill_name_en": "AutoReload",
+          "tree_name": "AutoReload",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Element Attack Up",
-          "skill_name_en": "Element Atk Up",
+          "skill_name_en": "Element Attack Up",
           "tree_name": "ElementAtk",
           "min_points": 10,
           "mapped": true
@@ -5471,13 +5471,13 @@
         },
         "body": {
           "source_name": "Lava Vest X",
-          "name_en": "Volganos Vest X",
+          "name_en": "Lava Vest X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Short Charge Jewel",
-              "name_en": "QuickCharge Jewel",
+              "name_en": "ShortChargeJewel",
               "count": 1,
               "mapped": true
             },
@@ -5497,7 +5497,7 @@
           "jewels": [
             {
               "source_name": "Rapid Charge Jewel",
-              "name_en": "SpeedCharge Jewel",
+              "name_en": "RapidChargeJewel",
               "count": 1,
               "mapped": true
             }
@@ -5505,7 +5505,7 @@
         },
         "waist": {
           "source_name": "Lava Coat X",
-          "name_en": "Volganos Coat X",
+          "name_en": "Lava Coat X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
@@ -5519,13 +5519,13 @@
         },
         "legs": {
           "source_name": "Lava Leggings X",
-          "name_en": "Volganos Leggings X",
+          "name_en": "Lava Leggings X",
           "mapped": true,
           "alternates_name_en": [],
           "jewels": [
             {
               "source_name": "Guts Jewel",
-              "name_en": "Survivor Jewel",
+              "name_en": "Guts Jewel",
               "count": 1,
               "mapped": true
             }
@@ -5549,19 +5549,19 @@
         },
         {
           "source_name": "Short Charge Jewel",
-          "name_en": "QuickCharge Jewel",
+          "name_en": "ShortChargeJewel",
           "count": 1,
           "mapped": true
         },
         {
           "source_name": "Rapid Charge Jewel",
-          "name_en": "SpeedCharge Jewel",
+          "name_en": "RapidChargeJewel",
           "count": 1,
           "mapped": true
         },
         {
           "source_name": "Guts Jewel",
-          "name_en": "Survivor Jewel",
+          "name_en": "Guts Jewel",
           "count": 1,
           "mapped": true
         }
@@ -5569,8 +5569,8 @@
       "skills": [
         {
           "source_name": "Capacity Up",
-          "skill_name_en": "Load Up",
-          "tree_name": "Loading",
+          "skill_name_en": "Capacity Up",
+          "tree_name": "Capacity",
           "min_points": 10,
           "mapped": true
         },
@@ -5583,15 +5583,15 @@
         },
         {
           "source_name": "Focus",
-          "skill_name_en": "Concentration",
-          "tree_name": "Fast Chrge",
+          "skill_name_en": "Focus",
+          "tree_name": "ShortCharg",
           "min_points": 10,
           "mapped": true
         },
         {
           "source_name": "Guts",
-          "skill_name_en": "Survival",
-          "tree_name": "Survival",
+          "skill_name_en": "Guts",
+          "tree_name": "Guts",
           "min_points": 10,
           "mapped": true
         }

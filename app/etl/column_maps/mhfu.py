@@ -81,7 +81,8 @@ def parse_hunter_type(raw: str) -> int:
     return HUNTER_TYPE.get(raw.strip().lower(), 2)
 
 
-# English name overlay used for dummy detection (`Armor.cpp:39` name.Contains("(dummy)")).
-# CSV names omit the marker; Athena applies Languages/English MHFU after load.
+# Official English overlay (`LoadedData::LoadLanguage`). CSV `name` columns follow
+# the TeamHGG P2G fan pack; set-seeker stores Languages/English MHFU instead.
+# Dummy detection still uses overlay names that contain `(dummy)` (`Armor.cpp:39`).
 ENGLISH_LOCALE_DIR = "Languages/English MHFU"
 DUMMY_MARK = "(dummy)"

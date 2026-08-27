@@ -24,7 +24,9 @@ Every repo implements the same five steps:
    slots, options (event gear, bad skills, piercings/arena, charm mode).
 2. **Relevance + dominance pruning** (`LoadedData::GetRelevantData`) — keep only armor and
    decorations that grant requested skills or top-tier slots; drop pieces strictly dominated
-   by another piece on all relevant skills + slots. *This is the real pruning.*
+   by another piece on all relevant skills + slots. *This is the real pruning.* Athena keeps
+   both `inf_*` (relevant) and `rel_*` (skyline) for Advanced Search; set-seeker does the
+   same — see `docs/specs/engine-spec.md` §1.
 3. **Fan out workers** — one `BackgroundWorker` per head-equivalence (MHFU) or per charm
    template (MHP3 onward); up to `ProcessorCount` run concurrently.
 4. **Brute-force enumeration** — 5 nested loops over head×body×arms×waist×legs (MH4/4U add a

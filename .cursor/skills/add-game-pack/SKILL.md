@@ -25,9 +25,15 @@ description: Add support for a new Monster Hunter generation (game pack) to set-
 4. Verify `sources/<GAME>-ASS/` exists; if missing, restore it via the commands in
    `SOURCES.md` (pinned commit) before touching ETL.
 5. Write the pack manifest (flags from the matrix in `docs/specs/data-pack-spec.md`), the
-   per-pack column map, and the ETL wiring.
+   per-pack column map, and the ETL wiring. If Athena ships `Languages/` overlays, store
+   **official localized English** as `name_en` (MHFU: `English MHFU`, not TeamHGG CSV
+   strings). Fan-only packs (MHP3) keep the fan marker from ADR 0009.
 6. Add ≥3 known queries with expected legacy results to the pack's validation suite.
-7. Run ETL, run the validation gate, then update the pack's legacy-analysis doc if ETL
+7. Verify Advanced Search columns from the feature-flag matrix (`docs/specs/engine-spec.md`
+   §1, `docs/specs/data-pack-spec.md` checklist item 8): armor slots + decorations, plus
+   charms if `talismans`, weapons if `weapon_search`. Do not add a second omit/catalog UI.
+   Extend Query hard filters only if this gen's `MatchesQuery` adds a filter we lack.
+8. Run ETL, run the validation gate, then update the pack's legacy-analysis doc if ETL
    uncovered format details the analysis missed.
 
 ## References

@@ -50,9 +50,11 @@ def test_index_renders_search_form(client: TestClient):
     assert "Offensive" in html
     assert 'name="allow_torso_inc"' in html
     assert 'name="allow_dummy"' in html
-    assert 'name="excluded_piece_id"' in html
-    assert 'name="excluded_decoration_id"' in html
-    assert 'id="exclude-modal"' in html
+    assert 'id="advanced-open"' in html
+    assert 'id="advanced-modal"' in html
+    assert 'disabled' in html.split('id="advanced-open"')[1].split(">")[0]
+    assert 'name="excluded_piece_id"' not in html
+    assert 'name="rel_piece_id"' not in html
     # weapon slots, gender, hunter type, HR/village filters
     assert 'name="weapon_slots"' in html
     assert 'name="gender"' in html
@@ -83,6 +85,13 @@ def test_start_search_returns_result_cards(client: TestClient):
     assert 'hx-target="#results-list"' in html
     assert 'hx-swap="beforeend"' in html
     assert SEARCH_ID_RE.search(html)
+    assert 'id="advanced-open"' in html
+    assert "disabled" not in html.split('id="advanced-open"')[1].split(">")[0]
+    assert 'name="rel_piece_id"' in html
+    assert 'name="rel_decoration_id"' in html
+    assert "Chain Faulds" in html
+    assert 'data-skyline="0"' in html
+    assert 'name="advanced_domain"' in html
 
 
 def test_load_more_updates_remaining_count(client: TestClient):
@@ -180,6 +189,37 @@ def test_search_excludes_omitted_pieces_from_results(client: TestClient):
     cards = _cards(response.text)
     assert cards
     assert all("Leather Helm" not in card for card in cards)
+
+
+def test_advanced_endpoint_lists_inf_and_checks_rel(client: TestClient):
+    first = client.post("/games/mhfu/search", data=SEARCH_FORM)
+    search_id = SEARCH_ID_RE.search(first.text).group(1)
+    response = client.get(f"/search/{search_id}/advanced")
+    assert response.status_code == 200
+    html = response.text
+    names = set(re.findall(r'for="adv-[^"]+">([^<]+)<', html))
+    assert "Chain Faulds" in names
+    assert "Leather Faulds" in names
+    # Dominated waist 11 is listed but not default-checked.
+    assert 'id="adv-waist-11"' in html
+    waist_11 = html.split('id="adv-waist-11"')[1].split(">", 1)[0]
+    assert "checked" not in waist_11
+    waist_10 = html.split('id="adv-waist-10"')[1].split(">", 1)[0]
+    assert "checked" in waist_10
+
+
+def test_advanced_force_include_checks_dominated_piece(client: TestClient):
+    response = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "forced_piece_id": ["11"]},
+    )
+    assert response.status_code == 200
+    waist_11 = response.text.split('id="adv-waist-11"')[1].split(">", 1)[0]
+    assert "checked" in waist_11
+
+
+def test_unknown_advanced_search_is_404(client: TestClient):
+    assert client.get("/search/does-not-exist/advanced").status_code == 404
 
 
 def test_index_lists_pack_scoped_categories(client: TestClient):

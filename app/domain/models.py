@@ -19,9 +19,12 @@ class Query:
     # Athena Form1.h: chkTorsoInc defaults checked; chkDummy does not.
     allow_torso_inc: bool = True
     allow_dummy: bool = False
-    # Omitted from the pruned domains before CP-SAT (Athena Advanced Search).
+    # Omitted from the solver skyline (Athena Advanced Search unchecks).
     excluded_piece_ids: tuple[int, ...] = ()
     excluded_decoration_ids: tuple[int, ...] = ()
+    # Dominated inf pieces forced back onto the skyline (Advanced checks).
+    forced_piece_ids: tuple[int, ...] = ()
+    forced_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
 
 @dataclass(frozen=True)

@@ -2,16 +2,14 @@
 """Build tests/fixtures/mhfu_set_mix.json from `mhfu set mix.txt`.
 
 Athena already ships a P2G overlay: sources/MHFU-ASS/Run/Data/Languages/TeamHGG MHP2ndG/.
-The English overlay is Languages/English MHFU/. CSV name_en is what ETL stores
-(mostly TeamHGG-identical; English overlay is official-EN). Extra typos live in
-packs/mhfu/name_aliases.yaml.
+Official English is Languages/English MHFU/ — that is what ETL stores as name_en.
+CSV strings are TeamHGG-style. Extra typos live in packs/mhfu/name_aliases.yaml.
 
 Run from repo root: python tests/fixtures/build_mhfu_set_mix.py
 """
 
 from __future__ import annotations
 
-import csv
 import json
 import re
 import sys
@@ -22,7 +20,14 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from app.etl.loaders import load_pack, load_skill_blocks
+from app.etl.column_maps import mhfu as cmap
+from app.etl.loaders import (
+    _strip_dummy_mark,
+    load_armor_file,
+    load_decorations,
+    load_pack,
+    load_skill_blocks,
+)
 from app.etl.manifest import load_manifest
 
 REPO = Path(__file__).resolve().parents[2]
@@ -67,20 +72,6 @@ def _read_lang(path: Path) -> list[str]:
     return names
 
 
-def _csv_armor_names(slot: str) -> list[str]:
-    path = DATA / f"{slot}.csv"
-    with path.open(newline="", encoding="utf-8") as fh:
-        reader = csv.reader(fh)
-        next(reader, None)
-        next(reader, None)
-        return [row[0].strip() for row in reader if row and row[0].strip()]
-
-
-def _csv_deco_names() -> list[str]:
-    with (DATA / "decorations.csv").open(newline="", encoding="utf-8") as fh:
-        return [row[0].strip() for row in csv.reader(fh) if row and row[0].strip()]
-
-
 def _skill_sections(path: Path) -> tuple[list[str], list[str]]:
     trees, resulting = [], []
     in_res = False
@@ -104,45 +95,6 @@ def norm(s: str) -> str:
     return compact
 
 
-def _align_overlay(overlay: list[str], canonical: list[str]) -> dict[str, str]:
-    """Map overlay-only names onto CSV names via identical-name anchors.
-
-    Gaps of equal length are zipped as aliases. A gap with one extra CSV
-    row (TeamHGG/English head lists omit Felyne Piercing) skips the CSV
-    name that is absent from the overlay. Never remap a name that already
-    exists as a CSV name_en.
-    """
-    canon_set = set(canonical)
-    overlay_set = set(overlay)
-    aliases: dict[str, str] = {}
-    anchors: list[tuple[int, int]] = []
-    ci = 0
-    for oi, ov in enumerate(overlay):
-        for j in range(ci, len(canonical)):
-            if canonical[j] == ov:
-                anchors.append((oi, j))
-                ci = j + 1
-                break
-    segs = [(-1, -1), *anchors, (len(overlay), len(canonical))]
-    for (oi0, ci0), (oi1, ci1) in zip(segs, segs[1:]):
-        o_slice = overlay[oi0 + 1 : oi1]
-        c_slice = canonical[ci0 + 1 : ci1]
-        if len(o_slice) == len(c_slice) + 1:
-            extra_ov = [n for n in o_slice if n not in canon_set]
-            if len(o_slice) - 1 == len(c_slice) and extra_ov:
-                pass  # overlay-only; don't guess
-        if len(c_slice) == len(o_slice) + 1:
-            extra = [c for c in c_slice if c not in overlay_set]
-            if len(extra) == 1:
-                c_slice = [c for c in c_slice if c != extra[0]]
-        if len(o_slice) != len(c_slice):
-            continue
-        for ov, cv in zip(o_slice, c_slice):
-            if ov != cv and ov not in canon_set:
-                aliases[ov] = cv
-    return aliases
-
-
 class NameMaps:
     def __init__(self) -> None:
         extra = yaml.safe_load(ALIASES_PATH.read_text()) or {}
@@ -158,29 +110,41 @@ class NameMaps:
         self.unmapped_deco: set[str] = set()
         self.unmapped_skill: set[str] = set()
 
+        pack = load_pack(load_manifest(REPO / "packs" / "mhfu"))
+
         for i, slot in enumerate(SLOTS):
-            csv_names = _csv_armor_names(slot)
-            self.csv_by_slot[i] = set(csv_names)
-            for n in csv_names:
+            official = [r.name_en for r in pack.armor if r.slot == i]
+            self.csv_by_slot[i] = set(official)
+            for n in official:
                 self._index_armor(n, n, i)
-            for pack in ("TeamHGG MHP2ndG", "English MHFU"):
-                overlay = _read_lang(LANG / pack / f"{slot}.txt")
-                for ov, cv in _align_overlay(overlay, csv_names).items():
-                    self._index_armor(ov, cv, i)
+            csv_rows, _ = load_armor_file(DATA / f"{slot}.csv", i, cmap, header_lines=2)
+            for csv_row, off in zip(csv_rows, official, strict=True):
+                if csv_row.name_en != off:
+                    self._index_armor(csv_row.name_en, off, i)
+            for pack_name in ("TeamHGG MHP2ndG", "English MHFU"):
+                overlay = _read_lang(LANG / pack_name / f"{slot}.txt")
+                for ov, off in zip(overlay, official, strict=True):
+                    cleaned, _ = _strip_dummy_mark(ov, "(dummy)")
+                    if ov != off:
+                        self._index_armor(ov, off, i)
+                    if cleaned != off:
+                        self._index_armor(cleaned, off, i)
 
-        deco_csv = _csv_deco_names()
-        self.deco_csv = set(deco_csv)
-        for n in deco_csv:
+        official_decos = [d.name_en for d in pack.decorations]
+        self.deco_csv = set(official_decos)
+        for n in official_decos:
             self.deco[norm(n)] = n
-        for pack in ("TeamHGG MHP2ndG", "English MHFU"):
-            overlay = _read_lang(LANG / pack / "decorations.txt")
-            for ov, cv in _align_overlay(overlay, deco_csv).items():
-                self.deco[norm(ov)] = cv
+        csv_decos = load_decorations(DATA / "decorations.csv", cmap)
+        for csv_row, off in zip(csv_decos, official_decos, strict=True):
+            if csv_row.name_en != off:
+                self.deco[norm(csv_row.name_en)] = off
+        for pack_name in ("TeamHGG MHP2ndG", "English MHFU"):
+            overlay = _read_lang(LANG / pack_name / "decorations.txt")
+            for ov, off in zip(overlay, official_decos, strict=True):
+                if ov != off:
+                    self.deco[norm(ov)] = off
 
-        blocks = load_skill_blocks(DATA / "skills.txt")
-        etl_trees = [b.name for b in blocks]
-        etl_skills = [name for b in blocks for _, name in b.thresholds]
-        for b in blocks:
+        for b in pack.skill_trees:
             self.tree[norm(b.name)] = b.name
             for pts, sname in b.thresholds:
                 self.skill[norm(sname)] = sname
@@ -189,24 +153,37 @@ class NameMaps:
                     "min_points": pts,
                     "skill_name_en": sname,
                 }
+        csv_blocks = load_skill_blocks(DATA / "skills.txt")
+        for csv_b, off_b in zip(csv_blocks, pack.skill_trees, strict=True):
+            if csv_b.name != off_b.name:
+                self.tree[norm(csv_b.name)] = off_b.name
+            for (_, csv_s), (_, off_s) in zip(csv_b.thresholds, off_b.thresholds, strict=True):
+                if csv_s != off_s:
+                    self.skill[norm(csv_s)] = off_s
+        for pack_name in ("TeamHGG MHP2ndG", "English MHFU"):
+            trees, resulting = _skill_sections(LANG / pack_name / "skills.txt")
+            official_trees = [b.name for b in pack.skill_trees]
+            official_skills = [n for b in pack.skill_trees for _, n in b.thresholds]
+            for ov, off in zip(trees, official_trees, strict=True):
+                if ov != off:
+                    self.tree[norm(ov)] = off
+            for ov, off in zip(resulting, official_skills, strict=True):
+                if ov != off:
+                    self.skill[norm(ov)] = off
 
-        for pack in ("TeamHGG MHP2ndG", "English MHFU"):
-            trees, resulting = _skill_sections(LANG / pack / "skills.txt")
-            for ov, cv in _align_overlay(trees, etl_trees).items():
-                self.tree[norm(ov)] = cv
-            for ov, cv in _align_overlay(resulting, etl_skills).items():
-                self.skill[norm(ov)] = cv
-
+        official_armor = set().union(*self.csv_by_slot.values())
         for src, dst in (extra.get("armor") or {}).items():
-            if dst not in set().union(*self.csv_by_slot.values()):
-                raise SystemExit(f"name_aliases.yaml armor target not in CSV: {dst!r}")
-            self.armor[norm(src)] = dst
+            canon = self.armor.get(norm(dst), dst)
+            if canon not in official_armor:
+                raise SystemExit(f"name_aliases.yaml armor target not in pack: {dst!r} -> {canon!r}")
+            self.armor[norm(src)] = canon
         for src, dst in (extra.get("decorations") or {}).items():
-            if dst not in self.deco_csv:
-                raise SystemExit(f"name_aliases.yaml deco target not in CSV: {dst!r}")
-            self.deco[norm(src)] = dst
+            canon = self.deco.get(norm(dst), dst)
+            if canon not in self.deco_csv:
+                raise SystemExit(f"name_aliases.yaml deco target not in pack: {dst!r} -> {canon!r}")
+            self.deco[norm(src)] = canon
         for src, dst in (extra.get("skills") or {}).items():
-            self.skill[norm(src)] = dst
+            self.skill[norm(src)] = self.skill.get(norm(dst), dst)
 
         # Common English monster-name drift: Narga <-> Naruga
         extras = {}
@@ -642,11 +619,11 @@ def build() -> dict:
         "athena_commit": "134acee87dd0105f3b03dcebe78c5ea9227dafb5",
         "mapping": {
             "strategy": (
-                "Athena CSV name_en is canonical (ETL). Aliases from positional "
-                "TeamHGG MHP2ndG and English MHFU language overlays, plus "
+                "Official English MHFU overlay is canonical (ETL name_en). "
+                "CSV/TeamHGG strings alias onto that overlay, plus "
                 "packs/mhfu/name_aliases.yaml for typos/forum names. "
                 "Narga/Naruga is applied as a mechanical extra. "
-                "name_en must exist in that slot's CSV. fully_mapped also "
+                "name_en must exist in the loaded pack. fully_mapped also "
                 "requires Pass A (sockets + positive skill points)."
             ),
             "unmapped_armor": sorted(maps.unmapped_armor),

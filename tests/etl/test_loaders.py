@@ -166,6 +166,16 @@ def test_load_pack_totals(pack_data):
     assert len(pack_data.armor) == 2080
     assert len(pack_data.decorations) == 168
     assert sorted(set(pack_data.duplicates_skipped)) == ["Felyne Piercing"]
+    # Official English overlay, not TeamHGG CSV strings.
+    trees = {b.name for b in pack_data.skill_trees}
+    assert "AutoReload" in trees
+    assert "Speed Fire" not in trees
+    skills = {name for b in pack_data.skill_trees for _, name in b.thresholds}
+    assert "Normal S All LV Add" in skills
+    assert "All Shots Up" not in skills
+    jewels = {d.name_en for d in pack_data.decorations}
+    assert "Cont. Fire Jewel" in jewels
+    assert "SpeedFire Jewel" not in jewels
     # Every referenced tree must resolve (referential integrity at parse level).
     tree_names = {b.name for b in pack_data.skill_trees}
     for row in pack_data.armor:

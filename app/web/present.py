@@ -7,9 +7,22 @@ one wraps repository.game_data at integration time.
 
 from typing import Any, Protocol
 
-from app.domain.models import ArmorSetResult, SearchPage
+from app.domain.models import ArmorSetResult, Query, SearchPage
+from app.engine.data import ARMOR_SLOT_KINDS, PackData
+from app.engine.pruning import PrunedPack, domain_snapshot
 
 SLOT_ORDER = ("head", "body", "arms", "waist", "legs")
+
+KIND_LABELS = {
+    "head": "Head",
+    "body": "Chest",
+    "arms": "Arms",
+    "waist": "Waist",
+    "legs": "Legs",
+    "decorations": "Jewels",
+    "charms": "Charms",
+    "weapons": "Weapons",
+}
 
 
 class NameResolver(Protocol):
@@ -66,7 +79,65 @@ def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str,
     }
 
 
-def page_context(page: SearchPage, resolver: NameResolver) -> dict[str, Any]:
+def advanced_columns(
+    pack: PackData, pruned: PrunedPack, query: Query, resolver: NameResolver
+) -> list[dict[str, Any]]:
+    """One tab per snapshot kind; checked = current solver rel."""
+    excluded_p = set(query.excluded_piece_ids)
+    forced_p = set(query.forced_piece_ids)
+    excluded_d = set(query.excluded_decoration_ids)
+    forced_d = set(query.forced_decoration_ids)
+    columns: list[dict[str, Any]] = []
+    for kind, ids in domain_snapshot(pack, pruned)["kinds"].items():
+        skyline = set(ids["rel_ids"])
+        items: list[dict[str, Any]] = []
+        if kind in ARMOR_SLOT_KINDS:
+            input_name = "rel_piece_id"
+            for piece_id in ids["inf_ids"]:
+                items.append(
+                    {
+                        "id": piece_id,
+                        "name": resolver.armor_piece(piece_id)["name"],
+                        "checked": (
+                            (piece_id in skyline and piece_id not in excluded_p)
+                            or piece_id in forced_p
+                        ),
+                        "skyline": piece_id in skyline,
+                    }
+                )
+        elif kind == "decorations":
+            input_name = "rel_decoration_id"
+            for deco_id in ids["inf_ids"]:
+                items.append(
+                    {
+                        "id": deco_id,
+                        "name": resolver.decoration_name(deco_id),
+                        "checked": (
+                            (deco_id in skyline and deco_id not in excluded_d)
+                            or deco_id in forced_d
+                        ),
+                        "skyline": deco_id in skyline,
+                    }
+                )
+        else:
+            input_name = f"rel_{kind.rstrip('s')}_id"
+        columns.append(
+            {
+                "key": kind,
+                "label": KIND_LABELS.get(kind, kind),
+                "input_name": input_name,
+                "rows": items,
+            }
+        )
+    return columns
+
+
+def page_context(
+    page: SearchPage,
+    resolver: NameResolver,
+    *,
+    advanced: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """The exact template context settled in phase0-contracts §5."""
     return {
         "search_id": page.search_id,
@@ -75,4 +146,5 @@ def page_context(page: SearchPage, resolver: NameResolver) -> dict[str, Any]:
         "exhausted": page.exhausted,
         "shown_count": page.shown_count,
         "remaining_count": page.remaining_count,
+        "advanced_columns": advanced or [],
     }

@@ -13,6 +13,7 @@
 <script type="application/json" id="ss-catalogs">{{ catalogs | tojson }}</script>
 
 <form class="card ss-form mb-4"
+      id="search-form"
       x-data="searchForm()"
       action="/games/{{ games[0].code if games else 'mhfu' }}/search"
       method="post"
@@ -20,7 +21,8 @@
       :hx-post="'/games/' + game + '/search'"
       hx-target="#results"
       hx-swap="innerHTML"
-      hx-indicator="#search-working">
+      hx-indicator="#search-working"
+      hx-disabled-elt="#advanced-open">
 
   <div class="card-body">
     <label class="form-label ss-label" for="game">Game</label>
@@ -143,11 +145,15 @@
   </fieldset>
 
   <div class="card-body border-top">
-    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exclude-modal">
-      Exclude pieces &amp; jewels
-      <span class="badge ss-exclude-count" x-text="excludeCount || ''" x-show="excludeCount"></span>
-    </button>
-    <p class="ss-hint mt-2 mb-0">Omitted gear is dropped before search, not after.</p>
+    <span id="advanced-open-wrap">
+      <button type="button" id="advanced-open" class="btn btn-outline-secondary"
+              data-bs-toggle="modal" data-bs-target="#advanced-modal" disabled>
+        Advanced Search
+        <span class="badge ss-exclude-count" x-text="excludeCount || ''" x-show="excludeCount"></span>
+      </button>
+    </span>
+    <span id="advanced-domain-slot"></span>
+    <p class="ss-hint mt-2 mb-0">Edit the relevant-piece domain after you find sets. Checked pieces stay in the search; unchecked ones are dropped.</p>
   </div>
 
   <div class="card-body border-top d-flex align-items-center gap-3">
@@ -158,64 +164,23 @@
     </span>
   </div>
 
-  <div class="modal fade" id="exclude-modal" tabindex="-1" aria-labelledby="exclude-modal-title" aria-hidden="true">
+  <div class="modal fade" id="advanced-modal" tabindex="-1" aria-labelledby="advanced-modal-title" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title ss-card-title fs-5" id="exclude-modal-title">Exclude pieces and jewels</h2>
+          <h2 class="modal-title ss-card-title fs-5" id="advanced-modal-title">Advanced Search</h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <label class="form-label ss-label" for="exclude-filter">Search catalog</label>
-          <input id="exclude-filter" class="form-control mb-3" type="search"
-                 placeholder="Filter by name" x-model="excludeFilter">
-          <ul class="nav nav-tabs ss-exclude-tabs mb-3" role="tablist">
-            <template x-for="tab in slotTabs" :key="tab.key">
-              <li class="nav-item" role="presentation">
-                <button type="button" class="nav-link" :class="excludeTab === tab.key && 'active'"
-                        @click="excludeTab = tab.key" x-text="tab.label"></button>
-              </li>
-            </template>
-          </ul>
-          <template x-for="tab in slotTabs" :key="'panel-'+tab.key">
-            <div x-show="excludeTab === tab.key">
-              <template x-for="item in filteredExclude(tab.key)" :key="tab.key + '-' + item.id">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox"
-                         :id="'ex-'+tab.key+'-'+item.id"
-                         :name="tab.key === 'jewels' ? 'excluded_decoration_id' : 'excluded_piece_id'"
-                         :value="item.id">
-                  <label class="form-check-label" :for="'ex-'+tab.key+'-'+item.id" x-text="item.name"></label>
-                </div>
-              </template>
-            </div>
-          </template>
-          {# SSR fallback so tests and no-JS still post exclusions #}
-          <div class="ss-ssr-exclude">
-            {% for slot, items in pieces.items() %}
-            <p class="ss-label mt-3">{{ slot }}</p>
-            {% for item in items %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox"
-                     id="ex-ssr-{{ slot }}-{{ item.id }}"
-                     name="excluded_piece_id" value="{{ item.id }}">
-              <label class="form-check-label" for="ex-ssr-{{ slot }}-{{ item.id }}">{{ item.name }}</label>
-            </div>
-            {% endfor %}
-            {% endfor %}
-            <p class="ss-label mt-3">jewels</p>
-            {% for item in decorations %}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox"
-                     id="ex-ssr-jewel-{{ item.id }}"
-                     name="excluded_decoration_id" value="{{ item.id }}">
-              <label class="form-check-label" for="ex-ssr-jewel-{{ item.id }}">{{ item.name }}</label>
-            </div>
-            {% endfor %}
+          <label class="form-label ss-label" for="advanced-filter">Filter by name</label>
+          <input id="advanced-filter" class="form-control mb-3" type="search"
+                 placeholder="Filter by name" x-model="advancedFilter" @input="filterAdvanced()">
+          <div id="advanced-modal-body">
+            <p class="ss-hint mb-0">Find sets first — Advanced Search lists the relevant domain, not the full catalog.</p>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn ss-btn-brass" data-bs-dismiss="modal">Done</button>
+          <button type="submit" class="btn ss-btn-brass" data-bs-dismiss="modal">Search</button>
         </div>
       </div>
     </div>
@@ -226,31 +191,87 @@
 <script>
 function searchForm() {
   const catalogs = JSON.parse(document.getElementById("ss-catalogs").textContent || "{}");
+  const domainFields = new Set([
+    "skill_id", "weapon_slots", "gender", "hunter_type", "hr", "village_stars",
+    "sort", "allow_event", "allow_bad_skills", "allow_torso_inc", "allow_dummy",
+  ]);
   return {
     game: {{ (games[0].code if games else "mhfu") | tojson }},
     catalogs,
     category: "all",
-    excludeFilter: "",
-    excludeTab: "head",
+    advancedFilter: "",
+    advancedTab: "head",
     excludeCount: 0,
-    slotTabs: [
-      { key: "head", label: "Head" },
-      { key: "body", label: "Chest" },
-      { key: "arms", label: "Arms" },
-      { key: "waist", label: "Waist" },
-      { key: "legs", label: "Legs" },
-      { key: "jewels", label: "Jewels" },
-    ],
     get currentCatalog() {
-      return this.catalogs[this.game] || { categories: [], skills: [], pieces: {}, decorations: [] };
+      return this.catalogs[this.game] || { categories: [], skills: [] };
     },
     init() {
       document.querySelectorAll(".ss-ssr-chip").forEach((el) => el.remove());
-      document.querySelectorAll(".ss-ssr-exclude").forEach((el) => el.remove());
       this.$watch("category", () => this.applySkillFilter());
       this.$watch("game", () => this.rebuildSkillOptions());
       this.applySkillFilter();
-      this.$el.addEventListener("change", () => this.refreshExcludeCount());
+      this.$el.addEventListener("change", (e) => {
+        const name = e.target && e.target.name;
+        if (name && domainFields.has(name)) this.invalidateAdvanced();
+        this.refreshExcludeCount();
+      });
+      this.$el.addEventListener("click", (e) => {
+        const tab = e.target.closest("[data-adv-tab]");
+        if (tab && this.$el.contains(tab)) {
+          this.advancedTab = tab.getAttribute("data-adv-tab");
+          this.showAdvancedTab();
+          return;
+        }
+        const panelBtn = e.target.closest("[data-adv-default], [data-adv-none]");
+        if (!panelBtn || !this.$el.contains(panelBtn)) return;
+        const panel = panelBtn.closest("[data-adv-panel]");
+        if (!panel) return;
+        const on = panelBtn.hasAttribute("data-adv-default");
+        panel.querySelectorAll("input[type=checkbox]").forEach((c) => {
+          c.checked = on ? c.dataset.skyline === "1" : false;
+        });
+        this.refreshExcludeCount();
+      });
+      document.body.addEventListener("htmx:afterSwap", () => {
+        this.showAdvancedTab();
+        this.filterAdvanced();
+        this.refreshExcludeCount();
+      });
+    },
+    showAdvancedTab() {
+      const body = document.getElementById("advanced-modal-body");
+      if (!body) return;
+      const tabs = [...body.querySelectorAll("[data-adv-tab]")];
+      if (tabs.length && !tabs.some((t) => t.getAttribute("data-adv-tab") === this.advancedTab)) {
+        this.advancedTab = tabs[0].getAttribute("data-adv-tab");
+      }
+      tabs.forEach((t) => {
+        t.classList.toggle("active", t.getAttribute("data-adv-tab") === this.advancedTab);
+      });
+      body.querySelectorAll("[data-adv-panel]").forEach((panel) => {
+        panel.hidden = panel.getAttribute("data-adv-panel") !== this.advancedTab;
+      });
+    },
+    invalidateAdvanced() {
+      const btn = document.getElementById("advanced-open");
+      if (btn) btn.disabled = true;
+      const body = document.getElementById("advanced-modal-body");
+      if (body) {
+        body.innerHTML = "<p class=\"ss-hint mb-0\">Find sets first — Advanced Search lists the relevant domain, not the full catalog.</p>";
+      }
+      const slot = document.getElementById("advanced-domain-slot");
+      if (slot) slot.innerHTML = "";
+      this.excludeCount = 0;
+    },
+    filterAdvanced() {
+      const q = this.advancedFilter.trim().toLowerCase();
+      const body = document.getElementById("advanced-modal-body");
+      if (!body) return;
+      body.querySelectorAll(".form-check").forEach((row) => {
+        const label = row.querySelector("label");
+        const text = (label && label.textContent || "").toLowerCase();
+        row.hidden = Boolean(q) && !text.includes(q);
+      });
     },
     skillMatches(categories) {
       if (this.category === "all") return true;
@@ -290,19 +311,14 @@ function searchForm() {
         sel.value = kept;
       });
     },
-    filteredExclude(tab) {
-      const q = this.excludeFilter.trim().toLowerCase();
-      const items = tab === "jewels"
-        ? (this.currentCatalog.decorations || [])
-        : ((this.currentCatalog.pieces || {})[tab] || []);
-      if (!q) return items;
-      return items.filter((item) => item.name.toLowerCase().includes(q));
-    },
     refreshExcludeCount() {
-      const form = this.$el;
-      this.excludeCount = form.querySelectorAll(
-        "input[name=excluded_piece_id]:checked, input[name=excluded_decoration_id]:checked"
-      ).length;
+      const body = document.getElementById("advanced-modal-body");
+      if (!body) {
+        this.excludeCount = 0;
+        return;
+      }
+      const checks = [...body.querySelectorAll("input[type=checkbox]")];
+      this.excludeCount = checks.filter((c) => c.checked !== (c.dataset.skyline === "1")).length;
     },
   };
 }

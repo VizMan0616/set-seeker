@@ -311,6 +311,10 @@ h1, h2, h3, .ss-card-title {
   margin: 0 0 0.75rem;
 }
 
+.ss-skyline {
+  font-weight: 600;
+}
+
 .ss-exclude-count {
   background: var(--ss-brass);
   color: var(--ss-pine-deep);

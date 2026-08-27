@@ -48,6 +48,7 @@ def create_app() -> FastAPI:
     for game in games:
         pack_loader(game["code"])
 
+    app.state.pack_loader = pack_loader
     app.state.search_service = CpSatSearchService(
         user_data,
         pack_loader,

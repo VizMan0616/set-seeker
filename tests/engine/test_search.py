@@ -83,3 +83,18 @@ def test_assertion_4_impossible_query_is_exhausted_not_an_exception(search_servi
     more = search_service.load_more("s4", page.search_id)
     assert more.exhausted
     assert more.results == ()
+
+
+def test_start_search_persists_inf_rel_snapshot(search_service, user_data_repo):
+    import json
+
+    page = search_service.start_search("s5", make_query(min_points=10))
+    state = user_data_repo.get_search_state(page.search_id)
+    snapshot = json.loads(state["query_json"])["domain_snapshot"]
+    assert set(snapshot["kinds"]) == {
+        "head", "body", "arms", "waist", "legs", "decorations",
+    }
+    waist = snapshot["kinds"]["waist"]
+    assert 11 in waist["inf_ids"]
+    assert 11 not in waist["rel_ids"]
+    assert 10 in waist["rel_ids"]

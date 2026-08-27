@@ -27,7 +27,9 @@ description: Build, rebuild, or debug the set-seeker game-data ETL that converts
 4. Run the ETL for the target pack(s); then run the validation gate.
 5. On data mismatches: diff against the legacy file cited in
    `docs/legacy-analysis/<GAME>-ASS.md` before touching parser code — most mismatches are
-   column-map drift, not parser bugs.
+   column-map drift, not parser bugs. For MHFU **names**, the CSV is TeamHGG-style;
+   `name_en` must match `Languages/English MHFU` (official), not the CSV/`TeamHGG MHP2ndG`
+   strings.
 
 ## References
 

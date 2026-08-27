@@ -40,7 +40,8 @@ def test_bulk_insert_and_delete_game_data(packed_db):
                 "rarity": 1, "slots": 0, "gender": 2, "hunter_type": 2,
                 "hr_required": 0, "village_stars": 0, "defense": 1, "max_defense": 1,
                 "res_fire": 0, "res_water": 0, "res_ice": 0, "res_thunder": 0,
-                "res_dragon": 0, "torso_inc": False, "is_event": False}
+                "res_dragon": 0, "torso_inc": False, "is_event": False,
+                "is_dummy": False}
 
     repo.bulk_insert(t.armor_pieces, [
         bulk_helm(9001, "Bulk Helm A"),

@@ -7,7 +7,7 @@ Field positions come exclusively from the pack's column map module
 import csv
 import importlib
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from app.etl.manifest import PackManifest
@@ -22,6 +22,7 @@ class SkillTreeBlock:
     name: str
     tag: str | None
     thresholds: tuple[tuple[int, str], ...]  # (points, skill name), signed
+    tags: tuple[str, ...] = ()               # all Athena tags; tag is tags[0]
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class ArmorRow:
     res_thunder: int
     res_dragon: int
     torso_inc: bool
+    is_dummy: bool
     skills: tuple[tuple[str, int], ...]  # (tree name, points); Torso Inc excluded
 
 
@@ -72,15 +74,19 @@ def load_skill_blocks(path: Path) -> list[SkillTreeBlock]:
     """
     blocks: list[SkillTreeBlock] = []
     name: str | None = None
-    tag: str | None = None
+    tags: list[str] = []
     thresholds: list[tuple[int, str]] = []
 
     def close() -> None:
-        nonlocal name, tag, thresholds
+        nonlocal name, tags, thresholds
         if name is not None:
-            blocks.append(SkillTreeBlock(name=name, tag=tag,
-                                         thresholds=tuple(thresholds)))
-        name, tag, thresholds = None, None, []
+            blocks.append(SkillTreeBlock(
+                name=name,
+                tag=tags[0] if tags else None,
+                tags=tuple(tags),
+                thresholds=tuple(thresholds),
+            ))
+        name, tags, thresholds = None, [], []
 
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
@@ -91,8 +97,9 @@ def load_skill_blocks(path: Path) -> list[SkillTreeBlock]:
             close()
             name = line.strip('"')
         elif line.lower().startswith("tag"):
-            if tag is None:  # schema stores one category_tag; first tag wins
-                tag = line.partition("=")[2].strip().strip('"')
+            tag = line.partition("=")[2].strip().strip('"')
+            if tag and tag not in tags:
+                tags.append(tag)
         else:
             match = _THRESHOLD_LINE.match(line)
             if match:
@@ -156,6 +163,7 @@ def load_armor_file(path: Path, slot: int, cmap,
                 res_thunder=int(fields[cols["res_thunder"]]),
                 res_dragon=int(fields[cols["res_dragon"]]),
                 torso_inc=torso_inc,
+                is_dummy=getattr(cmap, "DUMMY_MARK", "(dummy)").lower() in name.lower(),
                 skills=tuple(skills),
             ))
     return rows, skipped
@@ -186,6 +194,42 @@ def load_decorations(path: Path, cmap) -> list[DecorationRow]:
     return rows
 
 
+def _read_locale_names(path: Path) -> list[str]:
+    """Athena language lists are UTF-16 with a `;Slot:` header line."""
+    raw = path.read_bytes()
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        text = raw.decode("utf-16")
+    else:
+        text = raw.decode("utf-8-sig")
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    if lines and (lines[0].startswith(";") or lines[0].endswith(":")):
+        lines = lines[1:]
+    return lines
+
+
+def apply_locale_dummy_flags(armor: tuple[ArmorRow, ...], data_dir: Path, cmap) -> tuple[ArmorRow, ...]:
+    """Set is_dummy from the English overlay, matching Armor.cpp:39.
+
+    CSV names omit `(dummy)`; Athena applies Languages/English MHFU first.
+    """
+    locale_rel = getattr(cmap, "ENGLISH_LOCALE_DIR", None)
+    mark = getattr(cmap, "DUMMY_MARK", "(dummy)").lower()
+    if not locale_rel:
+        return armor
+    locale_dir = data_dir / locale_rel
+    if not locale_dir.is_dir():
+        return armor
+    updated: list[ArmorRow] = []
+    for slot, stem in enumerate(SLOT_FILES):
+        path = locale_dir / f"{stem}.txt"
+        names = _read_locale_names(path) if path.is_file() else []
+        pieces = [row for row in armor if row.slot == slot]
+        for i, row in enumerate(pieces):
+            dummy = mark in names[i].lower() if i < len(names) else row.is_dummy
+            updated.append(replace(row, is_dummy=dummy) if dummy != row.is_dummy else row)
+    return tuple(updated)
+
+
 def load_pack(manifest: PackManifest) -> PackData:
     """Load every source file for the pack, bound to its own column map."""
     cmap = importlib.import_module(f"app.etl.column_maps.{manifest.id}")
@@ -204,7 +248,7 @@ def load_pack(manifest: PackManifest) -> PackData:
     return PackData(
         manifest=manifest,
         skill_trees=tuple(load_skill_blocks(data_dir / "skills.txt")),
-        armor=tuple(armor),
+        armor=apply_locale_dummy_flags(tuple(armor), data_dir, cmap),
         decorations=tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
         duplicates_skipped=tuple(skipped),
     )

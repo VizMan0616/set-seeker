@@ -34,6 +34,8 @@ class PackWriter:
         tree_ids: dict[str, int] = {}
         tree_rows: list[dict[str, Any]] = []
         skill_rows: list[dict[str, Any]] = []
+        tag_rows: list[dict[str, Any]] = []
+        category_order: list[str] = []
         for ordinal, block in enumerate(data.skill_trees, start=1):
             tree_id = base + ordinal
             tree_ids[block.name] = tree_id
@@ -41,6 +43,10 @@ class PackWriter:
                 "id": tree_id, "game_id": game_id, "name_en": block.name,
                 "name_ja": block.name, "category_tag": block.tag,
             })
+            for tag in block.tags:
+                tag_rows.append({"tree_id": tree_id, "tag": tag})
+                if tag not in category_order:
+                    category_order.append(tag)
             for points, skill_name in block.thresholds:
                 skill_rows.append({
                     "id": base + len(skill_rows) + 1, "tree_id": tree_id,
@@ -49,8 +55,15 @@ class PackWriter:
                 })
         self._repo.bulk_insert(t.skill_trees, tree_rows)
         self._repo.bulk_insert(t.skills, skill_rows)
+        self._repo.bulk_insert(t.skill_tree_tags, tag_rows)
+        self._repo.bulk_insert(t.skill_categories, [
+            {"game_id": game_id, "tag": tag, "sort_order": i}
+            for i, tag in enumerate(category_order)
+        ])
         counts["skill_trees"] = len(tree_rows)
         counts["skills"] = len(skill_rows)
+        counts["skill_tree_tags"] = len(tag_rows)
+        counts["skill_categories"] = len(category_order)
 
         armor_rows: list[dict[str, Any]] = []
         armor_skill_rows: list[dict[str, Any]] = []
@@ -66,6 +79,7 @@ class PackWriter:
                 "res_fire": row.res_fire, "res_water": row.res_water,
                 "res_ice": row.res_ice, "res_thunder": row.res_thunder,
                 "res_dragon": row.res_dragon, "torso_inc": row.torso_inc,
+                "is_dummy": row.is_dummy,
             })
             seen_trees: set[int] = set()
             for tree_name, points in row.skills:
@@ -143,12 +157,16 @@ def table_counts(repo: GameDataRepository, game_id: int) -> dict[str, Any]:
         n_deco_skills += len(repo.list_decoration_skills_for_decoration(deco["id"]))
     n_trees = 0
     n_skills = 0
+    n_tags = 0
     for tree in repo.list_skill_trees(game_id):
         n_trees += 1
         n_skills += len(repo.list_skills_for_tree(tree["id"]))
+        n_tags += len(repo.list_skill_tree_tags(tree["id"]))
     return {
         "skill_trees": n_trees,
         "skills": n_skills,
+        "skill_tree_tags": n_tags,
+        "skill_categories": len(repo.list_skill_categories(game_id)),
         "armor_pieces": n_armor,
         "armor_skills": n_armor_skills,
         "decorations": n_decos,

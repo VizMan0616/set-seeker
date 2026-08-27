@@ -55,6 +55,7 @@ class PackLoader:
                 hr_required=p["hr_required"],
                 village_stars=p["village_stars"],
                 is_event=bool(p["is_event"]),
+                is_dummy=bool(p.get("is_dummy", False)),
                 res_fire=p["res_fire"],
                 res_water=p["res_water"],
                 res_ice=p["res_ice"],

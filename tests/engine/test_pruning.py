@@ -142,6 +142,34 @@ def test_uncapped_progression_paths_admit_everything(tiny_pack_data):
     assert {92, 93} <= legs_member_ids
 
 
+def test_excluded_ids_leave_the_pruned_domains(tiny_pack_data):
+    pruned = prune(
+        tiny_pack_data,
+        make_query(min_points=10, excluded_piece_ids=(1, 7), excluded_decoration_ids=(101,)),
+    )
+    kept = {m.id for slot in pruned.classes for c in slot for m in c.members}
+    assert 1 not in kept
+    assert 7 not in kept
+    assert {d.id for d in pruned.decorations} == {102}
+
+
+def test_torso_inc_and_dummy_hard_filters(tiny_pack_data):
+    pack = _pack_with_extra_pieces(tiny_pack_data, [
+        _piece(80, HEAD, slots=3, attack=5, torso_inc=True),
+        _piece(81, HEAD, slots=3, attack=5, is_dummy=True),
+    ])
+    default = prune(pack, make_query(min_points=10))
+    heads = {m.id for c in default.classes[HEAD] for m in c.members}
+    assert 80 in heads  # Athena chkTorsoInc defaults on
+    assert 81 not in heads
+
+    no_torso = prune(pack, make_query(min_points=10, allow_torso_inc=False))
+    assert 80 not in {m.id for c in no_torso.classes[HEAD] for m in c.members}
+
+    with_dummy = prune(pack, make_query(min_points=10, allow_dummy=True))
+    assert 81 in {m.id for c in with_dummy.classes[HEAD] for m in c.members}
+
+
 def test_village_only_decoration_survives_hr_cap(tiny_pack_data):
     """Village-path jewels (hr sentinel 10) must not vanish from capped searches."""
     from app.engine.data import Decoration

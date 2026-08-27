@@ -7,6 +7,8 @@ EXPECTED_COUNTS = {
     "games": 1,
     "skill_trees": 99,
     "skills": 216,
+    "skill_tree_tags": 101,
+    "skill_categories": 8,
     "armor_pieces": 2080,
     "armor_skills": 7142,
     "decorations": 168,
@@ -54,6 +56,21 @@ def test_bilingual_names_populated_via_fallback(etl_db):
     assert skill["name_ja"] == skill["name_en"]
     deco = repo.list_decorations(game_id, allow_event=True)[0]
     assert deco["name_ja"] == deco["name_en"]
+
+
+def test_pack_scoped_tags_and_dummy_flag(etl_db):
+    repo, game_id, _ = etl_db
+    tags = [c["tag"] for c in repo.list_skill_categories(game_id)]
+    assert tags == [
+        "Offensive", "Defensive", "Resistance", "Blademaster",
+        "Bowgun", "Bow", "Treasure Hunting", "Farming",
+    ]
+    artisan = next(t for t in repo.list_skill_trees(game_id) if t["name_en"] == "Artisan")
+    artisan_tags = {r["tag"] for r in repo.list_skill_tree_tags(artisan["id"])}
+    assert artisan_tags == {"Offensive", "Blademaster"}
+    helm = next(p for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
+                if p["name_en"] == "Red Lobster Helm")
+    assert helm["is_dummy"] in (True, 1)
 
 
 def test_negative_skills_flagged(etl_db):

@@ -29,6 +29,8 @@ class Catalog(Protocol):
 
     def list_skill_trees(self, game: str) -> list[dict[str, Any]]: ...
 
+    def list_search_catalog(self, game: str) -> dict[str, Any]: ...
+
 
 def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str, Any]:
     pieces = []
@@ -71,4 +73,6 @@ def page_context(page: SearchPage, resolver: NameResolver) -> dict[str, Any]:
         "results": [_result_context(r, resolver) for r in page.results],
         "partial": page.partial,
         "exhausted": page.exhausted,
+        "shown_count": page.shown_count,
+        "remaining_count": page.remaining_count,
     }

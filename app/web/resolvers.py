@@ -72,3 +72,39 @@ class RepositoryCatalog:
             }
             for tree in self._repo.list_skill_trees(row["id"])
         ]
+
+    def list_search_catalog(self, game: str) -> dict[str, Any]:
+        """Skills, pack-scoped categories, and omit-lists for the search form."""
+        row = self._repo.get_game_by_code(game)
+        if row is None:
+            return {
+                "categories": [],
+                "skills": [],
+                "pieces": {slot: [] for slot in ("head", "body", "arms", "waist", "legs")},
+                "decorations": [],
+            }
+        game_id = row["id"]
+        slot_names = ("head", "body", "arms", "waist", "legs")
+        pieces: dict[str, list[dict[str, Any]]] = {name: [] for name in slot_names}
+        for piece in self._repo.list_armor_pieces(game_id, allow_event=True):
+            slot = slot_names[piece["slot"]]
+            pieces[slot].append({"id": piece["id"], "name": piece["name_en"]})
+        return {
+            "categories": [c["tag"] for c in self._repo.list_skill_categories(game_id)],
+            "skills": [
+                {
+                    "id": s["id"],
+                    "name": s["name_en"],
+                    "tree_id": s["tree_id"],
+                    "tree_name": s["tree_name"],
+                    "points": s["points"],
+                    "categories": s["categories"],
+                }
+                for s in self._repo.list_skills_for_game(game_id)
+            ],
+            "pieces": pieces,
+            "decorations": [
+                {"id": d["id"], "name": d["name_en"]}
+                for d in self._repo.list_decorations(game_id, allow_event=True)
+            ],
+        }

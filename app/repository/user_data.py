@@ -102,6 +102,15 @@ class UserDataRepository:
             )
             return state
 
+    def update_search_query_json(self, search_id: str, query_json: str) -> bool:
+        with self._engine.begin() as conn:
+            result = conn.execute(
+                update(t.search_states)
+                .where(t.search_states.c.id == search_id)
+                .values(query_json=query_json)
+            )
+            return result.rowcount > 0
+
     def delete_search_state(self, search_id: str) -> bool:
         with self._engine.begin() as conn:
             result = conn.execute(

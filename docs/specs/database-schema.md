@@ -36,7 +36,20 @@ skill_trees (
   game_id       INTEGER NOT NULL REFERENCES games(id),
   name_en       String(64)  NOT NULL,
   name_ja       String(64),
-  category_tag  String(32)                        -- from tags.txt
+  category_tag  String(32)                        -- first Athena tag (legacy column)
+);
+
+skill_tree_tags (
+  tree_id       INTEGER NOT NULL REFERENCES skill_trees(id),
+  tag           String(32) NOT NULL,
+  PRIMARY KEY (tree_id, tag)
+);
+
+skill_categories (
+  game_id       INTEGER NOT NULL REFERENCES games(id),
+  tag           String(32) NOT NULL,
+  sort_order    Integer     NOT NULL,             -- encounter order in skills.txt
+  PRIMARY KEY (game_id, tag)
 );
 
 skills (                                          -- threshold rows: "Attack Up (L)" = 20 pts
@@ -65,7 +78,8 @@ armor_pieces (
   res_fire      Integer NOT NULL, res_water Integer NOT NULL, res_ice Integer NOT NULL,
   res_thunder   Integer NOT NULL, res_dragon Integer NOT NULL,
   torso_inc     Boolean     NOT NULL DEFAULT 0,
-  is_event      Boolean     NOT NULL DEFAULT 0
+  is_event      Boolean     NOT NULL DEFAULT 0,
+  is_dummy      Boolean     NOT NULL DEFAULT 0    -- English overlay name contains (dummy)
 );
 
 armor_skills (

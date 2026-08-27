@@ -102,6 +102,12 @@ class GameDataRepository:
                 delete(c.mh3u_charm_tables).where(c.mh3u_charm_tables.c.game_id == game_id)
             )
             conn.execute(delete(c.skills).where(c.skills.c.tree_id.in_(tree_ids)))
+            conn.execute(
+                delete(c.skill_tree_tags).where(c.skill_tree_tags.c.tree_id.in_(tree_ids))
+            )
+            conn.execute(
+                delete(c.skill_categories).where(c.skill_categories.c.game_id == game_id)
+            )
             conn.execute(delete(c.armor_pieces).where(c.armor_pieces.c.game_id == game_id))
             conn.execute(delete(c.decorations).where(c.decorations.c.game_id == game_id))
             conn.execute(delete(c.skill_trees).where(c.skill_trees.c.game_id == game_id))
@@ -151,6 +157,63 @@ class GameDataRepository:
     def delete_skill_tree(self, tree_id: int) -> bool:
         return self._delete(t.skill_trees, id=tree_id)
 
+    def set_skill_tree_tag(self, *, tree_id: int, tag: str) -> dict[str, Any]:
+        return self._create(t.skill_tree_tags, {"tree_id": tree_id, "tag": tag})
+
+    def list_skill_tree_tags(self, tree_id: int) -> list[dict[str, Any]]:
+        return self._list(
+            t.skill_tree_tags,
+            t.skill_tree_tags.c.tree_id == tree_id,
+            order_by=t.skill_tree_tags.c.tag,
+        )
+
+    def list_skill_tree_tags_for_game(self, game_id: int) -> list[dict[str, Any]]:
+        tree_ids = select(t.skill_trees.c.id).where(t.skill_trees.c.game_id == game_id)
+        return self._list(
+            t.skill_tree_tags,
+            t.skill_tree_tags.c.tree_id.in_(tree_ids),
+        )
+
+    def list_skill_categories(self, game_id: int) -> list[dict[str, Any]]:
+        rows = self._list(
+            t.skill_categories,
+            t.skill_categories.c.game_id == game_id,
+            order_by=t.skill_categories.c.sort_order,
+        )
+        if rows:
+            return rows
+        # Fixture packs may only have skill_trees.category_tag.
+        seen: list[dict[str, Any]] = []
+        for tree in self.list_skill_trees(game_id):
+            tag = tree.get("category_tag")
+            if tag and tag not in {r["tag"] for r in seen}:
+                seen.append({"game_id": game_id, "tag": tag, "sort_order": len(seen)})
+        return seen
+
+    def list_skills_for_game(
+        self, game_id: int, *, include_negative: bool = False
+    ) -> list[dict[str, Any]]:
+        tags_by_tree: dict[int, list[str]] = {}
+        for row in self.list_skill_tree_tags_for_game(game_id):
+            tags_by_tree.setdefault(row["tree_id"], []).append(row["tag"])
+        out: list[dict[str, Any]] = []
+        for tree in self.list_skill_trees(game_id):
+            categories = tags_by_tree.get(tree["id"]) or (
+                [tree["category_tag"]] if tree.get("category_tag") else []
+            )
+            for skill in self.list_skills_for_tree(tree["id"]):
+                if not include_negative and skill["is_negative"]:
+                    continue
+                out.append(
+                    {
+                        **skill,
+                        "tree_name": tree["name_en"],
+                        "categories": categories,
+                    }
+                )
+        out.sort(key=lambda s: s["name_en"])
+        return out
+
     # --- skills (threshold rows) ---
 
     def create_skill(self, *, tree_id: int, name_en: str, points: int,
@@ -180,14 +243,14 @@ class GameDataRepository:
                            res_thunder: int, res_dragon: int, name_ja: str | None = None,
                            hr_required: int = 0, village_stars: int = 0,
                            torso_inc: bool = False, is_event: bool = False,
-                           **extra) -> dict[str, Any]:
+                           is_dummy: bool = False, **extra) -> dict[str, Any]:
         return self._create(t.armor_pieces, dict(
             game_id=game_id, slot=slot, name_en=name_en, name_ja=name_ja, rarity=rarity,
             slots=slots, gender=gender, hunter_type=hunter_type, hr_required=hr_required,
             village_stars=village_stars, defense=defense, max_defense=max_defense,
             res_fire=res_fire, res_water=res_water, res_ice=res_ice,
             res_thunder=res_thunder, res_dragon=res_dragon, torso_inc=torso_inc,
-            is_event=is_event, **extra))
+            is_event=is_event, is_dummy=is_dummy, **extra))
 
     def get_armor_piece(self, piece_id: int) -> dict[str, Any] | None:
         return self._get(t.armor_pieces, id=piece_id)

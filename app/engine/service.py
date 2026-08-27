@@ -9,6 +9,10 @@ import json
 from collections.abc import Callable
 
 from app.domain.models import PAGE_SIZE, ArmorSetResult, Query, SearchPage, SkillRequest
+
+# Tail census after the first page so the UI can say "N more to load".
+# Only representative ids are walked; cards stay page-sized (ADR 0005).
+_CENSUS_CAP = 500
 from app.engine.data import PackData
 from app.engine.pruning import PrunedPack, prune
 from app.engine.solver import solve_one
@@ -27,9 +31,24 @@ def _query_to_json(query: Query) -> str:
             "village_stars": query.village_stars,
             "allow_event": query.allow_event,
             "allow_bad_skills": query.allow_bad_skills,
+            "allow_torso_inc": query.allow_torso_inc,
+            "allow_dummy": query.allow_dummy,
+            "excluded_piece_ids": list(query.excluded_piece_ids),
+            "excluded_decoration_ids": list(query.excluded_decoration_ids),
             "sort": query.sort,
         }
     )
+
+
+def _with_found_total(query_json: str, found_total: int) -> str:
+    payload = json.loads(query_json)
+    payload["found_total"] = found_total
+    return json.dumps(payload)
+
+
+def _found_total(query_json: str) -> int | None:
+    value = json.loads(query_json).get("found_total")
+    return int(value) if value is not None else None
 
 
 def _query_from_json(payload: str) -> Query:
@@ -44,6 +63,10 @@ def _query_from_json(payload: str) -> Query:
         village_stars=d["village_stars"],
         allow_event=d["allow_event"],
         allow_bad_skills=d["allow_bad_skills"],
+        allow_torso_inc=d.get("allow_torso_inc", True),
+        allow_dummy=d.get("allow_dummy", False),
+        excluded_piece_ids=tuple(d.get("excluded_piece_ids") or ()),
+        excluded_decoration_ids=tuple(d.get("excluded_decoration_ids") or ()),
         sort=d["sort"],
     )
 
@@ -82,11 +105,33 @@ class CpSatSearchService:
         results, new_exclusions, partial, exhausted = self._solve_page(query, [])
         if new_exclusions:
             self._user_data.append_exclusions(state["id"], new_exclusions)
+        shown = len(results)
+        remaining: int | None
+        if exhausted:
+            remaining = 0
+            self._user_data.update_search_query_json(
+                state["id"], _with_found_total(state["query_json"], shown)
+            )
+        elif not results:
+            remaining = None
+        else:
+            extra, exact = self._count_further(
+                query, [tuple(e) for e in new_exclusions]
+            )
+            if exact:
+                remaining = extra
+                self._user_data.update_search_query_json(
+                    state["id"], _with_found_total(state["query_json"], shown + extra)
+                )
+            else:
+                remaining = None
         return SearchPage(
             search_id=state["id"],
             results=tuple(results),
             partial=partial,
             exhausted=exhausted,
+            shown_count=shown,
+            remaining_count=remaining,
         )
 
     def load_more(self, session_id: str, search_id: str) -> SearchPage:
@@ -94,17 +139,25 @@ class CpSatSearchService:
         if state is None or state["session_id"] != session_id:
             # Unknown or foreign search id (e.g. invalidated by a newer search):
             # an empty exhausted page, never an exception.
-            return SearchPage(search_id=search_id, results=(), partial=False, exhausted=True)
+            return SearchPage(
+                search_id=search_id, results=(), partial=False, exhausted=True,
+                shown_count=0, remaining_count=0,
+            )
         query = _query_from_json(state["query_json"])
         exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
         results, new_exclusions, partial, exhausted = self._solve_page(query, exclusions)
         if new_exclusions:
             self._user_data.append_exclusions(search_id, new_exclusions)
+        shown = len(exclusions) + len(results)
+        total = _found_total(state["query_json"])
+        remaining = 0 if exhausted else (None if total is None else max(total - shown, 0))
         return SearchPage(
             search_id=search_id,
             results=tuple(results),
             partial=partial,
             exhausted=exhausted,
+            shown_count=shown,
+            remaining_count=remaining,
         )
 
     def _solve_page(
@@ -145,3 +198,34 @@ class CpSatSearchService:
                 break
 
         return results, new_exclusions, partial, exhausted
+
+    def _count_further(
+        self, query: Query, exclusions: list[tuple[int, int, int, int, int]]
+    ) -> tuple[int, bool]:
+        """How many more representative sets exist after ``exclusions``.
+
+        Walks iterate-and-exclude without keeping cards. ``exact`` is False
+        when the budget or ``_CENSUS_CAP`` stops the walk.
+        """
+        pack = self._pack_loader(query.game)
+        pruned: PrunedPack = prune(pack, query)
+        working = list(exclusions)
+        extra = 0
+        for _ in range(_CENSUS_CAP):
+            outcome = solve_one(
+                pack=pack,
+                pruned=pruned,
+                query=query,
+                exclusions=working,
+                time_limit_ms=self._time_limit_ms,
+                num_workers=self._num_workers,
+            )
+            if outcome.status == "infeasible":
+                return extra, True
+            if outcome.result is None:
+                return extra, False
+            working.append(tuple(outcome.result.piece_ids))
+            extra += 1
+            if outcome.status == "feasible":
+                return extra, False
+        return extra, False

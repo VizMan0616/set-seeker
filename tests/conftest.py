@@ -40,10 +40,15 @@ def load_tiny_pack(repo: GameDataRepository) -> None:
     )
     repo.create_skill_tree(
         id=ATTACK_TREE_ID, game_id=GAME_ID, name_en="Attack", name_ja="Attack",
+        category_tag="Offensive",
     )
     repo.create_skill(
         id=ATTACK_UP_S_SKILL_ID, tree_id=ATTACK_TREE_ID,
         name_en="Attack Up (S)", points=10,
+    )
+    repo.create_skill(
+        id=2, tree_id=ATTACK_TREE_ID,
+        name_en="Attack Up (Absurd)", points=99,
     )
     for slot, rows in enumerate((
         tiny_pack.HEAD, tiny_pack.BODY, tiny_pack.ARMS, tiny_pack.WAIST, tiny_pack.LEGS,

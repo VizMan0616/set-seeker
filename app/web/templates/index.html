@@ -10,8 +10,10 @@
   </p>
 </header>
 
+<script type="application/json" id="ss-catalogs">{{ catalogs | tojson }}</script>
+
 <form class="card ss-form mb-4"
-      x-data="{ game: '{{ games[0].code if games else 'mhfu' }}' }"
+      x-data="searchForm()"
       action="/games/{{ games[0].code if games else 'mhfu' }}/search"
       method="post"
       hx-post="/games/{{ games[0].code if games else 'mhfu' }}/search"
@@ -31,25 +33,37 @@
 
   <fieldset class="card-body border-top">
     <legend class="ss-legend">Desired skills <span class="ss-legend-note">pick 1–{{ max_skill_picks }}</span></legend>
+    <div class="ss-chip-row mb-3" role="group" aria-label="Skill category">
+      <button type="button" class="btn btn-sm ss-chip ss-chip-on"
+              :class="{ 'ss-chip-on': category === 'all' }"
+              :aria-pressed="category === 'all'"
+              @click="category = 'all'">All</button>
+      <button type="button" class="btn btn-sm ss-chip"
+              :class="{ 'ss-chip-on': category === 'untagged' }"
+              :aria-pressed="category === 'untagged'"
+              @click="category = 'untagged'">Untagged</button>
+      <template x-for="tag in currentCatalog.categories" :key="tag">
+        <button type="button" class="btn btn-sm ss-chip"
+                :class="{ 'ss-chip-on': category === tag }"
+                :aria-pressed="category === tag"
+                @click="category = tag" x-text="tag"></button>
+      </template>
+      {% for tag in categories %}
+      <button type="button" class="btn btn-sm ss-chip ss-ssr-chip">{{ tag }}</button>
+      {% endfor %}
+    </div>
     {% for i in range(max_skill_picks) %}
-    <div class="row g-2 mb-2">
-      <div class="col-7 col-md-8">
-        <label class="visually-hidden" for="skill-tree-{{ i }}">Skill {{ i + 1 }}</label>
-        <select id="skill-tree-{{ i }}" class="form-select" name="skill_tree">
-          <option value="">—</option>
-          {% for tree in skill_trees %}
-          <option value="{{ tree.id }}">{{ tree.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-5 col-md-4">
-        <label class="visually-hidden" for="skill-points-{{ i }}">Minimum points for skill {{ i + 1 }}</label>
-        <input id="skill-points-{{ i }}" class="form-control" type="number"
-               name="skill_points" min="1" max="99" placeholder="points ≥">
-      </div>
+    <div class="mb-2">
+      <label class="visually-hidden" for="skill-id-{{ i }}">Skill {{ i + 1 }}</label>
+      <select id="skill-id-{{ i }}" class="form-select" name="skill_id">
+        <option value="">—</option>
+        {% for skill in skills %}
+        <option value="{{ skill.id }}"
+                data-categories="{{ skill.categories | join('|') }}">{{ skill.name }}</option>
+        {% endfor %}
+      </select>
     </div>
     {% endfor %}
-    <p class="ss-hint">Points needed to activate the skill — Attack Up (S) needs 10.</p>
   </fieldset>
 
   <fieldset class="card-body border-top">
@@ -116,9 +130,25 @@
           <input class="form-check-input" type="checkbox" id="allow-bad-skills" name="allow_bad_skills">
           <label class="form-check-label" for="allow-bad-skills">Allow sets with negative skills</label>
         </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="allow-torso-inc" name="allow_torso_inc" checked>
+          <label class="form-check-label" for="allow-torso-inc">Allow Torso Inc</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
+          <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
+        </div>
       </div>
     </div>
   </fieldset>
+
+  <div class="card-body border-top">
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exclude-modal">
+      Exclude pieces &amp; jewels
+      <span class="badge ss-exclude-count" x-text="excludeCount || ''" x-show="excludeCount"></span>
+    </button>
+    <p class="ss-hint mt-2 mb-0">Omitted gear is dropped before search, not after.</p>
+  </div>
 
   <div class="card-body border-top d-flex align-items-center gap-3">
     <button type="submit" class="btn ss-btn-brass btn-lg">Find sets</button>
@@ -127,7 +157,154 @@
       Searching…
     </span>
   </div>
+
+  <div class="modal fade" id="exclude-modal" tabindex="-1" aria-labelledby="exclude-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title ss-card-title fs-5" id="exclude-modal-title">Exclude pieces and jewels</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label ss-label" for="exclude-filter">Search catalog</label>
+          <input id="exclude-filter" class="form-control mb-3" type="search"
+                 placeholder="Filter by name" x-model="excludeFilter">
+          <ul class="nav nav-tabs ss-exclude-tabs mb-3" role="tablist">
+            <template x-for="tab in slotTabs" :key="tab.key">
+              <li class="nav-item" role="presentation">
+                <button type="button" class="nav-link" :class="excludeTab === tab.key && 'active'"
+                        @click="excludeTab = tab.key" x-text="tab.label"></button>
+              </li>
+            </template>
+          </ul>
+          <template x-for="tab in slotTabs" :key="'panel-'+tab.key">
+            <div x-show="excludeTab === tab.key">
+              <template x-for="item in filteredExclude(tab.key)" :key="tab.key + '-' + item.id">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                         :id="'ex-'+tab.key+'-'+item.id"
+                         :name="tab.key === 'jewels' ? 'excluded_decoration_id' : 'excluded_piece_id'"
+                         :value="item.id">
+                  <label class="form-check-label" :for="'ex-'+tab.key+'-'+item.id" x-text="item.name"></label>
+                </div>
+              </template>
+            </div>
+          </template>
+          {# SSR fallback so tests and no-JS still post exclusions #}
+          <div class="ss-ssr-exclude">
+            {% for slot, items in pieces.items() %}
+            <p class="ss-label mt-3">{{ slot }}</p>
+            {% for item in items %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox"
+                     id="ex-ssr-{{ slot }}-{{ item.id }}"
+                     name="excluded_piece_id" value="{{ item.id }}">
+              <label class="form-check-label" for="ex-ssr-{{ slot }}-{{ item.id }}">{{ item.name }}</label>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            <p class="ss-label mt-3">jewels</p>
+            {% for item in decorations %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox"
+                     id="ex-ssr-jewel-{{ item.id }}"
+                     name="excluded_decoration_id" value="{{ item.id }}">
+              <label class="form-check-label" for="ex-ssr-jewel-{{ item.id }}">{{ item.name }}</label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn ss-btn-brass" data-bs-dismiss="modal">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 
 <div id="results" aria-live="polite"></div>
+<script>
+function searchForm() {
+  const catalogs = JSON.parse(document.getElementById("ss-catalogs").textContent || "{}");
+  return {
+    game: {{ (games[0].code if games else "mhfu") | tojson }},
+    catalogs,
+    category: "all",
+    excludeFilter: "",
+    excludeTab: "head",
+    excludeCount: 0,
+    slotTabs: [
+      { key: "head", label: "Head" },
+      { key: "body", label: "Chest" },
+      { key: "arms", label: "Arms" },
+      { key: "waist", label: "Waist" },
+      { key: "legs", label: "Legs" },
+      { key: "jewels", label: "Jewels" },
+    ],
+    get currentCatalog() {
+      return this.catalogs[this.game] || { categories: [], skills: [], pieces: {}, decorations: [] };
+    },
+    init() {
+      document.querySelectorAll(".ss-ssr-chip").forEach((el) => el.remove());
+      document.querySelectorAll(".ss-ssr-exclude").forEach((el) => el.remove());
+      this.$watch("category", () => this.applySkillFilter());
+      this.$watch("game", () => this.rebuildSkillOptions());
+      this.applySkillFilter();
+      this.$el.addEventListener("change", () => this.refreshExcludeCount());
+    },
+    skillMatches(categories) {
+      if (this.category === "all") return true;
+      if (this.category === "untagged") return categories.length === 0;
+      return categories.includes(this.category);
+    },
+    rebuildSkillOptions() {
+      this.$el.querySelectorAll("select[name=skill_id]").forEach((sel) => {
+        const kept = sel.value;
+        sel.querySelectorAll("option[data-categories]").forEach((opt) => opt.remove());
+        for (const skill of this.currentCatalog.skills || []) {
+          const opt = document.createElement("option");
+          opt.value = String(skill.id);
+          opt.textContent = skill.name;
+          opt.dataset.categories = (skill.categories || []).join("|");
+          sel.appendChild(opt);
+        }
+        sel.value = kept;
+      });
+      this.applySkillFilter();
+    },
+    applySkillFilter() {
+      // Rebuild options: <option hidden> is ignored by Firefox/Safari.
+      const skills = this.currentCatalog.skills || [];
+      this.$el.querySelectorAll("select[name=skill_id]").forEach((sel) => {
+        const kept = sel.value;
+        sel.querySelectorAll("option[data-categories]").forEach((opt) => opt.remove());
+        for (const skill of skills) {
+          const cats = skill.categories || [];
+          if (!this.skillMatches(cats) && String(skill.id) !== kept) continue;
+          const opt = document.createElement("option");
+          opt.value = String(skill.id);
+          opt.textContent = skill.name;
+          opt.dataset.categories = cats.join("|");
+          sel.appendChild(opt);
+        }
+        sel.value = kept;
+      });
+    },
+    filteredExclude(tab) {
+      const q = this.excludeFilter.trim().toLowerCase();
+      const items = tab === "jewels"
+        ? (this.currentCatalog.decorations || [])
+        : ((this.currentCatalog.pieces || {})[tab] || []);
+      if (!q) return items;
+      return items.filter((item) => item.name.toLowerCase().includes(q));
+    },
+    refreshExcludeCount() {
+      const form = this.$el;
+      this.excludeCount = form.querySelectorAll(
+        "input[name=excluded_piece_id]:checked, input[name=excluded_decoration_id]:checked"
+      ).length;
+    },
+  };
+}
+</script>
 {% endblock %}

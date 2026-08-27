@@ -59,6 +59,7 @@ def test_skill_block_attack_exact():
     blocks = {b.name: b for b in load_skill_blocks(DATA_DIR / "skills.txt")}
     attack = blocks["Attack"]
     assert attack.tag == "Offensive"
+    assert attack.tags == ("Offensive",)
     assert attack.thresholds == (
         (20, "Attack Up (Large)"),
         (15, "Attack Up (Medium)"),
@@ -67,6 +68,13 @@ def test_skill_block_attack_exact():
         (-15, "Attack Dwn (Medium)"),
         (-20, "Attack Dwn (Large)"),
     )
+
+
+def test_skill_block_keeps_every_athena_tag():
+    blocks = {b.name: b for b in load_skill_blocks(DATA_DIR / "skills.txt")}
+    artisan = blocks["Artisan"]
+    assert artisan.tags == ("Offensive", "Blademaster")
+    assert artisan.tag == "Offensive"
 
 
 def test_torso_inc_block_has_no_thresholds():
@@ -145,6 +153,13 @@ def test_dual_skill_decoration_keeps_negative_points():
 
 
 # --- whole-pack load ---
+
+def test_dummy_flag_comes_from_english_overlay(pack_data):
+    helm = next(r for r in pack_data.armor if r.name_en == "Red Lobster Helm")
+    chain = next(r for r in pack_data.armor if r.name_en == "Chain Helm")
+    assert helm.is_dummy is True
+    assert chain.is_dummy is False
+
 
 def test_load_pack_totals(pack_data):
     assert len(pack_data.skill_trees) == 99

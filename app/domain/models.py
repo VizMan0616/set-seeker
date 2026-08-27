@@ -16,6 +16,12 @@ class Query:
     village_stars: int | None            # None = uncapped
     allow_event: bool = False
     allow_bad_skills: bool = False
+    # Athena Form1.h: chkTorsoInc defaults checked; chkDummy does not.
+    allow_torso_inc: bool = True
+    allow_dummy: bool = False
+    # Omitted from the pruned domains before CP-SAT (Athena Advanced Search).
+    excluded_piece_ids: tuple[int, ...] = ()
+    excluded_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
 
 @dataclass(frozen=True)
@@ -41,5 +47,7 @@ class SearchPage:
     results: tuple[ArmorSetResult, ...]  # len <= PAGE_SIZE
     partial: bool                        # solver hit its time budget
     exhausted: bool                      # no further solutions exist
+    shown_count: int = 0                 # sets delivered so far (all pages)
+    remaining_count: int | None = None   # None = more exist but the tail was not counted
 
 PAGE_SIZE = 10

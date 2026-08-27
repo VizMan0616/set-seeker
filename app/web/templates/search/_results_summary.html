@@ -1,0 +1,13 @@
+<p id="results-summary" class="ss-results-summary"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if not shown_count %}
+    {% if exhausted %}
+      0 sets found.
+    {% endif %}
+  {% elif remaining_count == 0 %}
+    {{ shown_count }} set{% if shown_count != 1 %}s{% endif %} found.
+  {% elif remaining_count is not none %}
+    {{ shown_count }} shown — {{ remaining_count }} more to load.
+  {% else %}
+    {{ shown_count }} shown — more to load.
+  {% endif %}
+</p>

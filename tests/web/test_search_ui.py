@@ -11,14 +11,14 @@ from app.main import create_app
 from tests.conftest import PIECE_NAMES
 
 SEARCH_FORM = {
-    "skill_tree": ["1", "", "", "", ""],
-    "skill_points": ["10", "", "", "", ""],
+    "skill_id": ["1", "", "", "", ""],
     "weapon_slots": "0",
     "gender": "m",
     "hunter_type": "blademaster",
     "hr": "",
     "village_stars": "",
     "sort": "defense",
+    "allow_torso_inc": "on",
 }
 
 CARD_RE = re.compile(r'<div class="card ss-result')
@@ -43,11 +43,16 @@ def test_index_renders_search_form(client: TestClient):
     assert response.status_code == 200
     html = response.text
     assert '<meta name="viewport"' in html
-    # up to 5 skill picks
-    assert html.count('name="skill_tree"') == 5
-    assert html.count('name="skill_points"') == 5
-    # the tiny pack's tree is a real form option
-    assert ">Attack</option>" in html
+    # up to 5 named-skill picks (threshold rows, not tree + raw points)
+    assert html.count('name="skill_id"') == 5
+    assert 'name="skill_points"' not in html
+    assert ">Attack Up (S)</option>" in html
+    assert "Offensive" in html
+    assert 'name="allow_torso_inc"' in html
+    assert 'name="allow_dummy"' in html
+    assert 'name="excluded_piece_id"' in html
+    assert 'name="excluded_decoration_id"' in html
+    assert 'id="exclude-modal"' in html
     # weapon slots, gender, hunter type, HR/village filters
     assert 'name="weapon_slots"' in html
     assert 'name="gender"' in html
@@ -72,10 +77,27 @@ def test_start_search_returns_result_cards(client: TestClient):
         assert set(card) <= set(PIECE_NAMES.values())
     assert "Attack Up (S)" in html
     assert 'id="results-list"' in html
+    assert 'id="results-summary"' in html
+    assert "more to load" in html or "found." in html
     # load-more button wired per §5
     assert 'hx-target="#results-list"' in html
     assert 'hx-swap="beforeend"' in html
     assert SEARCH_ID_RE.search(html)
+
+
+def test_load_more_updates_remaining_count(client: TestClient):
+    first = client.post("/games/mhfu/search", data=SEARCH_FORM)
+    assert first.status_code == 200
+    assert "results-summary" in first.text
+    if "more to load" not in first.text:
+        assert "found." in first.text
+        return
+    search_id = SEARCH_ID_RE.search(first.text).group(1)
+    more = client.post(f"/search/{search_id}/more")
+    assert more.status_code == 200
+    assert 'id="results-summary"' in more.text
+    assert 'hx-swap-oob="true"' in more.text
+    assert "more to load" in more.text or "found." in more.text
 
 
 def test_load_more_pages_until_exhausted_without_repeats(client: TestClient):
@@ -106,14 +128,15 @@ def test_load_more_pages_until_exhausted_without_repeats(client: TestClient):
 def test_impossible_query_renders_empty_exhausted_state(client: TestClient):
     response = client.post(
         "/games/mhfu/search",
-        data={**SEARCH_FORM, "skill_points": ["99", "", "", "", ""]},
+        data={**SEARCH_FORM, "skill_id": ["2", "", "", "", ""]},
     )
 
     assert response.status_code == 200
     html = response.text
     assert "No sets activate those skills" in html
     assert "All sets found" in html
-    assert "ss-result" not in html
+    assert "0 sets found" in html
+    assert 'class="card ss-result' not in html
 
 
 def test_vendored_static_assets_are_served(client: TestClient):
@@ -130,7 +153,36 @@ def test_vendored_static_assets_are_served(client: TestClient):
 def test_search_requires_at_least_one_skill(client: TestClient):
     response = client.post(
         "/games/mhfu/search",
-        data={**SEARCH_FORM, "skill_tree": ["", "", "", "", ""],
-              "skill_points": ["", "", "", "", ""]},
+        data={**SEARCH_FORM, "skill_id": ["", "", "", "", ""]},
     )
     assert response.status_code == 422
+
+
+def test_search_rejects_unknown_and_invented_skills(client: TestClient):
+    unknown = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "skill_id": ["99999", "", "", "", ""]},
+    )
+    assert unknown.status_code == 422
+    garbage = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "skill_id": ["nope", "", "", "", ""]},
+    )
+    assert garbage.status_code == 422
+
+
+def test_search_excludes_omitted_pieces_from_results(client: TestClient):
+    response = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "excluded_piece_id": ["1"]},
+    )
+    assert response.status_code == 200
+    cards = _cards(response.text)
+    assert cards
+    assert all("Leather Helm" not in card for card in cards)
+
+
+def test_index_lists_pack_scoped_categories(client: TestClient):
+    html = client.get("/").text
+    assert "Offensive" in html
+    assert "Treasure Hunting" not in html  # tiny pack, not a hardcoded MHFU list

@@ -272,6 +272,59 @@ h1, h2, h3, .ss-card-title {
   font-size: 0.9rem;
 }
 
+.ss-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ss-chip {
+  --bs-btn-color: var(--ss-pine);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--ss-moss);
+  --bs-btn-hover-color: var(--ss-paper);
+  --bs-btn-hover-bg: var(--ss-moss);
+  --bs-btn-hover-border-color: var(--ss-moss);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.btn.ss-chip.ss-chip-on {
+  --bs-btn-color: var(--ss-paper);
+  --bs-btn-bg: var(--ss-pine);
+  --bs-btn-border-color: var(--ss-pine);
+  --bs-btn-hover-color: var(--ss-paper);
+  --bs-btn-hover-bg: var(--ss-pine-deep);
+  --bs-btn-hover-border-color: var(--ss-pine-deep);
+  --bs-btn-active-color: var(--ss-paper);
+  --bs-btn-active-bg: var(--ss-pine-deep);
+  --bs-btn-active-border-color: var(--ss-pine-deep);
+  color: var(--ss-paper);
+  background-color: var(--ss-pine);
+  border-color: var(--ss-pine);
+}
+
+.ss-results-summary {
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 600;
+  color: var(--ss-pine);
+  margin: 0 0 0.75rem;
+}
+
+.ss-exclude-count {
+  background: var(--ss-brass);
+  color: var(--ss-pine-deep);
+}
+
+.ss-exclude-tabs .nav-link {
+  color: var(--ss-moss);
+}
+
+.ss-exclude-tabs .nav-link.active {
+  color: var(--ss-pine-deep);
+  font-weight: 600;
+}
+
 .ss-footer {
   font-size: 0.8rem;
   color: rgba(35, 42, 36, 0.5);

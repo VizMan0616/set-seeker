@@ -46,18 +46,29 @@ def _within_progression_caps(hr_required: int, village_stars: int, query: Query)
     return hr_ok or village_ok
 
 
-def _passes_hard_filters(piece: ArmorPiece, query: Query) -> bool:
+def _passes_hard_filters(
+    piece: ArmorPiece,
+    query: Query,
+    excluded_pieces: set[int],
+) -> bool:
+    if piece.id in excluded_pieces:
+        return False
     if piece.gender not in (_GENDER_CODE[query.gender], 2):
         return False
     if piece.hunter_type not in (_HUNTER_TYPE_CODE[query.hunter_type], 2):
         return False
     if not _within_progression_caps(piece.hr_required, piece.village_stars, query):
         return False
-    return not (piece.is_event and not query.allow_event)
+    if piece.is_event and not query.allow_event:
+        return False
+    if piece.torso_inc and not query.allow_torso_inc:
+        return False
+    return not (piece.is_dummy and not query.allow_dummy)
 
 
 def hard_filter(pieces: list[ArmorPiece], query: Query) -> list[ArmorPiece]:
-    return [p for p in pieces if _passes_hard_filters(p, query)]
+    excluded = set(query.excluded_piece_ids)
+    return [p for p in pieces if _passes_hard_filters(p, query, excluded)]
 
 
 def relevance_filter_pieces(
@@ -84,10 +95,12 @@ def relevance_filter_decorations(
     decorations: list[Decoration], requested: tuple[int, ...], query: Query
 ) -> list[Decoration]:
     trees = set(requested)
+    excluded = set(query.excluded_decoration_ids)
     return [
         d
         for d in decorations
-        if any(pts != 0 and t in trees for t, pts in d.skills)
+        if d.id not in excluded
+        and any(pts != 0 and t in trees for t, pts in d.skills)
         and _within_progression_caps(d.hr_required, d.village_stars, query)
         and (query.allow_event or not d.is_event)
     ]

@@ -42,6 +42,24 @@ skill_trees = Table(
     Column("category_tag", String(32)),
 )
 
+# Athena skill trees can carry several filter tags (Artisan is Offensive +
+# Blademaster). category_tag keeps the first tag; this table stores all of them.
+skill_tree_tags = Table(
+    "skill_tree_tags",
+    metadata,
+    Column("tree_id", Integer, ForeignKey("skill_trees.id"), primary_key=True),
+    Column("tag", String(32), primary_key=True),
+)
+
+# Pack-scoped filter chips in encounter order (Treasure Hunting is MHFU-only).
+skill_categories = Table(
+    "skill_categories",
+    metadata,
+    Column("game_id", Integer, ForeignKey("games.id"), primary_key=True),
+    Column("tag", String(32), primary_key=True),
+    Column("sort_order", Integer, nullable=False),
+)
+
 skills = Table(
     "skills",
     metadata,
@@ -77,6 +95,7 @@ armor_pieces = Table(
     Column("res_dragon", Integer, nullable=False),
     Column("torso_inc", Boolean, nullable=False, default=False),
     Column("is_event", Boolean, nullable=False, default=False),
+    Column("is_dummy", Boolean, nullable=False, default=False),
     Index("ix_armor_pieces_pruning", "game_id", "slot", "hunter_type", "gender"),
     Index("ix_armor_pieces_hr", "game_id", "hr_required"),
 )

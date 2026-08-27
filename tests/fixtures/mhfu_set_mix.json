@@ -1,0 +1,5695 @@
+{
+  "meta": {
+    "source_file": "mhfu set mix.txt",
+    "athena_commit": "134acee87dd0105f3b03dcebe78c5ea9227dafb5",
+    "mapping": {
+      "strategy": "Athena CSV name_en is canonical (ETL). Aliases from positional TeamHGG MHP2ndG and English MHFU language overlays, plus packs/mhfu/name_aliases.yaml for typos/forum names. Narga/Naruga is applied as a mechanical extra. name_en must exist in that slot's CSV. fully_mapped also requires Pass A (sockets + positive skill points).",
+      "unmapped_armor": [
+        "Guardian Spirit Raiment X",
+        "Kirin Hoop Z"
+      ],
+      "unmapped_decorations": [
+        "Rapid Fire Jewel"
+      ],
+      "unmapped_skills": [],
+      "dump_illegal": [
+        {
+          "id": "blademaster-005-akantor-razor",
+          "title": "Akantor Razor",
+          "reason": "dump_illegal_sockets:need 3 have 1"
+        },
+        {
+          "id": "blademaster-009-dark-wyvern",
+          "title": "Dark Wyvern",
+          "reason": "dump_illegal_sockets:need 3 have 2"
+        },
+        {
+          "id": "blademaster-020-remobra-skin",
+          "title": "Remobra Skin",
+          "reason": "dump_illegal_points:Runner Stamina 2<10; PierceS/PierceBow Up PierceS Up 2<10; Sharpness +1 Artisan 2<10"
+        },
+        {
+          "id": "blademaster-023-rakonga",
+          "title": "Rakonga",
+          "reason": "dump_illegal_sockets:need 3 have 2"
+        },
+        {
+          "id": "blademaster-025-gold-plesioth",
+          "title": "Gold Plesioth",
+          "reason": "dump_illegal_points:Good Luck Fate 9<10"
+        },
+        {
+          "id": "blademaster-026-dragon-pounce",
+          "title": "Dragon Pounce",
+          "reason": "dump_illegal_sockets:need 2 have 1"
+        },
+        {
+          "id": "blademaster-027-deadly-nightshade",
+          "title": "Deadly Nightshade",
+          "reason": "dump_illegal_points:Evade Distance Up Evade Inc 9<10; Trap Expert Set Trap 8<10"
+        },
+        {
+          "id": "gunner-042-ninja-bug",
+          "title": "Ninja Bug",
+          "reason": "dump_illegal_points:Evade +2 Evade 3<15; Bomber BombStrUp 2<10; Abnormal Sts Atk Up Spc Attack 2<10"
+        }
+      ]
+    },
+    "counts": {
+      "raw": 42,
+      "fully_mapped": 31,
+      "skipped": 11,
+      "dump_illegal": 8
+    }
+  },
+  "records": [
+    {
+      "id": "blademaster-001-silver-reus",
+      "source_line": 3,
+      "title": "Silver Reus",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 2,
+      "pieces": {
+        "head": {
+          "source_name": "Chaoshroom",
+          "name_en": "Chaos Shroom",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Rathalos Mail X",
+          "name_en": "Rathalos Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Diablo Vambraces X",
+          "name_en": "Diablo Vambraces X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Silver Sol Coil Z",
+          "name_en": "Silver Sol Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strongest Jewel",
+              "name_en": "Merciless Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Silver Sol Greaves Z",
+          "name_en": "Silver Sol Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Fierce Jewel",
+          "name_en": "Fierce Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Fierce Jewel",
+          "name_en": "Fierce Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Strongest Jewel",
+          "name_en": "Merciless Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Attack Up (Large)",
+          "skill_name_en": "Attack Up (Large)",
+          "tree_name": "Attack",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Abnormal Sts Atk Up",
+          "skill_name_en": "Abnormal Sts Atk Up",
+          "tree_name": "Spc Attack",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Silver Reus - HR9\nPost by Yukiiko\n\n2 Slot Weapon\n[Gem 1: Fierce Jewel]\n\nChaoshroom\n\nRathalos Mail X\n[Gem 1: Master Jewel]\n\nDiablo Vambraces X\n[Gem 1: Artisan Jewel] [Gem 2: Artisan Jewel]\n\nSilver Sol Coil Z\n[Gem 1: Strongest Jewel]\n\nSilver Sol Greaves Z\n[Gem 1: Master Jewel]\n\nAttack Up (Large)\nAbnormal Sts Atk Up\nSharpness +1"
+    },
+    {
+      "id": "blademaster-002-golden-black-dragon",
+      "source_line": 28,
+      "title": "Golden Black Dragon",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Mizuha Cap Shin",
+          "name_en": "True Mizuha Cap",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Danger Jewel",
+              "name_en": "Danger Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Earplug Jewel",
+              "name_en": "Earplug Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Golden Haori",
+          "name_en": "Golden Haori",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "arms": {
+          "source_name": "Golden Kote Shin",
+          "name_en": "True Golden Kote",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Pinch Jewel",
+              "name_en": "Calamity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Fatalis Spine Z",
+          "name_en": "Fatalis Spine Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Pinch Jewel",
+              "name_en": "Calamity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Monodevil Greaves U",
+          "name_en": "Monodevil Greaves U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Pinch Jewel",
+              "name_en": "Calamity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Silencer Jewel",
+          "name_en": "Silencer Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Silencer Jewel",
+          "name_en": "Silencer Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Danger Jewel",
+          "name_en": "Danger Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Earplug Jewel",
+          "name_en": "Earplug Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Pinch Jewel",
+          "name_en": "Calamity Jewel",
+          "count": 3,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Adrenaline +2",
+          "skill_name_en": "Adrenaline +2",
+          "tree_name": "Potential",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Earplug",
+          "skill_name_en": "Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Golden Black Dragon - HR9\nPost by Yukiiko\n\n3 Slot Weapon\n[Gem 1: Silencer Jewel]\n\nMizuha Cap Shin\n[Gem 1: Danger Jewel] [Gem 2: Earplug Jewel]\n\nGolden Haori\n\nGolden Kote Shin\n[Gem 1: Pinch Jewel]\n\nFatalis Spine Z\n[Gem 1: Pinch Jewel]\n\nMonodevil Greaves U\n[Gem 1: Pinch Jewel]\n\nAdrenaline +2\nEarplug\nSharpness +1\nNote: Looks pretty sick. Black mage's hat, black, spined legs with a thick dragon's tail, and a golden flaring shirt."
+    },
+    {
+      "id": "blademaster-003-narjang",
+      "source_line": 54,
+      "title": "Narjang",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Narga Cap X",
+          "name_en": "Naruga Cap X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Narga Mail X",
+          "name_en": "Naruga Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Golden Kote Shin",
+          "name_en": "True Golden Kote",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Narga Tasset X",
+          "name_en": "Naruga Tasset X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Golden Hakama Shin",
+          "name_en": "True Golden Hakama",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Dodge Jewel",
+          "name_en": "Dodge Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade +2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Narjang - HR9\nPost by Yukiiko\n\n1 Slot Weapon\n[Gem 1: Expert Jewel]\n\nNarga Cap X\n[Gem 1: Master Jewel]\n\nNarga Mail X\n[Gem 1: Celebrity Jewel]\n\nGolden Kote Shin\n[Gem 1: Celebrity Jewel]\n\nNarga Tasset X\n[Gem 1: Dodge Jewel]\n\nGolden Hakama Shin\n[Gem 1: Celebrity Jewel]\n\nEvade +2\nReckless Abandon +1\nSharpness +1"
+    },
+    {
+      "id": "blademaster-004-kimono",
+      "source_line": 80,
+      "title": "KiMono",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 2,
+      "pieces": {
+        "head": {
+          "source_name": "Kirin Horn X",
+          "name_en": "Kirin Horn X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Monoblos Mail X",
+          "name_en": "Monoblos Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Danger Jewel",
+              "name_en": "Danger Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kirin Longarms X",
+          "name_en": "Kirin Longarms X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Pinch Jewel",
+              "name_en": "Calamity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Monoblos Coil X",
+          "name_en": "Monoblos Coil X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Pinch Jewel",
+              "name_en": "Calamity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Diablo Greaves Z",
+          "name_en": "Diablo Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Jewel",
+          "name_en": "Element Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Danger Jewel",
+          "name_en": "Danger Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Pinch Jewel",
+          "name_en": "Calamity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Adrenaline +2",
+          "skill_name_en": "Adrenaline +2",
+          "tree_name": "Potential",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "KiMono - HR9\nPost by Yukiiko\n\n2 Slot Weapon\n[Gem 1: Expert Jewel] [Gem 2: Expert Jewel]\n\nKirin Horn X\n[Gem 1: Element Jewel] [Gem 2: Element Jewel]\n\nMonoblos Mail X\n[Gem 1: Danger Jewel]\n\nKirin Longarms X\n[Gem 1: Pinch Jewel]\n\nMonoblos Coil X\n[Gem 1: Pinch Jewel]\n\nDiablo Greaves Z\n[Gem 1: Celebrity Jewel]\n\nAdrenaline +2\nElement Attack Up\nReckless Abandon +1\nNote: Looks epic on females. A beautiful, dainty Kirin haircut, and then a big *bleep*-off Monoblos head on your chest. Has about 100 horns in every place you can imagine, so it's good for puns, eh?"
+    },
+    {
+      "id": "blademaster-005-akantor-razor",
+      "source_line": 107,
+      "title": "Akantor Razor",
+      "author": "Pwned227",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Dark Akantor Mask",
+          "name_en": "Dark Akantor Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Rathalos Soul Mail Z",
+          "name_en": "Rathalos Soul Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Dark Akantor Claw",
+          "name_en": "Dark Akantor Claw",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Dark Akantor Cincture",
+          "name_en": "DarkAkantor Cincture",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "legs": {
+          "source_name": "Dark Akantor Hessian",
+          "name_en": "Dark Akantor Hessian",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Hermit Jewel",
+              "name_en": "Hermit Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Hermit Jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon+3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_sockets:need 3 have 1"
+      ],
+      "raw": "Akantor Razor - HR9\nPost by Pwned227\n\nDark Akantor Mask\n[Gem 1: Razor Jewel]\n\nRathalos Soul Mail Z\n[Gem 1: Celebrity Jewel]\n\nDark Akantor Claw\n[Gem 1: Razor Jewel]\n\nDark Akantor Cincture\n\nDark Akantor Hessian\n[Gem 1: Hermit Jewel]\n\nReckless Abandon+3\nSharpness+1\nThis allows you to get RA+3 and still get rid of the nasty Distracted skill that Akantor armour has. The waist part has 2 open gem slots, so with a 3 slot weapon you could add a 5 gem skill such as Bomber or Sharpening Skill Inc"
+    },
+    {
+      "id": "blademaster-006-guardian-tigrex-mail",
+      "source_line": 129,
+      "title": "Guardian Tigrex Mail",
+      "author": "Kyosato",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 2,
+      "pieces": {
+        "head": {
+          "source_name": "Tigrex Helm X",
+          "name_en": "Tigrex Helm X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Expert Jewel",
+              "name_en": "Expert Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Guardian Spirit Raiment X",
+          "name_en": null,
+          "mapped": false,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Iron Curtain Jewel",
+              "name_en": "Iron Curtain Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Tigrex Vambraces X",
+          "name_en": "Tigrex Vambraces X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Iron Curtain Jewel",
+              "name_en": "Iron Curtain Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Hermitaur Tasset Z",
+          "name_en": "Hermitaur Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Tigrex Greaves X",
+          "name_en": "Tigrex Greaves X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Iron Curtain Jewel",
+          "name_en": "Iron Curtain Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Iron Curtain Jewel",
+          "name_en": "Iron Curtain Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Quick Eating",
+          "skill_name_en": "Quick Eating",
+          "tree_name": "Cooking",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Guard +1",
+          "skill_name_en": "Guard +1",
+          "tree_name": "Guard",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "unmapped_piece"
+      ],
+      "raw": "Guardian Tigrex Mail - HR9\nPost by Kyosato\n\nTwo slot weapon\n[Gem 1: Iron Curtain Jewel]\n\nTigrex Helm X\n[Gem 1: Expert Jewel]\n\nGuardian Spirit Raiment X\n[Gem 1: Iron Curtain Jewel]\n\nTigrex Vambraces X\n[Gem 1: Iron Curtain Jewel]\n\nHermitaur Tasset Z\n[Gem 1: Celebrity Jewel]\n\nTigrex Greaves X\n[Gem 1: Celebrity Jewel]\n\nQuick Eating\nGuard +1\nSharpness +1\nI made this custom armor to be used with sword and shield. It's designed with the shield in mind. Quick eating since you can eat while holding guard was its main point. ~Kyosato~"
+    },
+    {
+      "id": "blademaster-007-divine-kirin",
+      "source_line": 156,
+      "title": "Divine Kirin",
+      "author": "Kyosato (LordPilot's set, but edited by Kyosato)",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Kirin Horn X",
+          "name_en": "Kirin Horn X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Golden Moon Mail Z",
+          "name_en": "Golden Moon Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Artisan Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kirin Longarms X",
+          "name_en": "Kirin Longarms X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Kirin Hoop Z",
+          "name_en": null,
+          "mapped": false,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Kirin Leg Guards X",
+          "name_en": "Kirin Leg Guards X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Protection Jewel",
+              "name_en": "Protection Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 6,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Artisan Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Protection Jewel",
+          "name_en": "Protection Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Runner",
+          "skill_name_en": "Runner",
+          "tree_name": "Stamina",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Divine Protection",
+          "skill_name_en": "Divine Protection",
+          "tree_name": "Protection",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "unmapped_piece"
+      ],
+      "raw": "Divine Kirin - HR9\nPost by Kyosato (LordPilot's set, but edited by Kyosato)\n\nKirin Horn X\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nGolden Moon Mail Z\n[Gem 1: Master Artisan Jewel]\n\nKirin Longarms X\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nKirin Hoop Z\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nKirin Leg Guards X\n[Gem 1: Protection Jewel]\n[Gem 2: Protection Jewel]\n\nRunner\nDivine Protection\nElement Attack Up\nSharpness +1\nI do realize this is mainly Kirin X gemmed for Sharpness +1, but it yields 4 awesome Dual Sword Skills ~Kyosato~"
+    },
+    {
+      "id": "blademaster-008-rakanzu",
+      "source_line": 185,
+      "title": "Rakanzu",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Khezu Helm Z",
+          "name_en": "Khezu Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Conga Mail Z",
+          "name_en": "Conga Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Artisan Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Khezu Tasset Z",
+          "name_en": "Khezu Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Artisan Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Rathalos Soul Greaves Z",
+          "name_en": "RathalosSoulGreavesZ",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Artisan Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Grade Earplug",
+          "skill_name_en": "High Grade Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +2",
+          "skill_name_en": "Reckless Abandon+2",
+          "tree_name": "Expert",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Rakanzu - HR9\nPost by 2legitimate\n\nKhezu Helm Z\n[Gem 1: Celebrity Jewel]\n\nConga Mail Z\n[Gem 1: Artisan jewel]\n[Gem 2: Artisan jewel]\n\nRathalos Soul Vambraces Z/b]\n[Gem 1: Master Artisan Jewel]\n\n[b]Khezu Tasset Z\n[Gem 1: Master Artisan Jewel]\n\nRathalos Soul Greaves Z\n[Gem 1: Celebrity Jewel]\n\nSharpness +1\nHigh Grade Earplug\nReckless Abandon +2"
+    },
+    {
+      "id": "blademaster-009-dark-wyvern",
+      "source_line": 209,
+      "title": "Dark Wyvern",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Dark Akantor Mask",
+          "name_en": "Dark Akantor Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Evade Jewel",
+              "name_en": "Evade Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Narge Mail X",
+          "name_en": "Naruga Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Artisan Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Obituary/Butterfly Anca",
+          "name_en": "Obituary Anka",
+          "mapped": true,
+          "alternates_name_en": [
+            "Butterfly Anka"
+          ],
+          "jewels": [
+            {
+              "source_name": "Evade Jewel",
+              "name_en": "Evade Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Dark Akantor Hessian",
+          "name_en": "Dark Akantor Hessian",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Evade Jewel",
+          "name_en": "Evade Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Dodge Jewel",
+          "name_en": "Dodge Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Artisan Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Evade+2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_sockets:need 3 have 2"
+      ],
+      "raw": "Dark Wyvern - HR9\nPost by 2legitimate\n\nOne Slot Weapon\n[Gem 1: Artisan Jewel]\n\nDark Akantor Mask\n[Gem 1: Evade Jewel]\n\nNarge Mail X\n[Gem 1: Dodge Jewel]\n\nRathalos Soul Vambraces Z\n[Gem 1: Master Artisan Jewel]\n\nObituary/Butterfly Anca\n[Gem 1: Evade Jewel]\n[Gem 2: Dodge Jewel]\n\nDark Akantor Hessian\n[Gem 1: Artisan Jewel]\n\nSharpness +1\nEvade+2\nReckless Abandon +1"
+    },
+    {
+      "id": "blademaster-010-treasure-hunter-set",
+      "source_line": 236,
+      "title": "Treasure Hunter Set",
+      "author": "2legitimate",
+      "hr": 4,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Chain Helm U",
+          "name_en": "Chain Helm U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Gathering Jewel",
+              "name_en": "Gathering Jewel",
+              "count": 3,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Chain Mail U",
+          "name_en": "Chain Mail U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Good Luck Jewel",
+              "name_en": "Good Luck Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Chain Vambraces U",
+          "name_en": "Chain Vambraces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grab'n'Dash Jewel",
+              "name_en": "Grab'n'DashJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Melahoa Skirt U",
+          "name_en": "Melahoa Skirt U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grab'n'Dash Jewel",
+              "name_en": "Grab'n'DashJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Coffee Pants",
+          "name_en": "Coffee Pants",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Gathering Jewel",
+              "name_en": "Gathering Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Backpacker Jewel",
+              "name_en": "Backpacker Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Gathering Jewel",
+          "name_en": "Gathering Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Good Luck Jewel",
+          "name_en": "Good Luck Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Gathering Jewel",
+          "name_en": "Gathering Jewel",
+          "count": 6,
+          "mapped": true
+        },
+        {
+          "source_name": "Good Luck Jewel",
+          "name_en": "Good Luck Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Grab'n'Dash Jewel",
+          "name_en": "Grab'n'DashJewel",
+          "count": 4,
+          "mapped": true
+        },
+        {
+          "source_name": "Backpacker Jewel",
+          "name_en": "Backpacker Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Divine Whim",
+          "skill_name_en": "Divine Whim",
+          "tree_name": "Whim",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Speed Gathering",
+          "skill_name_en": "High Speed Gathering",
+          "tree_name": "HiSpdGathr",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Gathering +2",
+          "skill_name_en": "Gathering +2",
+          "tree_name": "Gathering",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Backpacking Expert",
+          "skill_name_en": "Backpacking Expert",
+          "tree_name": "Backpackng",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Treasure Hunter Set - HR4\nPost by 2legitimate\n\nThree Slot Weapon\n[Gem 1: Gathering Jewel]\n[Gem 2: Gathering Jewel]\n[Gem 3: Good Luck Jewel]\n\nChain Helm U\n[Gem 1: Gathering Jewel]\n[Gem 2: Gathering Jewel]\n[Gem 3: Gathering Jewel]\n\nChain Mail U\n[Gem 1: Good Luck Jewel]\n[Gem 2: Good Luck Jewel]\n\nChain Vambraces U\n[Gem 1: Grab'n'Dash Jewel]\n[Gem 2: Grab'n'Dash Jewel]\n\nMelahoa Skirt U\n[Gem 1: Grab'n'Dash Jewel]\n[Gem 2: Grab'n'Dash Jewel]\n\nCoffee Pants\n[Gem 1: Gathering Jewel]\n[Gem 2: Backpacker Jewel]\n\nDivine Whim\nHigh Speed Gathering\nGathering +2\nBackpacking Expert\nI use the Popcorn Gunlance because it's good for breaking rocks. ~2legitimate~"
+    },
+    {
+      "id": "blademaster-011-kirin-blade",
+      "source_line": 272,
+      "title": "Kirin Blade",
+      "author": "King Of The Skies",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Kirin Horn X",
+          "name_en": "Kirin Horn X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Ceanataur Mail Z",
+          "name_en": "Ceanataur Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kirin Longarms X",
+          "name_en": "Kirin Longarms X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Ceanataur Tasset Z",
+          "name_en": "Ceanataur Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Ceanataur Greaves Z",
+          "name_en": "Ceanataur Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Grinder Jewel",
+          "name_en": "Grinder Jewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Jewel",
+          "name_en": "Element Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpening Skill Inc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "-30 Defense",
+          "skill_name_en": "Defence -30",
+          "tree_name": "Defence",
+          "min_points": -15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Kirin Blade - HR9\nPost by King Of The Skies\n\n3 Slot Weapon\n[Gem 1: Master Jewel]\n\nKirin Horn X\n[Gem 1: Razor Jewel]\n[Gem 2: Razor Jewel]\n\nCeanataur Mail Z\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nKirin Longarms X\n[Gem 1: Razor Jewel]\n[Gem 2: Element Jewel]\n\nCeanataur Tasset Z\n[Gem 1: Grinder Jewel]\n[Gem 2: Element Jewel]\n\nCeanataur Greaves Z\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\n\nSharpness +1\nSharp Sword\nElement Attack Up\nSharpening Skill Inc\n-30 Defense\nRecommended with Silhouette Sabers G for anything weak to Ice. If you want to be cautious, remove the Sharpening Skill Inc and replace with a turtle jewel and 3 divineprotect jewels, that takes the defence loss down to 20 and switches SSI with Divine Protection. ~King Of The Skies~"
+    },
+    {
+      "id": "blademaster-012-mega-medley",
+      "source_line": 307,
+      "title": "Mega Medley",
+      "author": "Pwned227",
+      "hr": 6,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Red Piercing",
+          "name_en": "Red Piercing",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Short Charge Jewel",
+              "name_en": "QuickCharge Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Hypno Mail S",
+          "name_en": "Hypnoc Mail S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Rapid Fire Jewel",
+              "name_en": null,
+              "count": 1,
+              "mapped": false
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Ceanataur Braces U",
+          "name_en": "Ceanataur Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Hermit Jewel",
+              "name_en": "Hermit Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Kut-ku Tasset U",
+          "name_en": "Kut-Ku Tasset U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Ioprey Greaves S",
+          "name_en": "Ioprey Greaves S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Short Charge Jewel",
+          "name_en": "QuickCharge Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Rapid Fire Jewel",
+          "name_en": null,
+          "count": 1,
+          "mapped": false
+        },
+        {
+          "source_name": "Hermit Jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "RA+2",
+          "skill_name_en": "Reckless Abandon+2",
+          "tree_name": "Expert",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Focus",
+          "skill_name_en": "Concentration",
+          "tree_name": "Fast Chrge",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "unmapped_jewel"
+      ],
+      "raw": "Mega Medley - HR6\nPost by Pwned227\n\nRed Piercing\n[Gem 1: Short Charge Jewel]\n[Gem 2: Short Charge Jewel]\n\nHypno Mail S\n[Gem 1: Rapid Fire Jewel]\n\nCeanataur Braces U\n[Gem 1: Hermit Jewel]\n\nKut-ku Tasset U\n[Gem 1: Celebrity Jewel]\n\nIoprey Greaves S\n\nRA+2\nFocus"
+    },
+    {
+      "id": "blademaster-013-diablo-stinger",
+      "source_line": 329,
+      "title": "Diablo Stinger",
+      "author": "pwned227",
+      "hr": 6,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Diablo Helm U",
+          "name_en": "Diablo Helm U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Hornet Mail S",
+          "name_en": "Hornet Mail S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Hornet Vambraces S",
+          "name_en": "Hornet Vambraces S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Diablo Coil U",
+          "name_en": "Diablo Coil U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Hornet Greaves S",
+          "name_en": "Hornet Greaves S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Grinder Jewel",
+          "name_en": "Grinder Jewel",
+          "count": 4,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpening Skill Inc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Diablo Stinger - HR6\nPost by pwned227\n\nDiablo Helm U\n[Gem 1: Grinder Jewel]\n\nHornet Mail S\n[Gem 1: Grinder Jewel]\n\nHornet Vambraces S\n[Gem 1: Grinder Jewel]\n\nDiablo Coil U\n[Gem 1: Grinder Jewel]\n\nHornet Greaves S\n\nSharp Sword\nSharpening Skill Inc"
+    },
+    {
+      "id": "blademaster-014-diablo-soul-cutter",
+      "source_line": 350,
+      "title": "Diablo Soul Cutter",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Sword Saint Piercing",
+          "name_en": "Sword Saint Piercing",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Diablo Mail Z",
+          "name_en": "Diablo Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Expert Jewel",
+              "name_en": "Expert Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Silencer Jewel",
+              "name_en": "Silencer Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Diablo Coil Z",
+          "name_en": "Diablo Coil Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Rathalos Soul Greaves Z",
+          "name_en": "RathalosSoulGreavesZ",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 6,
+          "mapped": true
+        },
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Silencer Jewel",
+          "name_en": "Silencer Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "ESP",
+          "skill_name_en": "ESP",
+          "tree_name": "Fencing",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Grade Earplug",
+          "skill_name_en": "High Grade Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Diablo Soul Cutter - HR9\nPost by 2legitimate\n\nOne Slot Weapon\n[Gem 1: Razor Jewel]\n\nSword Saint Piercing\n\nDiablo Mail Z\n[Gem 1: Razor Jewel]\n[Gem 2: Expert Jewel]\n\nRathalos Soul Vambraces Z\n[Gem 1: Silencer Jewel]\n\nDiablo Coil Z\n[Gem 1: Razor Jewel]\n[Gem 2: Razor Jewel]\n\nRathalos Soul Greaves Z\n[Gem 1: Razor Jewel]\n[Gem 2: Razor Jewel]\n\nESP\nSharp Sword\nHigh Grade Earplug\nReckless Abandon +1"
+    },
+    {
+      "id": "blademaster-015-diablo-slicer",
+      "source_line": 379,
+      "title": "Diablo Slicer",
+      "author": "King Of The Skies",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Diablo Helm Z",
+          "name_en": "Diablo Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Silencer Jewel",
+              "name_en": "Silencer Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Diablo Mail Z",
+          "name_en": "Diablo Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Diablo Coil Z",
+          "name_en": "Diablo Coil Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Diablo Greaves Z",
+          "name_en": "Diablo Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Expert Jewel",
+              "name_en": "Expert Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Divine Protection Jewel",
+              "name_en": "DivinePrtctionJewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Silencer Jewel",
+          "name_en": "Silencer Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Divine Protection Jewel",
+          "name_en": "DivinePrtctionJewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Grade Earplug",
+          "skill_name_en": "High Grade Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Diablo Slicer - HR9\nPost by King Of The Skies\n\nThree Slot Weapon\n[Gem 1: Master Jewel]\n\nDiablo Helm Z\n[Gem 1: Silencer Jewel]\n\nDiablo Mail Z\n[Gem 1: Razor Jewel]\n[Gem 2: Razor Jewel]\n\nRathalos Soul Vambraces Z\n[Gem 1: Master Jewel]\n\nDiablo Coil Z\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nDiablo Greaves Z\n[Gem 1: Expert Jewel]\n[Gem 2: Divine Protection Jewel]\n\nSharpness+1\nSharp Sword\nHigh Grade Earplug\nReckless Abandon +1"
+    },
+    {
+      "id": "blademaster-016-dark-soul",
+      "source_line": 409,
+      "title": "Dark Soul",
+      "author": "mhdude",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Khezu Helm Z",
+          "name_en": "Khezu Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Earplug Jewel",
+              "name_en": "Earplug Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Dark Akantor Aegis",
+          "name_en": "Dark Akantor Aegis",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "DarkAkantor Cincture",
+          "name_en": "DarkAkantor Cincture",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Rathalos Soul Greaves Z",
+          "name_en": "RathalosSoulGreavesZ",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Earplug Jewel",
+          "name_en": "Earplug Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Grade Earplug",
+          "skill_name_en": "High Grade Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +2",
+          "skill_name_en": "Reckless Abandon+2",
+          "tree_name": "Expert",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Dark Soul - HR9\nPost by mhdude\n\nKhezu Helm Z\n[Gem :1 Earplug Jewel]\n[Gem :1 Artisan Jewel]\n\nDark Akantor Aegis\n[Gem 1: Artisan Jewel]\n\nRathalos Soul Vambraces Z\n[Gem :1 Master Jewel]\n\nDarkAkantor Cincture\n[Gem :1 Celebrity Jewel]\n\nRathalos Soul Greaves Z\n[Gem 1: Celebrity Jewel]\n\nSharpness+1\nHigh Grade Earplug\nReckless Abandon +2"
+    },
+    {
+      "id": "blademaster-017-diablos-pain",
+      "source_line": 433,
+      "title": "Diablos Pain",
+      "author": "mhdude",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Diablo Helm Z",
+          "name_en": "Diablo Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Hermit Jewel",
+              "name_en": "Hermit Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Diablo Mail Z",
+          "name_en": "Diablo Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Earplug Jewel",
+              "name_en": "Earplug Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Vambraces Z",
+          "name_en": "Rthlos Soul Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Cutter Jewel",
+              "name_en": "Cutter Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Diablo Coil Z",
+          "name_en": "Diablo Coil Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Rathalos Soul Greaves Z",
+          "name_en": "RathalosSoulGreavesZ",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Hermit Jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Earplug Jewel",
+          "name_en": "Earplug Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Cutter Jewel",
+          "name_en": "Cutter Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "High Grade Earplug",
+          "skill_name_en": "High Grade Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Diablos Pain - HR9\nPost by mhdude\n\nDiablo Helm Z\n[Gem 1: Hermit Jewel]\n\nDiablo Mail Z\n[Gem 1: Earplug Jewel]\n[Gem 2: Earplug Jewel]\n\nRathalos Soul Vambraces Z\n[Gem 1: Cutter Jewel]\n\nDiablo Coil Z\n[Gem 1: Celebrity Jewel]\n\nRathalos Soul Greaves Z\n[Gem 1: Celebrity Jewel]\n\nSharp Sword\nHigh Grade Earplug\nReckless Abandon +3"
+    },
+    {
+      "id": "blademaster-018-white-sol",
+      "source_line": 457,
+      "title": "White Sol",
+      "author": "Arcliff",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Silver Sol Helm Z",
+          "name_en": "Silver Sol Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "White Fatalis Hide",
+          "name_en": "White Fatalis Hide",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "arms": {
+          "source_name": "Dark Ukanlos Claw",
+          "name_en": "Ucamulbas Claw",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Silver Sol Coil Z",
+          "name_en": "Silver Sol Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strongest Jewel",
+              "name_en": "Merciless Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Silver Sol Greaves Z",
+          "name_en": "Silver Sol Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Strongest Jewel",
+          "name_en": "Merciless Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Attack Up (Medium)",
+          "skill_name_en": "Attack Up (Medium)",
+          "tree_name": "Attack",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "ESP",
+          "skill_name_en": "ESP",
+          "tree_name": "Fencing",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "White Sol - HR9\nPosted by Arcliff\n\nSilver Sol Helm Z\n[Gem 1: Artisan Jewel]\n\nWhite Fatalis Hide\n[No gems]\n\nDark Ukanlos Claw\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nSilver Sol Coil Z\n[Gem 1: Strongest Jewel]\n\nSilver Sol Greaves Z\n[Gem 1: Master Jewel]\n\nAttack Up (Medium)\nESP\nSharpness+1"
+    },
+    {
+      "id": "blademaster-019-stabby-stabby",
+      "source_line": 481,
+      "title": "Stabby Stabby",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Kaiser Crown X",
+          "name_en": "Kaiser Crown X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Ceanataur Mail U",
+          "name_en": "Ceanataur Mail U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Ceanataur Vambraces U",
+          "name_en": "Ceanataur Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Ceanataur Tasset Z",
+          "name_en": "Ceanataur Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Dark Akantor Greaves",
+          "name_en": "Dark Akantor Hessian",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon +3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Stabby Stabby - HR9\nPosted by 2legitimate\n\nOne Slot Weapon\n[Gem 1: Artisan Jewel]\n\nKaiser Crown X\n[Gem 1: Celebrity Jewel]\n\nCeanataur Mail U\n[Gem 1: Celebrity Jewel]\n\nCeanataur Vambraces U\n[Gem 1: Master Jewel]\n\nCeanataur Tasset Z\n[Gem 1: Celebrity Jewel]\n\nDark Akantor Greaves\n[Gem 1: Artisan Jewel]\n\nReckless Abandon +3\nSharp Sword\nSharpness+1"
+    },
+    {
+      "id": "blademaster-020-remobra-skin",
+      "source_line": 507,
+      "title": "Remobra Skin",
+      "author": "LordPilot",
+      "hr": 1,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Black Belt Helm",
+          "name_en": "Black Belt Helm",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Remobra Suit",
+          "name_en": "Remobra Suit",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "arms": {
+          "source_name": "Black Belt Vambraces S",
+          "name_en": "BlackBeltVambraces S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "waist": {
+          "source_name": "Remobra Belt",
+          "name_en": "Remobra Belt",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "legs": {
+          "source_name": "Remobra Feet/Chrome Metal Boots",
+          "name_en": "Chrome Metal Boots",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Impervious Jewel",
+          "name_en": "Impervious Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Impervious Jewel",
+          "name_en": "Impervious Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Runner",
+          "skill_name_en": "Runner",
+          "tree_name": "Stamina",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "PierceShot/PierceBow Up",
+          "skill_name_en": "PierceS/PierceBow Up",
+          "tree_name": "PierceS Up",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_points:Runner Stamina 2<10; PierceS/PierceBow Up PierceS Up 2<10; Sharpness +1 Artisan 2<10"
+      ],
+      "raw": "Remobra Skin - HR1\nPosted by LordPilot\n\nOne Slot Weapon\n[Gem 1: Impervious Jewel]\n\nBlack Belt Helm\n\nRemobra Suit\n\nBlack Belt Vambraces S\n\nRemobra Belt\n\nRemobra Feet/Chrome Metal Boots\n\nRunner\nPierceShot/PierceBow Up\nSharpness+1"
+    },
+    {
+      "id": "blademaster-021-shogun-flame",
+      "source_line": 528,
+      "title": "Shogun Flame",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Kaiser Crown X",
+          "name_en": "Kaiser Crown X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Razor Jewel",
+              "name_en": "Razor Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Kaiser Mail X",
+          "name_en": "Kaiser Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "arms": {
+          "source_name": "Ceanataur Vambraces U",
+          "name_en": "Ceanataur Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Hermit Jewel",
+              "name_en": "Hermit Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Ceanataur Tasset U",
+          "name_en": "Ceanataur Tasset U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Diablos Greaves Z",
+          "name_en": "Diablo Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Grinder Jewel",
+          "name_en": "Grinder Jewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Razor Jewel",
+          "name_en": "Razor Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Hermit Jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon +3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpening Skill Inc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Shogun Flame - HR9\nPosted by 2legitimate\n\nKaiser Crown X\n[Gem 1: Grinder Jewel]\n[Gem 2: Razor Jewel]\n\nKaiser Mail X\n\nCeanataur Vambraces U\n[Gem 1: Hermit Jewel]\n\nCeanataur Tasset U\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nDiablos Greaves Z\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nReckless Abandon +3\nSharp Sword\nSharpening Skill Inc"
+    },
+    {
+      "id": "blademaster-022-battle-healthy",
+      "source_line": 553,
+      "title": "Battle Healthy",
+      "author": "LordPilot",
+      "hr": 1,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Bullfango Mask",
+          "name_en": "Bullfango Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Battle Mail",
+          "name_en": "Battle Mail",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "arms": {
+          "source_name": "Battle Vambraces",
+          "name_en": "Battle Vambraces",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strength Jewel",
+              "name_en": "Strength Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Battle Tasset",
+          "name_en": "Battle Tasset",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Battle Greaves",
+          "name_en": "Battle Greaves",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Strength Jewel",
+          "name_en": "Strength Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Strength Jewel",
+          "name_en": "Strength Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Jewel",
+          "name_en": "Attack Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Health +50",
+          "skill_name_en": "Health +50",
+          "tree_name": "Health",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Up (Small)",
+          "skill_name_en": "Attack Up (Small)",
+          "tree_name": "Attack",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharping Skill Inc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Battle Healthy - HR1\nPosted by LordPilot\n\nOne Slot Weapon\n[Gem 1: Strength Jewel]\n\nBullfango Mask\n\nBattle Mail\n\nBattle Vambraces\n[Gem 1: Strength Jewel]\n\nBattle Tasset\n[Gem 1: Attack Jewel]\n\nBattle Greaves\n[Gem 1: Attack Jewel]\n\nHealth +50\nAttack Up (Small)\nSharping Skill Inc"
+    },
+    {
+      "id": "blademaster-023-rakonga",
+      "source_line": 577,
+      "title": "Rakonga",
+      "author": "firestorm79",
+      "hr": 8,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Dark Akantor Mask",
+          "name_en": "Dark Akantor Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Expert Jewel",
+              "name_en": "Expert Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Conga Mail Z",
+          "name_en": "Conga Mail Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rath Soul Vambraces U",
+          "name_en": "Rthlos Soul Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Khezu Tasset Z",
+          "name_en": "Khezu Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Rath Soul Greaves Z",
+          "name_en": "RathalosSoulGreavesZ",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon +3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness +1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Earplug",
+          "skill_name_en": "Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_sockets:need 3 have 2"
+      ],
+      "raw": "Rakonga - HR8\nPosted by firestorm79\n\nDark Akantor Mask\n[Gem 1: Expert Jewel]\n\nConga Mail Z\n[Gem 1: Celebrity Jewel]\n\nRath Soul Vambraces U\n[Gem 1: Master Jewel]\n\nKhezu Tasset Z\n[Gem 1: Master Jewel]\n\nRath Soul Greaves Z\n[Gem 1: Celebrity Jewel]\n\nReckless Abandon +3\nSharpness +1\nEarplug"
+    },
+    {
+      "id": "blademaster-024-gold-plesioth",
+      "source_line": 600,
+      "title": "Gold Plesioth",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Plesioth Cap X(Gunner)",
+          "name_en": "Plesioth Cap X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Destiny Jewel",
+              "name_en": "Destiny Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Plesioth Mail X",
+          "name_en": "Plesioth Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Fate Jewel",
+              "name_en": "Fate Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Golden Moon Vambraces Z",
+          "name_en": "Golden Moon Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Destiny Jewel",
+              "name_en": "Destiny Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Plesioth Tasset X",
+          "name_en": "Plesioth Tasset X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Trapmaster Jewel",
+              "name_en": "TrapMaster Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Golden Moon Z Greaves",
+          "name_en": "GoldenMoon Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Trapmaster Jewel",
+              "name_en": "TrapMaster Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Trapmaster Jewel",
+          "name_en": "TrapMaster Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Trapmaster Jewel",
+          "name_en": "TrapMaster Jewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Destiny Jewel",
+          "name_en": "Destiny Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Fate Jewel",
+          "name_en": "Fate Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Trapmaster",
+          "skill_name_en": "Trap Expert",
+          "tree_name": "Set Trap",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Tranquilizing Guru",
+          "skill_name_en": "Eagle Eye",
+          "tree_name": "Observance",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Tranquilizing Celebrity",
+          "skill_name_en": "Reward Celebrity",
+          "tree_name": "Trapper",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Luck Booster",
+          "skill_name_en": "Luck Booster",
+          "tree_name": "Fate",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Gold Plesioth - HR9\nPost by 2legitimate\n\nOne Slot Weapon\n[Gem 1: Trapmaster Jewel]\n\nPlesioth Cap X(Gunner)\n[Gem 1: Destiny Jewel]\n\nPlesioth Mail X\n[Gem 1: Fate Jewel]\n\nGolden Moon Vambraces Z\n[Gem 1: Destiny Jewel]\n\nPlesioth Tasset X\n[Gem 1: Trapmaster Jewel]\n[Gem 2: Trapmaster Jewel]\n\nGolden Moon Z Greaves\n[Gem 1: Trapmaster Jewel]\n[Gem 2: Trapmaster Jewel]\n\nTrapmaster\nTranquilizing Guru\nTranquilizing Celebrity\nLuck Booster"
+    },
+    {
+      "id": "blademaster-025-gold-plesioth",
+      "source_line": 629,
+      "title": "Gold Plesioth",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Plesioth Cap X(Gunner)",
+          "name_en": "Plesioth Cap X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Psychic Vision Jewel",
+              "name_en": "Psychic Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Plesioth Mail X",
+          "name_en": "Plesioth Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Fate Jewel",
+              "name_en": "Fate Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Golden Moon Vambraces Z",
+          "name_en": "Golden Moon Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Psychic Vision Jewel",
+              "name_en": "Psychic Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Plesioth Tasset X",
+          "name_en": "Plesioth Tasset X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Psychic Vision Jewel",
+              "name_en": "Psychic Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Golden Moon Z Greaves",
+          "name_en": "GoldenMoon Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Psychic Vision Jewel",
+              "name_en": "Psychic Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Psychic Vision Jewel",
+          "name_en": "Psychic Jewel",
+          "count": 8,
+          "mapped": true
+        },
+        {
+          "source_name": "Fate Jewel",
+          "name_en": "Fate Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Autotracker",
+          "skill_name_en": "Autotracker",
+          "tree_name": "PsychicVis",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Tranquilizing Guru",
+          "skill_name_en": "Eagle Eye",
+          "tree_name": "Observance",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Tranquilizing Celebrity",
+          "skill_name_en": "Reward Celebrity",
+          "tree_name": "Trapper",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Good Luck",
+          "skill_name_en": "Good Luck",
+          "tree_name": "Fate",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_points:Good Luck Fate 9<10"
+      ],
+      "raw": "Gold Plesioth - HR9\nPost by 2legitimate\n\nPlesioth Cap X(Gunner)\n[Gem 1: Psychic Vision Jewel]\n[Gem 2: Psychic Vision Jewel]\n\nPlesioth Mail X\n[Gem 1: Fate Jewel]\n\nGolden Moon Vambraces Z\n[Gem 1: Psychic Vision Jewel]\n[Gem 2: Psychic Vision Jewel]\n\nPlesioth Tasset X\n[Gem 1: Psychic Vision Jewel]\n[Gem 2: Psychic Vision Jewel]\n\nGolden Moon Z Greaves\n[Gem 1: Psychic Vision Jewel]\n[Gem 2: Psychic Vision Jewel]\n\nAutotracker\nTranquilizing Guru\nTranquilizing Celebrity\nGood Luck"
+    },
+    {
+      "id": "blademaster-026-dragon-pounce",
+      "source_line": 657,
+      "title": "Dragon Pounce",
+      "author": "2legitimate",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Rathalos Helm X",
+          "name_en": "Rathalos Helm X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Kaiser Mail X",
+          "name_en": "Kaiser Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Unsheathing jewel",
+              "name_en": "Unsheathe Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kaiser Vambraces X",
+          "name_en": "Kaiser Vambraces X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Kaiser Tasset X",
+          "name_en": "Kaiser Tasset X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Ceanataur Greaves X",
+          "name_en": "Ceanataur Greaves X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Hermit jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Hermit jewel",
+          "name_en": "Hermit Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Unsheathing jewel",
+          "name_en": "Unsheathe Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Grinder jewel",
+          "name_en": "Grinder Jewel",
+          "count": 5,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon+3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Art of Unsheathing",
+          "skill_name_en": "Unsheathed Atk Crit",
+          "tree_name": "Drawn Crit",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpening Skl Inc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_sockets:need 2 have 1"
+      ],
+      "raw": "Dragon Pounce - HR9\nPost by 2legitimate\n3 Slot Weapon\n[Gem 1: Hermit jewel]\n\nRathalos Helm X\n[Gem 1: Celebrity jewel]\n\nKaiser Mail X\n[Gem 1: Unsheathing jewel]\n\nKaiser Vambraces X\n[Gem 1: Grinder jewel]\n[Gem 2: Grinder jewel]\n\nKaiser Tasset X\n[Gem 1: Grinder jewel]\n[Gem 2: Empty slot]\n\nCeanataur Greaves X\n[Gem 1: Grinder jewel]\n[Gem 2: Grinder jewel]\n\nReckless Abandon+3*\nArt of Unsheathing\nSharpening Skl Inc\n\n*Reckless Abandon +2 without the 3 slot weapon."
+    },
+    {
+      "id": "blademaster-027-deadly-nightshade",
+      "source_line": 687,
+      "title": "Deadly Nightshade",
+      "author": "Ravenous_2k10",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 3,
+      "pieces": {
+        "head": {
+          "source_name": "Narga Helm X",
+          "name_en": "Naruga Helm X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Jumping Jewel",
+              "name_en": "Jump Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "DivineProtectJwl",
+              "name_en": "DivinePrtctionJewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Narga Mail X",
+          "name_en": "Naruga Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "DivineProtectJwl",
+              "name_en": "DivinePrtctionJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Narga Guards X",
+          "name_en": "Naruga Guards X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "DivineProtectJwl",
+              "name_en": "DivinePrtctionJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Narga Tasset X",
+          "name_en": "Naruga Tasset X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Obituary Gamba X",
+          "name_en": "Obituary Gamba X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 3,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "TrapMaster Jewel",
+          "name_en": "TrapMaster Jewel",
+          "count": 3,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "TrapMaster Jewel",
+          "name_en": "TrapMaster Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Jumping Jewel",
+          "name_en": "Jump Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "DivineProtectJwl",
+          "name_en": "DivinePrtctionJewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Grinder Jewel",
+          "name_en": "Grinder Jewel",
+          "count": 5,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade +2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "EvadeDistanceUp",
+          "skill_name_en": "Evade Distance Up",
+          "tree_name": "Evade Inc",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Trap Master",
+          "skill_name_en": "Trap Expert",
+          "tree_name": "Set Trap",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Divine Protection",
+          "skill_name_en": "Divine Protection",
+          "tree_name": "Protection",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "SwdSharpSklInc",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_points:Evade Distance Up Evade Inc 9<10; Trap Expert Set Trap 8<10"
+      ],
+      "raw": "Deadly Nightshade - HR9\nPost by Ravenous_2k10\n\n3-slot weapon\n[Gem 1: TrapMaster Jewel]\n[Gem 2: TrapMaster Jewel]\n[Gem 3: TrapMaster Jewel]\n\nNarga Helm X\n[Gem 1: Jumping Jewel]\n[Gem 2: DivineProtectJwl]\n\nNarga Mail X\n[Gem 1: DivineProtectJwl]\n[Gem 2: DivineProtectJwl]\n\nNarga Guards X\n[Gem 1: DivineProtectJwl]\n[Gem 2: DivineProtectJwl]\n\nNarga Tasset X\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nObituary Gamba X\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n[Gem 3: Grinder Jewel]\n\nEvade +2\nEvadeDistanceUp\nTrap Master\nDivine Protection\nSwdSharpSklInc"
+    },
+    {
+      "id": "blademaster-028-deaf-attacker",
+      "source_line": 723,
+      "title": "Deaf Attacker",
+      "author": "vespoidkill",
+      "hr": null,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Garuga Mask",
+          "name_en": "Garuga Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Earplug Jewel",
+              "name_en": "Earplug Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Rathalos Soul Mail",
+          "name_en": "Rathalos Soul Mail",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kut-Ku Vambraces",
+          "name_en": "Kut-Ku Vambraces",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Rathalos Soul Coil",
+          "name_en": "Rathalos Soul Coil",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Monoblos Greaves",
+          "name_en": "Monoblos Greaves",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Earplug Jewel",
+          "name_en": "Earplug Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Jewel",
+          "name_en": "Attack Jewel",
+          "count": 5,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Earplug",
+          "skill_name_en": "Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Up Medium",
+          "skill_name_en": "Attack Up (Medium)",
+          "tree_name": "Attack",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Deaf Attacker\nPost by vespoidkill\n\nGaruga Mask\n[Gem 1: Earplug Jewel]\n\nRathalos Soul Mail\n[Gem 1: Attack Jewel]\n\nKut-Ku Vambraces\n[Gem 1: Attack Jewel]\n\nRathalos Soul Coil\n[Gem 1: Attack Jewel]\n[Gem 2: Attack Jewel]\n\nMonoblos Greaves\n[Gem 1: Attack Jewel]\n\nEarplug\nAttack Up Medium"
+    },
+    {
+      "id": "blademaster-029-shinofly-hr9",
+      "source_line": 746,
+      "title": "Shinofly HR9",
+      "author": "Rawrr",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 2,
+      "pieces": {
+        "head": {
+          "source_name": "Shinobi Mask(Heaven)",
+          "name_en": "Shinobi Mask (Heaven)",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Evade Jewel",
+              "name_en": "Evade Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Shinobi Suit(Heaven)",
+          "name_en": "Shinobi Suit(Heaven)",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Butterfly Mano X",
+          "name_en": "Butterfly Mano X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 3,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Butterfly Anca X",
+          "name_en": "Butterfly Anka X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Butterfly Gamba X",
+          "name_en": "Butterfly Gamba X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Evade Jewel",
+          "name_en": "Evade Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Jewel",
+          "name_en": "Element Jewel",
+          "count": 6,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade+2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Elemental Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Cold Inc[Lo]",
+          "skill_name_en": "Cold Increase [Lo]",
+          "tree_name": "Cold Res",
+          "min_points": -10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Shinofly HR9\nPost by Rawrr\n2 Slot weapon\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\n\nShinobi Mask(Heaven)\n[Gem 1: Evade Jewel]\n[Gem 2: Element Jewel]\n\nShinobi Suit(Heaven)\n[Gem 1: Element Jewel]\n[Gem 2: Element Jewel]\n\nButterfly Mano X\n[Gem 1: Element Jewel]\n[Gem 2: Element Jewel]\n[Gem 3: Element Jewel]\n\nButterfly Anca X\n[Gem 1: Master Jewel]\n\nButterfly Gamba X\n[Gem 1: Master Jewel]\n\nEvade+2\nElemental Attack Up\nSharpness+1\nCold Inc[Lo]"
+    },
+    {
+      "id": "blademaster-030-dark-sol",
+      "source_line": 777,
+      "title": "Dark Sol",
+      "author": "mhdude",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Silver Sol Hel Z",
+          "name_en": "Silver Sol Helm Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Dark Uknlos Aegis",
+          "name_en": "Ucamulbas Aegis",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "SilverSolVambrancesZ",
+          "name_en": "Silver Sol Braces Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "DarkUknlosCincture",
+          "name_en": "Ucamulbas Cincture",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Grinder Jewel",
+              "name_en": "Grinder Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Silver Sol Greaves Z",
+          "name_en": "Silver Sol Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Grinder Jewel",
+          "name_en": "Grinder Jewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Atk up small",
+          "skill_name_en": "Attack Up (Small)",
+          "tree_name": "Attack",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "ESP",
+          "skill_name_en": "ESP",
+          "tree_name": "Fencing",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Quick sharpen",
+          "skill_name_en": "Sharpening Skl Inc",
+          "tree_name": "SwdShrpner",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Dark Sol - HR9\nPost by mhdude\n\nSilver Sol Hel Z\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nDark Uknlos Aegis\n[Gem 1: Grinder Jewel]\n[Gem 2: Grinder Jewel]\n\nSilverSolVambrancesZ\n[Gem 1: Artisan Jewel]\n\nDarkUknlosCincture\n[Gem 1: Grinder Jewel]\n\nSilver Sol Greaves Z\n[Gem 1: Master Jewel]\n\nAtk up small\nSharpness+1\nESP\nQuick sharpen"
+    },
+    {
+      "id": "blademaster-031-untouchable",
+      "source_line": 803,
+      "title": "Untouchable",
+      "author": "mhdude",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Fatalis Head Z",
+          "name_en": "Fatalis Head Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "IronCurtainJewel",
+              "name_en": "Iron Curtain Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Narga Mail X",
+          "name_en": "Naruga Mail X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "IronCurtainJewel",
+              "name_en": "Iron Curtain Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Obituary Mano X",
+          "name_en": "Obituary Mano X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Obituary Anca X",
+          "name_en": "Obituary Anka X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Obituary Gamba X",
+          "name_en": "Obituary Gamba X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "IronCurtainJewel",
+              "name_en": "Iron Curtain Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Stone Wall Jewel",
+              "name_en": "Stone Wall Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "IronCurtainJewel",
+          "name_en": "Iron Curtain Jewel",
+          "count": 3,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Stone Wall Jewel",
+          "name_en": "Stone Wall Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade+2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Guard+1",
+          "skill_name_en": "Guard +1",
+          "tree_name": "Guard",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Untouchable - HR9\nPost by mhdude\n\nFatalis Head Z\n[Gem 1: IronCurtainJewel]\n\nNarga Mail X\n[Gem 1: IronCurtainJewel]\n\nObituary Mano X\n[Gem 1: Master Jewel]\n\nObituary Anca X\n[Gem 1: Master Jewel]\n\nObituary Gamba X\n[Gem 1: IronCurtainJewel]\n[Gem 2: Stone Wall Jewel]\n\nEvade+2\nGuard+1\nSharpness+1"
+    },
+    {
+      "id": "blademaster-032-charge-in",
+      "source_line": 827,
+      "title": "Charge In",
+      "author": "Hanners",
+      "hr": 3,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Garuga Mask",
+          "name_en": "Garuga Mask",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Paperweight Jewel",
+              "name_en": "PaperweightJewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Diablo Mail D",
+          "name_en": "Diablo Mail D",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Paperweight Jewel",
+              "name_en": "PaperweightJewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Soul Braces",
+          "name_en": "Rathalos Soul Braces",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Earplug Jewel",
+              "name_en": "Earplug Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Diablo Coil D",
+          "name_en": "Diablo Coil D",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Paperweight Jewel",
+              "name_en": "PaperweightJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Diablo Greaves D",
+          "name_en": "Diablo Greaves D",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Paperweight Jewel",
+              "name_en": "PaperweightJewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Paperweight Jewel",
+          "name_en": "PaperweightJewel",
+          "count": 6,
+          "mapped": true
+        },
+        {
+          "source_name": "Earplug Jewel",
+          "name_en": "Earplug Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "High Wind Res",
+          "skill_name_en": "High Wind Res",
+          "tree_name": "WindPress",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Regular-Grade Earplugs",
+          "skill_name_en": "Earplug",
+          "tree_name": "HearProtct",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Charge In - HR3\nPost by Hanners\n\nGaruga Mask\n[Gem 1: Paperweight Jewel]\n\nDiablo Mail D\n[Gem 1: Paperweight Jewel]\n\nRathalos Soul Braces\n[Gem 1: Earplug Jewel]\n\nDiablo Coil D\n[Gem 1: Paperweight Jewel]\n[Gem 2: Paperweight Jewel]\n\nDiablo Greaves D\n[Gem 1: Paperweight Jewel]\n[Gem 2: Paperweight Jewel]\n\nHigh Wind Res\nRegular-Grade Earplugs\nNOTES: If you had a 3-slotted weapon and a Cutter Jewel (+4 Sharpness) you could add Sharp Sword to this list of attributes."
+    },
+    {
+      "id": "blademaster-033-stabby-stabby-alternate",
+      "source_line": 852,
+      "title": "Stabby Stabby Alternate",
+      "author": "firestorm79",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Skull Face",
+          "name_en": "Skull Face",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Ceanataur Mail U",
+          "name_en": "Ceanataur Mail U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Ceanataur Vambraces U",
+          "name_en": "Ceanataur Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Ceanataur Tasset Z",
+          "name_en": "Ceanataur Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Ceanataur Greaves Z",
+          "name_en": "Ceanataur Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 4,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Reckless Abandon +3",
+          "skill_name_en": "Reckless Abandon+3",
+          "tree_name": "Expert",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Stabby Stabby Alternate - HR9\nPosted by firestorm79\n\nOne Slot Weapon\n[Gem 1: Expert Jewel]\n\nSkull Face\n[Gem 1: Celebrity Jewel]\n\nCeanataur Mail U\n[Gem 1: Celebrity Jewel]\n\nCeanataur Vambraces U\n[Gem 1: Master Jewel]\n\nCeanataur Tasset Z\n[Gem 1: Celebrity Jewel]\n\nCeanataur Greaves Z\n[Gem 1: Celebrity Jewel]\n\nReckless Abandon +3\nSharp Sword\nSharpness+1"
+    },
+    {
+      "id": "blademaster-034-ultimate-slicer",
+      "source_line": 878,
+      "title": "Ultimate Slicer",
+      "author": "firestorm79 (credit: tehdarklight)",
+      "hr": 9,
+      "hunter_type": "blademaster",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Sword Saint Piercing",
+          "name_en": "Sword Saint Piercing",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Ceanataur Mail U",
+          "name_en": "Ceanataur Mail U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Ceanataur Vambraces U",
+          "name_en": "Ceanataur Braces U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Master Jewel",
+              "name_en": "Master Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Ceanataur Tasset Z",
+          "name_en": "Ceanataur Tasset Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Ceanataur Greaves Z",
+          "name_en": "Ceanataur Greaves Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Artisan Jewel",
+              "name_en": "Artisan Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Master Jewel",
+          "name_en": "Master Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Artisan Jewel",
+          "name_en": "Artisan Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "ESP",
+          "skill_name_en": "ESP",
+          "tree_name": "Fencing",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharp Sword",
+          "skill_name_en": "Sharp Sword",
+          "tree_name": "Sharpness",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Sharpness+1",
+          "skill_name_en": "Sharpness +1",
+          "tree_name": "Artisan",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Ultimate Slicer - HR9\nPosted by firestorm79 (credit: tehdarklight)\n\n\nSword Saint Piercing\n\nCeanataur Mail U\n[Gem 1: Celebrity Jewel]\n\nCeanataur Vambraces U\n[Gem 1: Master Jewel]\n\nCeanataur Tasset Z\n[Gem 1: Celebrity Jewel]\n\nCeanataur Greaves Z\n[Gem 1: Artisan Jewel]\n[Gem 2: Artisan Jewel]\nESP\nReckless Abandon +1\nSharp Sword\nSharpness+1"
+    },
+    {
+      "id": "gunner-035-kushala-steel-support",
+      "source_line": 909,
+      "title": "Kushala Steel Support",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 2,
+      "pieces": {
+        "head": {
+          "source_name": "Steadfast Helm Shin",
+          "name_en": "True Steadfast Helm",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Recoilless Jewel",
+              "name_en": "Recoilless Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Kushala Vise X",
+          "name_en": "Kushala Vise X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "High Speed Jewel",
+              "name_en": "High Speed Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kushala Embrace X",
+          "name_en": "Kushala Grasp X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "High Speed Jewel",
+              "name_en": "High Speed Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Steadfast Coat Shin",
+          "name_en": "True Steadfast Coat",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Shockless Jewel",
+              "name_en": "Shockless Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Kushala Shank X",
+          "name_en": "Kushala Shank X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "High Speed Jewel",
+              "name_en": "High Speed Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "High Speed Jewel",
+          "name_en": "High Speed Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "High Speed Jewel",
+          "name_en": "High Speed Jewel",
+          "count": 4,
+          "mapped": true
+        },
+        {
+          "source_name": "Recoilless Jewel",
+          "name_en": "Recoilless Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Shockless Jewel",
+          "name_en": "Shockless Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Recoil Negated",
+          "skill_name_en": "Recoil Reduction +2",
+          "tree_name": "Recoil",
+          "min_points": 20,
+          "mapped": true
+        },
+        {
+          "source_name": "Reloading Speed +1",
+          "skill_name_en": "Reloading Speed +1",
+          "tree_name": "Load",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Kushala Steel Support - HR9\nPost by Yukiiko\n\n2 Slot Weapon\n[Gem 1: High Speed Jewel]\n\nSteadfast Helm Shin\n[Gem 1: Recoilless Jewel]\n\nKushala Vise X\n[Gem 1: High Speed Jewel]\n\nKushala Embrace X\n[Gem 1: High Speed Jewel]\n\nSteadfast Coat Shin\n[Gem 1: Shockless Jewel]\n\nKushala Shank X\n[Gem 1: High Speed Jewel]\n\nRecoil Negated\nReloading Speed +1\nAlternatively, swap the Helm for a Barrage Piercing, and put a High Speed Jewel] and [Early Bird Jewel] in the Steadfast Coat Shin to get Reloading Speed +3, Capacity Up and Recoil Reduction+1.\nThis is purely to Para/Poison support or Clust spam in multiplayer quests. Works brilliantly with AncientDrgnwoodCan."
+    },
+    {
+      "id": "gunner-036-red-butterfly",
+      "source_line": 936,
+      "title": "Red Butterfly",
+      "author": "Yukiiko",
+      "hr": 5,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Rathalos Cap S",
+          "name_en": "Rathalos Cap S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Fierce Jewel",
+              "name_en": "Fierce Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Giaprey Vest U",
+          "name_en": "Giaprey Vest U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Rathalos Guards S",
+          "name_en": "Rathalos Guards S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Fierce Jewel",
+              "name_en": "Fierce Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Butterfly Cocusa S",
+          "name_en": "Butterfly Cocusa S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Butterfly Femur S",
+          "name_en": "Butterfly Femur S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Fierce Jewel",
+          "name_en": "Fierce Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Dodge Jewel",
+          "name_en": "Dodge Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Jewel",
+          "name_en": "Attack Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Attack Up (Medium)",
+          "skill_name_en": "Attack Up (Medium)",
+          "tree_name": "Attack",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Evade +2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Red Butterfly - HR5\nPost by Yukiiko\n\nRathalos Cap S\n[Gem 1: Fierce Jewel]\n\nGiaprey Vest U\n[Gem 1: Dodge Jewel]\n\nRathalos Guards S\n[Gem 1: Fierce Jewel]\n\nButterfly Cocusa S\n[Gem 1: Attack Jewel]\n\nButterfly Femur S\n[Gem 1: Dodge Jewel]\n\nAttack Up (Medium)\nEvade +2\nQuite simply, easy to make. Doesn't need horrible Elder Dragons or anything."
+    },
+    {
+      "id": "gunner-037-kirin-storm",
+      "source_line": 959,
+      "title": "Kirin Storm",
+      "author": "Yukiiko",
+      "hr": 9,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Kirin Horn X",
+          "name_en": "Kirin Horn X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Cont. Fire Jewel",
+              "name_en": "SpeedFire Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Narge Vest X",
+          "name_en": "Naruga Vest X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Shinobi Kote Heaven",
+          "name_en": "Shinobi Kote(Heaven)",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Barrage Jewel",
+              "name_en": "Barrage Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Kirin Shorts X",
+          "name_en": "Kirin Shorts X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Dodge Jewel",
+              "name_en": "Dodge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Butterfly Femur X",
+          "name_en": "Butterfly Femur X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Barrage Jewel",
+              "name_en": "Barrage Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Cont. Fire Jewel",
+          "name_en": "SpeedFire Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Dodge Jewel",
+          "name_en": "Dodge Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Barrage Jewel",
+          "name_en": "Barrage Jewel",
+          "count": 2,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade+2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Atk Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "AutoReload",
+          "skill_name_en": "Speed Fire",
+          "tree_name": "Speed Fire",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Kirin Storm - HR9\nPost by Yukiiko\n\nKirin Horn X\n[Gem 1: Cont. Fire Jewel]\n[Gem 2: Cont. Fire Jewel]\n\nNarge Vest X\n[Gem 1: Dodge Jewel]\n\nShinobi Kote Heaven\n[Gem 1: Barrage Jewel]\n\nKirin Shorts X\n[Gem 1: Dodge Jewel]\n\nButterfly Femur X\n[Gem 1: Barrage Jewel]\n\nEvade+2\nElement Atk Up\nAutoReload\nThe Autoreload gems can easily be swapped with Short Charge gems for bowing."
+    },
+    {
+      "id": "gunner-038-black-white-mono",
+      "source_line": 984,
+      "title": "Black & White Mono",
+      "author": "Yukiiko",
+      "hr": 1,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Monodevil Cap",
+          "name_en": "Monodevil Cap",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Danger Jewel",
+              "name_en": "Danger Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Monoblos Vest S",
+          "name_en": "Monoblos Vest S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Monodevil Guards",
+          "name_en": "Monodevil Guards",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Monoblos Coat S",
+          "name_en": "Monoblos Coat S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Attack Jewel",
+              "name_en": "Attack Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Monoblos Leggings S",
+          "name_en": "Monoblos Leggings S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Expert Jewel",
+              "name_en": "Expert Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Danger Jewel",
+          "name_en": "Danger Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Jewel",
+          "name_en": "Attack Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Expert Jewel",
+          "name_en": "Expert Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Adrenaline +2",
+          "skill_name_en": "Adrenaline +2",
+          "tree_name": "Potential",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Attack Up (Medium)",
+          "skill_name_en": "Attack Up (Medium)",
+          "tree_name": "Attack",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +1",
+          "skill_name_en": "Reckless Abandon+1",
+          "tree_name": "Expert",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Black & White Mono - HR1 (Nekoht's Quest)\nPost by Yukiiko\n\nMonodevil Cap\n[Gem 1: Danger Jewel]\n\nMonoblos Vest S\n[Gem 1: Celebrity Jewel]\n\nMonodevil Guards\n[Gem 1: Celebrity Jewel]\n\nMonoblos Coat S\n[Gem 1: Attack Jewel]\n\nMonoblos Leggings S\n[Gem 1: Expert Jewel]\n\nAdrenaline +2\nAttack Up (Medium)\nReckless Abandon +1"
+    },
+    {
+      "id": "gunner-039-kut-ku-special",
+      "source_line": 1007,
+      "title": "Kut-Ku Special",
+      "author": "Hepsilon",
+      "hr": 4,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Chaoshroom",
+          "name_en": "Chaos Shroom",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Kut-Ku Vest U",
+          "name_en": "Kut-Ku Vest U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Kut-Ku Guards U",
+          "name_en": "Kut-Ku Guards U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Celebrity Jewel",
+              "name_en": "Celebrity Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Kut-Ku Coat U",
+          "name_en": "Kut-Ku Coat U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Kut-Ku Leggings U",
+          "name_en": "Kut-Ku Leggings U",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strength Jewel",
+              "name_en": "Strength Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Celebrity Jewel",
+          "name_en": "Celebrity Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Jewel",
+          "name_en": "Element Jewel",
+          "count": 2,
+          "mapped": true
+        },
+        {
+          "source_name": "Strength Jewel",
+          "name_en": "Strength Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Special Attack Up",
+          "skill_name_en": "Abnormal Sts Atk Up",
+          "tree_name": "Spc Attack",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Reckless Abandon +2",
+          "skill_name_en": "Reckless Abandon+2",
+          "tree_name": "Expert",
+          "min_points": 15,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Kut-Ku Special - HR4\nPost by Hepsilon\n\nChaoshroom\n\nKut-Ku Vest U\n[Gem 1: Celebrity Jewel]\n\nKut-Ku Guards U\n[Gem 1: Celebrity Jewel]\n\nKut-Ku Coat U\n[Gem 1: Element Jewel]\n[Gem 2: Element Jewel]\n\nKut-Ku Leggings U\n[Gem 1: Strength Jewel]\n\nSpecial Attack Up\nElement Attack Up\nReckless Abandon +2\nAfter gemming there is still a spare slot on the leggings. So if you have a 3 slot weapon you can use a Celebrity and Hermit Jewel to get RA+3 at the cost of Health - 10"
+    },
+    {
+      "id": "gunner-040-blango-barrage",
+      "source_line": 1031,
+      "title": "Blango Barrage",
+      "author": "King Of The Skies",
+      "hr": 8,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Blango Cap Z",
+          "name_en": "Blango Cap Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Barrage Jewel",
+              "name_en": "Barrage Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "body": {
+          "source_name": "Blango Vest Z",
+          "name_en": "Blango Vest Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strong Shot Jewel",
+              "name_en": "StrongShot Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Blango Guards X",
+          "name_en": "Blango Guards X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Blango Coat X",
+          "name_en": "Blango Coat X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Strong Shot Jewel",
+              "name_en": "StrongShot Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Blango Leggings Z",
+          "name_en": "Blango Leggings Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Element Jewel",
+              "name_en": "Element Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Strong Shot Jewel",
+          "name_en": "StrongShot Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Strong Shot Jewel",
+          "name_en": "StrongShot Jewel",
+          "count": 4,
+          "mapped": true
+        },
+        {
+          "source_name": "Barrage Jewel",
+          "name_en": "Barrage Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Jewel",
+          "name_en": "Element Jewel",
+          "count": 5,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Autoreload",
+          "skill_name_en": "Speed Fire",
+          "tree_name": "Speed Fire",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Element Attack Up",
+          "skill_name_en": "Element Atk Up",
+          "tree_name": "ElementAtk",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Normal Shot/Rapid Bow Up",
+          "skill_name_en": "NormalS/RapidBow Up",
+          "tree_name": "NormalS Up",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Blango Barrage - HR8\nPost by King Of The Skies\n\nOne Slot Weapon\n[Gem 1: Strong Shot Jewel]\n\nBlango Cap Z\n[Gem 1: Barrage Jewel]\n\nBlango Vest Z\n[Gem 1: Strong Shot Jewel]\n[Gem 2: Element Jewel]\n\nBlango Guards X\n[Gem 1: Element Jewel]\n[Gem 2: Element Jewel]\n\nBlango Coat X\n[Gem 1: Strong Shot Jewel]\n[Gem 2: Strong Shot Jewel]\n\nBlango Leggings Z\n[Gem 1: Element Jewel]\n[Gem 2: Element Jewel]\n\nAutoreload\nElement Attack Up\nNormal Shot/Rapid Bow Up\nIt can be optimised for beating any epic quest by pairing it with the Genie's Lamp LBG to give : Autoreload, Element Up, Normal Up, and Bullet Limit. Bullet Limit is a VERY underated skill, especially when you are fighting anything weak to Water, Thunder, or Ice. ~King Of The Skies~"
+    },
+    {
+      "id": "gunner-041-lava-storm",
+      "source_line": 1062,
+      "title": "Lava Storm",
+      "author": "mhdude",
+      "hr": 9,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 1,
+      "pieces": {
+        "head": {
+          "source_name": "Barrage Piercing",
+          "name_en": "Barrage Piercing",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Lava Vest X",
+          "name_en": "Volganos Vest X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Short Charge Jewel",
+              "name_en": "QuickCharge Jewel",
+              "count": 1,
+              "mapped": true
+            },
+            {
+              "source_name": "Bombardier Jewel",
+              "name_en": "Bombardier Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Hermitaur Guards Z",
+          "name_en": "Hermitaur Guards Z",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Rapid Charge Jewel",
+              "name_en": "SpeedCharge Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "waist": {
+          "source_name": "Lava Coat X",
+          "name_en": "Volganos Coat X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Bombardier Jewel",
+              "name_en": "Bombardier Jewel",
+              "count": 2,
+              "mapped": true
+            }
+          ]
+        },
+        "legs": {
+          "source_name": "Lava Leggings X",
+          "name_en": "Volganos Leggings X",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Guts Jewel",
+              "name_en": "Survivor Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        }
+      },
+      "weapon_jewels": [
+        {
+          "source_name": "Bombardier Jewel",
+          "name_en": "Bombardier Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "jewels": [
+        {
+          "source_name": "Bombardier Jewel",
+          "name_en": "Bombardier Jewel",
+          "count": 5,
+          "mapped": true
+        },
+        {
+          "source_name": "Short Charge Jewel",
+          "name_en": "QuickCharge Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Rapid Charge Jewel",
+          "name_en": "SpeedCharge Jewel",
+          "count": 1,
+          "mapped": true
+        },
+        {
+          "source_name": "Guts Jewel",
+          "name_en": "Survivor Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Capacity Up",
+          "skill_name_en": "Load Up",
+          "tree_name": "Loading",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Bomber",
+          "skill_name_en": "Bomber",
+          "tree_name": "BombStrUp",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Focus",
+          "skill_name_en": "Concentration",
+          "tree_name": "Fast Chrge",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Guts",
+          "skill_name_en": "Survival",
+          "tree_name": "Survival",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": true,
+      "skip_reasons": [],
+      "raw": "Lava Storm - HR9\nPost by mhdude\n\nOne Slot Weapon\n[Gem 1: Bombardier Jewel]\n\nBarrage Piercing\n\nLava Vest X\n[Gem 1: Short Charge Jewel]\n[Gem 2: Bombardier Jewel]\n[Gem 3: Bombardier Jewel]\n\nHermitaur Guards Z\n[Gem 1: Rapid Charge Jewel]\n\nLava Coat X\n[Gem 1: Bombardier Jewel]\n[Gem 2: Bombardier Jewel]\n\nLava Leggings X\n[Gem 1: Guts Jewel]\n\nCapacity Up\nBomber\nFocus\nGuts\nThis is an anti-fatalis set, if coupled with Akantor Bow upgrade and Bomber Jewel ~mhdude~"
+    },
+    {
+      "id": "gunner-042-ninja-bug",
+      "source_line": 1092,
+      "title": "Ninja Bug",
+      "author": "LordPilot",
+      "hr": 1,
+      "hunter_type": "gunner",
+      "gender": "unknown",
+      "weapon_slots": 0,
+      "pieces": {
+        "head": {
+          "source_name": "Blackbelt Helm",
+          "name_en": "Black Belt Helm",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "body": {
+          "source_name": "Obituary Pectus S",
+          "name_en": "Obituary Pectus S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": [
+            {
+              "source_name": "Bombardier Jewel",
+              "name_en": "Bombardier Jewel",
+              "count": 1,
+              "mapped": true
+            }
+          ]
+        },
+        "arms": {
+          "source_name": "Blackbelt Vambraces S",
+          "name_en": "BlackBeltVambraces S",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "waist": {
+          "source_name": "Remobra Belt",
+          "name_en": "Remobra Belt",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        },
+        "legs": {
+          "source_name": "Chrome Metal Boots",
+          "name_en": "Chrome Metal Boots",
+          "mapped": true,
+          "alternates_name_en": [],
+          "jewels": []
+        }
+      },
+      "weapon_jewels": [],
+      "jewels": [
+        {
+          "source_name": "Bombardier Jewel",
+          "name_en": "Bombardier Jewel",
+          "count": 1,
+          "mapped": true
+        }
+      ],
+      "skills": [
+        {
+          "source_name": "Evade+2",
+          "skill_name_en": "Evade +2",
+          "tree_name": "Evade",
+          "min_points": 15,
+          "mapped": true
+        },
+        {
+          "source_name": "Bomber",
+          "skill_name_en": "Bomber",
+          "tree_name": "BombStrUp",
+          "min_points": 10,
+          "mapped": true
+        },
+        {
+          "source_name": "Abnormal Status Attack Up",
+          "skill_name_en": "Abnormal Sts Atk Up",
+          "tree_name": "Spc Attack",
+          "min_points": 10,
+          "mapped": true
+        }
+      ],
+      "fully_mapped": false,
+      "skip_reasons": [
+        "dump_illegal_points:Evade +2 Evade 3<15; Bomber BombStrUp 2<10; Abnormal Sts Atk Up Spc Attack 2<10"
+      ],
+      "raw": "Ninja Bug - HR1\nPost by LordPilot\n\nBlackbelt Helm\n\nObituary Pectus S\n[Gem 1: Bombardier Jewel]\n\nBlackbelt Vambraces S\n\nRemobra Belt\n\nChrome Metal Boots\n\nEvade+2\nBomber\nAbnormal Status Attack Up"
+    }
+  ]
+}

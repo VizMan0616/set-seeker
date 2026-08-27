@@ -1,0 +1,80 @@
+# Extra mix-file aliases that Athena language overlays do not cover.
+# Overlay aliases are generated at fixture-build time from
+# sources/MHFU-ASS/Run/Data/Languages/{TeamHGG MHP2ndG,English MHFU}/.
+# Keys: names as they appear in `mhfu set mix.txt`.
+# Values: Athena CSV `name_en` (what ETL stores).
+#
+# confidence:
+#   high   — typo, spacing, punctuation, obvious G-rank "Shin" = True
+#   medium — forum synonym for an awakened skill (not in overlays)
+
+armor:
+  Chaoshroom: Chaos Shroom
+  "Narge Mail X": Naruga Mail X
+  "Narge Vest X": Naruga Vest X
+  "Blackbelt Helm": Black Belt Helm
+  "Blackbelt Helm S": Black Belt Helm S
+  "Blackbelt Vambraces S": BlackBeltVambraces S
+  "Golden Hakama Shin": True Golden Hakama
+  "Golden Kote Shin": True Golden Kote
+  "Mizuha Cap Shin": True Mizuha Cap
+  "Steadfast Helm Shin": True Steadfast Helm
+  "Steadfast Coat Shin": True Steadfast Coat
+  "Shinobi Kote Heaven": "Shinobi Kote(Heaven)"
+  "Shinobi Mask(Heaven)": "Shinobi Mask (Heaven)"
+  "Shinobi Suit(Heaven)": "Shinobi Suit(Heaven)"
+  "Rathalos Soul Vambraces Z": "Rthlos Soul Braces Z"
+  "Rath Soul Vambraces U": "Rthlos Soul Braces U"
+  "Ceanataur Vambraces U": "Ceanataur Braces U"
+  "Golden Moon Z Greaves": "GoldenMoon Greaves Z"
+  "Golden Moon Vambraces Z": "Golden Moon Braces Z"
+  "Silver Sol Hel Z": "Silver Sol Helm Z"
+  "SilverSolVambrancesZ": "Silver Sol Braces Z"
+  "Dark Uknlos Aegis": "Ucamulbas Aegis"
+  "Dark Ukanlos Claw": "Ucamulbas Claw"
+  "DarkUknlosCincture": "Ucamulbas Cincture"
+  "Rath Soul Greaves Z": RathalosSoulGreavesZ
+  "Dark Akantor Greaves": "Dark Akantor Hessian"
+  "Diablos Greaves Z": "Diablo Greaves Z"
+
+decorations:
+  "Master Artisan Jewel": Master Jewel
+  "Artisan jewel": Artisan Jewel
+  "Grab'n'Dash Jewel": "Grab'n'DashJewel"
+  "Short Charge Jewel": QuickCharge Jewel
+  "Rapid Charge Jewel": SpeedCharge Jewel
+  "Strong Shot Jewel": StrongShot Jewel
+  "Iron Curtain Jewel": Iron Curtain Jewel
+  "Divine Protection Jewel": DivinePrtctionJewel
+  "DivineProtectJwl": DivinePrtctionJewel
+  "Psychic Vision Jewel": Psychic Jewel
+  "Grinder jewel": Grinder Jewel
+
+skills:
+  "Reckless Abandon +1": "Reckless Abandon+1"
+  "Reckless Abandon +2": "Reckless Abandon+2"
+  "Reckless Abandon +3": "Reckless Abandon+3"
+  "RA+2": "Reckless Abandon+2"
+  "RA+3": "Reckless Abandon+3"
+  "Sharpness+1": "Sharpness +1"
+  "Evade+2": "Evade +2"
+  "Guard+1": "Guard +1"
+  "Element Attack Up": "Element Atk Up"
+  "Elemental Attack Up": "Element Atk Up"
+  "Special Attack Up": "Abnormal Sts Atk Up"
+  "Abnormal Status Attack Up": "Abnormal Sts Atk Up"
+  "Recoil Negated": "Recoil Reduction +2"
+  "Recoil Reduction+1": "Recoil Reduction +1"
+  "Normal Shot/Rapid Bow Up": "NormalS/RapidBow Up"
+  "PierceShot/PierceBow Up": "PierceS/PierceBow Up"
+  "Sharpening Skill Inc": "Sharpening Skl Inc"
+  "Sharping Skill Inc": "Sharpening Skl Inc"
+  "SwdSharpSklInc": "Sharpening Skl Inc"
+  "Quick sharpen": "Sharpening Skl Inc"
+  "Attack Up Medium": "Attack Up (Medium)"
+  "Atk up small": "Attack Up (Small)"
+  "EvadeDistanceUp": "Evade Distance Up"
+  "Tranquilizing Celebrity": "Reward Celebrity"
+  "Regular-Grade Earplugs": Earplug
+  "Cold Inc[Lo]": "Cold Increase [Lo]"
+  "-30 Defense": "Defence -30"

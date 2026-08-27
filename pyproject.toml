@@ -40,3 +40,6 @@ line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "mhfu_set_mix_full: replay every fully-mapped mhfu set-mix row through CP-SAT (slow)",
+]

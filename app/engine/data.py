@@ -29,6 +29,7 @@ class ArmorPiece:
     hr_required: int = 0
     village_stars: int = 0
     is_event: bool = False
+    is_dummy: bool = False
     res_fire: int = 0
     res_water: int = 0
     res_ice: int = 0

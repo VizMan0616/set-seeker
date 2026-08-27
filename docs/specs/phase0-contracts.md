@@ -94,6 +94,10 @@ class Query:
     village_stars: int | None            # None = uncapped
     allow_event: bool = False
     allow_bad_skills: bool = False
+    allow_torso_inc: bool = True         # Athena chkTorsoInc defaults checked
+    allow_dummy: bool = False
+    excluded_piece_ids: tuple[int, ...] = ()
+    excluded_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
 
 @dataclass(frozen=True)

@@ -25,9 +25,22 @@ description: Add support for a new Monster Hunter generation (game pack) to set-
 4. Verify `sources/<GAME>-ASS/` exists; if missing, restore it via the commands in
    `SOURCES.md` (pinned commit) before touching ETL.
 5. Write the pack manifest (flags from the matrix in `docs/specs/data-pack-spec.md`), the
-   per-pack column map, and the ETL wiring. If Athena ships `Languages/` overlays, store
-   **official localized English** as `name_en` (MHFU: `English MHFU`, not TeamHGG CSV
-   strings). Fan-only packs (MHP3) keep the fan marker from ADR 0009.
+   per-pack column map, and the ETL wiring. Set `progression.guild_rank` and
+   `progression.village_stars` from the table below — **do not re-scan ASS or armor
+   files** (armor uses sentinel 10 / 99 for a closed path). If Athena ships
+   `Languages/` overlays, store **official localized English** as `name_en` (MHFU:
+   `English MHFU`, not TeamHGG CSV strings). Fan-only packs (MHP3) keep the fan
+   marker from ADR 0009.
+
+   | Pack | Village ★ | Guild / HR |
+   |---|---|---|
+   | mhfu | 9 | 9 |
+   | mhp3 | 6 | 6 |
+   | mh3u | 10 | 8 |
+   | mh4 | 7 | 8 |
+   | mh4u | 10 | 12 |
+   | mhgen | 6 | 8 |
+   | mhgu | 10 | 13 |
 6. Add ≥3 known queries with expected legacy results to the pack's validation suite.
 7. Verify Advanced Search columns from the feature-flag matrix (`docs/specs/engine-spec.md`
    §1, `docs/specs/data-pack-spec.md` checklist item 8): armor slots + decorations, plus

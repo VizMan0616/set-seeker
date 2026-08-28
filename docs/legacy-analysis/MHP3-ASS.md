@@ -11,6 +11,8 @@ Source root: `sources/MHP3-ASS/`. Solution: `Athena's ASS MHP3rd.sln`.
   `Decoration.cpp`, `ManageCharms.h`, `ImportCharms.h`, `PSPCryptoEngine.cpp`,
   `SaveDataEncryption.cpp`.
 - Data: external `.txt` CSV-like files (not `.csv`) under `Run/Data/`.
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 6, village ★6**
+  (`Form1.h:655,708`). High-rank only; closed-path sentinel in data is 99.
 
 ## Search algorithm
 

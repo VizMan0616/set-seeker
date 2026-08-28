@@ -12,6 +12,9 @@ Source root: `sources/MH4U-ASS/`. Solution: `MH4G ASS.sln` / `MH4G ASS.vcxproj`
   `savedata_format.txt`.
 - Data: ~1.5 MB under `Run/Data/`; ~600–640 armor rows/slot; 202 decorations; 278 skills;
   **6 charm types** (mystery, shining, ancient, distorted, enduring, graven).
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 12, village ★10**
+  (`Form1.h:1491,1504`). G-rank is hub ★9–12 (G1–G4); `GetTier` treats `hr > 8` as G
+  (`Armor.cpp:202-204`). Closed-path sentinel is 99.
 
 ## Search algorithm
 

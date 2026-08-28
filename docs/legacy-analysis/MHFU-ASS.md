@@ -11,6 +11,8 @@ Source root: `sources/MHFU-ASS/`. Solution: `MH Armor.sln`, project `MH Armor/MH
   matching, decoration fill), `LoadedData.cpp` (load/filter), `Armor.cpp`, `Decoration.cpp`,
   `Skill.cpp` (models + CSV parsers), `GGGThread.h` (Win32 thread helper), `frmAdvanced.h`.
 - Data: external under `Run/Data/`, not embedded.
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 9, village ★9**
+  (`Form1.h:540,593`). Armor sentinel for a closed path is 10.
 
 ## Search algorithm
 

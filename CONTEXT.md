@@ -27,9 +27,25 @@ responsive, and is simple to deploy with Docker.
 | **Torso Inc** | A property of some body armor that doubles the body's skill points (including body-socketed decorations). |
 | **Excavated gear** | MH4/MH4U randomized equipment ("relics") the user can register manually. |
 | **Charm Up / Skill +2** | MHGU mechanics that double charm skills or add +2 points to all skills. |
-| **HR / village★** | Hunter Rank and village quest star progression gates that filter available equipment. |
+| **HR / village★** | Athena **quest-star** gates (not in-game HR 1–999) that filter equipment. Caps are per pack — see below. |
 | **Hunter type** | Blademaster or Gunner; most armor is type-specific. |
 | **Game pack** | Our abstraction: one generation's data (armor, skills, decorations, charm rules) + feature flags, consumed by a single shared search engine. |
+
+### Progression caps (authoritative)
+
+Copied from Athena `nudHR` / `nudElder` maxima. Use these when writing a pack
+manifest; do not re-derive from armor rows (those store sentinel 10 or 99 for
+“closed path”). Full citations: `docs/specs/data-pack-spec.md`.
+
+| Pack | Village ★ | Guild / HR | Rank band |
+|---|---|---|---|
+| mhfu | 9 | 9 | G-rank |
+| mhp3 | 6 | 6 | High-rank |
+| mh3u | 10 | 8 | G-rank hub ★8, village 10★ |
+| mh4 | 7 | 8 | High-rank (hub ★8) |
+| mh4u | 10 | 12 | G-rank hub ★9–12 (G1–G4) |
+| mhgen | 6 | 8 | High-rank |
+| mhgu | 10 | 13 | G-rank hub ★9–13 |
 
 ## Hard constraints
 

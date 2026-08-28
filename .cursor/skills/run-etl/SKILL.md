@@ -20,6 +20,8 @@ description: Build, rebuild, or debug the set-seeker game-data ETL that converts
 ## Workflow
 
 1. Read `docs/specs/data-pack-spec.md` — source formats, ETL rules, manifest fields.
+   Progression caps are already listed there (and in `CONTEXT.md`); write those
+   integers into `progression.*` — do not infer them from max `hr` / village columns.
 2. Confirm `sources/<GAME>-ASS/` is present at the pinned commit (`SOURCES.md`); restore if
    missing.
 3. For mh3u/mhp3: charm tables are hardcoded C++ — run the one-time extraction into pack data

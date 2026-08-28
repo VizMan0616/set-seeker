@@ -40,8 +40,10 @@ Port of the legacy `GetRelevantData` idea, without its O(n²) implementation:
 2. **Hard filters** — gender, hunter type, HR/village★ ceiling, event-gear flag, per-game
    mechanics. The progression ceiling is **OR-availability**: a piece or jewel is excluded only
    when it exceeds *both* caps (legacy `Armor.cpp:102`); the stored per-path value is the
-   `max(available, required)` collapse of the legacy `A!B` level syntax, where 10 is the
-   sentinel for "not obtainable via this path" (both caps max at 9). A blank cap is uncapped.
+   `max(available, required)` collapse of the legacy `A!B` level syntax. The selectable
+   ceiling is per pack (`docs/specs/data-pack-spec.md` progression table). Data files use
+   a sentinel (10 in MHFU, 99 later) for "not obtainable via this path" — that is not a
+   UI cap. A blank query cap is uncapped.
 3. **Keep `inf`** — the post-hard-filter, post-relevance set per slot kind. This is the Advanced
    Search list (legacy `query->inf_*`). It is **not** the full catalog.
 4. **Dominance prune → `rel` / skyline** — piece A dominates piece B (same slot) if A ≥ B on

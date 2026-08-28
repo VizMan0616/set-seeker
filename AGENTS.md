@@ -13,6 +13,7 @@ Read `CONTEXT.md` first. It defines the domain language and the hard constraints
 | Implementing or changing the armor search engine | `docs/specs/engine-spec.md` + the relevant `docs/legacy-analysis/<GAME>-ASS.md` |
 | Phase 0/1 implementation work (foundation, ETL, solver, UI) | `docs/specs/phase0-contracts.md` — interfaces and file ownership are settled there |
 | Adding a new game / generation | `docs/specs/data-pack-spec.md` + `docs/roadmap.md` |
+| Village / guild rank caps for a pack | `CONTEXT.md` (table) — do not re-scan ASS |
 | Database schema, ETL, queries, swapping SQLite→MariaDB | `docs/specs/database-schema.md` |
 | Why a decision was made | `docs/adr/` (each ADR is self-contained) |
 | What to build next | `docs/roadmap.md` |

@@ -12,6 +12,8 @@ six repos) — MIT (AthenaADP 2017). Source root: `sources/MHGU-ASS/`.
   (`DoWork2` ~2706, `charm_up_armors_*`).
 - Data: **~2.5 MB — the largest pack**; ~1150–1240 armor rows/slot (~2× MHGen); 242
   decorations; 327 skills; **4 charm types** (mystery, shining, ancient, enduring).
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 13, village ★10**
+  (`Form1.h:1090,1104`). G-rank hub ★9–13. Closed-path sentinel is 99.
 
 ## Search algorithm
 

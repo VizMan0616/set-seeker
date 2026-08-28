@@ -11,6 +11,8 @@ Source root: `sources/MH4-ASS/`. Solution: `MH4 ASS.sln` (both `.vcproj` .NET 3.
 - Adds vs MH3U: `ManageEquipment.*`, `SkillHelp.*`, excavated gear, weapon loop in search.
   Forms renamed: `About`/`Advanced`/`Find`/`ImportCharms` (was `frm*`).
 - Data: external under `Run/Data/`, **plus `Run/Data/Charm Generation/*.csv`** (new in gen 4).
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 8, village ★7**
+  (`Form1.h:803,856`). High-rank only (hub ★8, not 7). Closed-path sentinel is 99.
 
 ## Search algorithm
 

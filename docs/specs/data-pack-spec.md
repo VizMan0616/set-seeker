@@ -46,20 +46,25 @@ Expected flag matrix (verify against each repo before ETL implementation):
 | mhgen | ✓ | — | ✓ (3 types) | — | — | — | — | ✓ |
 | mhgu | ✓ | — | ✓ (4 types) | — | — | ✓ | ✓ | ✓ |
 
-Progression ceilings (ETL writes `guild_rank_max` / `village_stars_max` onto
-`games.features`; the search UI only offers Uncapped plus 1…cap):
+Progression ceilings are **Athena quest-star numbers** (`nudHR` / `nudElder` on
+`Form1.h`), not in-game Hunter Rank (HR 1–999). Copy them into
+`progression.guild_rank` / `progression.village_stars`. ETL writes
+`guild_rank_max` / `village_stars_max` onto `games.features`; the search UI
+offers Uncapped plus 1…cap. Do not re-scan armor files for the cap — data uses a
+**sentinel** (10 in MHFU, 99 later) for “not via this path.”
 
-| Pack | Village ★ | Guild / HR | Notes |
-|---|---|---|---|
-| mhfu | 9 | 9 | G-rank Freedom Unite; 10 is the “not via this path” sentinel |
-| mhp3 | (pack) | (pack) | High-rank Portable 3rd — set when adding the pack |
-| mh3u | (pack) | (pack) | G-rank 3U — set when adding the pack |
-| mh4 | (pack) | 7 typical | High-rank only; confirm in that gen’s ASS |
-| mh4u | (pack) | G-rank (confirm G3 vs G4) | Expansion ceiling; confirm in MH4U-ASS |
-| mhgen / mhgu | (pack) | (pack) | Set from that pack’s quest tables |
+| Pack | Village ★ | Guild / HR | Athena UI | Notes |
+|---|---|---|---|---|
+| mhfu | 9 | 9 | `Form1.h:540,593` | G-rank Unite; sentinel 10 |
+| mhp3 | 6 | 6 | `Form1.h:655,708` | High-rank only |
+| mh3u | 10 | 8 | `Form1.h:764,856` | Village 10★; hub through G-rank ★8 |
+| mh4 | 7 | 8 | `Form1.h:803,856` | High-rank only; hub ★8 (not 7) |
+| mh4u | 10 | 12 | `Form1.h:1491,1504` | G-rank is hub ★9–12 (G1–G4); `GetTier` treats `hr > 8` as G |
+| mhgen | 6 | 8 | `Form1.h:1076,1090` | High-rank only |
+| mhgu | 10 | 13 | `Form1.h:1090,1104` | G-rank hub ★9–13 |
 
 Do not share one global max. Base games and expansions in the same generation
-often differ.
+differ (MH4 8/7 vs MH4U 12/10; MHGen 8/6 vs MHGU 13/10).
 
 ## Source file formats (as found in the legacy repos)
 

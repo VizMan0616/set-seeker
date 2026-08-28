@@ -12,6 +12,8 @@ Win 8.1 SDK).
   `SaveData.*` (not the Blowfish `Crypto/` of MH4U).
 - Data: ~1.5 MB; ~620–676 armor rows/slot; 219 decorations; 269 skills; **3 charm types**
   (mystery, shining, ancient).
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 8, village ★6**
+  (`Form1.h:1076,1090`). High-rank only. Closed-path sentinel is 99.
 
 ## Search algorithm
 

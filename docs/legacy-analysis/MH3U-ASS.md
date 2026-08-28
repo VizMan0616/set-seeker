@@ -12,6 +12,8 @@ Source root: `sources/MH3U-ASS/`. Solution: `MH3G ASS.sln` / `MH3G ASS.vcproj` (
 - Other files: `frmAdvanced.h`, `ManageCharms.h`, `Armor.cpp`, `Common.cpp`, `Skill.cpp`,
   `Decoration.cpp`, `LoadedData.cpp`.
 - Data: external under `Athena's ASS MH3G/Data/`.
+- Progression caps (Athena `nudHR` / `nudElder`): **guild HR 8, village ★10**
+  (`Form1.h:764,856`). Hub through G-rank ★8; closed-path sentinel in data is 99.
 
 ## Search algorithm
 

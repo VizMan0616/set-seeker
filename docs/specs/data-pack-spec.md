@@ -24,6 +24,9 @@ features:
   charm_up: false                     # MHGU: double charm skills
   skill_plus_two: false               # MHGU: +2 to all trees
   compound_skills: false              # gen4+: one tree grants several others
+progression:
+  guild_rank: 9                       # HR / guild quest cap (not the ETL sentinel 10)
+  village_stars: 9                    # village / Elder★ cap
 formats:
   armor_file_ext: csv                 # MHFU uses .csv; all others .txt
   armor_header_lines: 2               # MHFU: 2 header lines; others: comment headers
@@ -42,6 +45,21 @@ Expected flag matrix (verify against each repo before ETL implementation):
 | mh4u | ✓ | — | ✓ (6 types) | ✓ | ✓ | — | — | ✓ |
 | mhgen | ✓ | — | ✓ (3 types) | — | — | — | — | ✓ |
 | mhgu | ✓ | — | ✓ (4 types) | — | — | ✓ | ✓ | ✓ |
+
+Progression ceilings (ETL writes `guild_rank_max` / `village_stars_max` onto
+`games.features`; the search UI only offers Uncapped plus 1…cap):
+
+| Pack | Village ★ | Guild / HR | Notes |
+|---|---|---|---|
+| mhfu | 9 | 9 | G-rank Freedom Unite; 10 is the “not via this path” sentinel |
+| mhp3 | (pack) | (pack) | High-rank Portable 3rd — set when adding the pack |
+| mh3u | (pack) | (pack) | G-rank 3U — set when adding the pack |
+| mh4 | (pack) | 7 typical | High-rank only; confirm in that gen’s ASS |
+| mh4u | (pack) | G-rank (confirm G3 vs G4) | Expansion ceiling; confirm in MH4U-ASS |
+| mhgen / mhgu | (pack) | (pack) | Set from that pack’s quest tables |
+
+Do not share one global max. Base games and expansions in the same generation
+often differ.
 
 ## Source file formats (as found in the legacy repos)
 

@@ -61,6 +61,13 @@ def test_index_renders_search_form(client: TestClient):
     assert 'name="hunter_type"' in html
     assert 'name="hr"' in html
     assert 'name="village_stars"' in html
+    assert 'type="number"' not in html
+    assert "Guild rank" in html
+    assert "Village rank" in html
+    assert "List every set" in html
+    assert 'name="expand_equivalents"' in html
+    assert ">9</option>" in html
+    assert ">10</option>" not in html
     # vendored assets, no CDN framework links
     assert "/static/vendor/htmx.min.js" in html
     assert "/static/vendor/bootstrap.min.css" in html
@@ -157,6 +164,22 @@ def test_vendored_static_assets_are_served(client: TestClient):
         "/static/app.css",
     ):
         assert client.get(path).status_code == 200, path
+
+
+def test_search_lists_every_equivalent_when_requested(client: TestClient):
+    response = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "expand_equivalents": "on"},
+    )
+    assert response.status_code == 200
+    assert "Every equivalent piece is its own set." in response.text
+
+
+def test_search_rejects_rank_above_pack_cap(client: TestClient):
+    too_high = client.post("/games/mhfu/search", data={**SEARCH_FORM, "hr": "10"})
+    assert too_high.status_code == 422
+    village = client.post("/games/mhfu/search", data={**SEARCH_FORM, "village_stars": "99"})
+    assert village.status_code == 422
 
 
 def test_search_requires_at_least_one_skill(client: TestClient):

@@ -36,7 +36,9 @@ def load_tiny_pack(repo: GameDataRepository) -> None:
     """The §6 fixture as database rows; ids match tests/fixtures/tiny_pack.py."""
     repo.create_game(
         id=GAME_ID, code="mhfu", name="Monster Hunter Freedom Unite",
-        generation=2, features=json.dumps({"talismans": False}),
+        generation=2, features=json.dumps({
+            "talismans": False, "guild_rank_max": 9, "village_stars_max": 9,
+        }),
     )
     repo.create_skill_tree(
         id=ATTACK_TREE_ID, game_id=GAME_ID, name_en="Attack", name_ja="Attack",

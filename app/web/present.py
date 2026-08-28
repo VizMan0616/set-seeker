@@ -5,6 +5,8 @@ NameResolver. The mock resolver (app.web.mock) reads the tiny fixture; the real
 one wraps repository.game_data at integration time.
 """
 
+from dataclasses import replace
+from itertools import product
 from typing import Any, Protocol
 
 from app.domain.models import ArmorSetResult, Query, SearchPage
@@ -79,6 +81,28 @@ def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str,
     }
 
 
+def expand_equivalent_results(
+    result: ArmorSetResult, resolver: NameResolver
+) -> tuple[ArmorSetResult, ...]:
+    """One ArmorSetResult per equivalence-class combination (Athena expansion)."""
+    members = [
+        alts if alts else (piece_id,)
+        for piece_id, alts in zip(result.piece_ids, result.alternates, strict=True)
+    ]
+    expanded: list[ArmorSetResult] = []
+    for combo in product(*members):
+        defense = sum(resolver.armor_piece(pid)["defense"] for pid in combo)
+        expanded.append(
+            replace(
+                result,
+                piece_ids=(combo[0], combo[1], combo[2], combo[3], combo[4]),
+                alternates=tuple((pid,) for pid in combo),
+                defense=defense,
+            )
+        )
+    return tuple(expanded)
+
+
 def advanced_columns(
     pack: PackData, pruned: PrunedPack, query: Query, resolver: NameResolver
 ) -> list[dict[str, Any]]:
@@ -137,14 +161,22 @@ def page_context(
     resolver: NameResolver,
     *,
     advanced: list[dict[str, Any]] | None = None,
+    expand_equivalents: bool = False,
 ) -> dict[str, Any]:
     """The exact template context settled in phase0-contracts §5."""
+    rendered: list[ArmorSetResult] = []
+    for result in page.results:
+        if expand_equivalents:
+            rendered.extend(expand_equivalent_results(result, resolver))
+        else:
+            rendered.append(result)
     return {
         "search_id": page.search_id,
-        "results": [_result_context(r, resolver) for r in page.results],
+        "results": [_result_context(r, resolver) for r in rendered],
         "partial": page.partial,
         "exhausted": page.exhausted,
         "shown_count": page.shown_count,
         "remaining_count": page.remaining_count,
         "advanced_columns": advanced or [],
+        "expand_equivalents": expand_equivalents,
     }

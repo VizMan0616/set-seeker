@@ -26,6 +26,8 @@ class Query:
     forced_piece_ids: tuple[int, ...] = ()
     forced_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
+    # Expand equivalence members into separate result cards (Athena-style list).
+    expand_equivalents: bool = False
 
 @dataclass(frozen=True)
 class DecorationAssignment:

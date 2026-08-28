@@ -119,6 +119,65 @@ h1, h2, h3, .ss-card-title {
   margin-left: 0.35rem;
 }
 
+.ss-rank {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  max-width: 18rem;
+  border: 1px solid rgba(32, 52, 42, 0.22);
+  background: var(--ss-paper);
+}
+
+.ss-rank-step {
+  --bs-btn-color: var(--ss-pine);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--ss-pine-deep);
+  --bs-btn-hover-bg: rgba(176, 141, 47, 0.18);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-disabled-color: rgba(35, 42, 36, 0.28);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: transparent;
+  width: 2.75rem;
+  font-size: 1.35rem;
+  line-height: 1;
+  border-radius: 0;
+}
+
+.ss-rank-face {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.45rem 0.6rem;
+  border-left: 1px solid rgba(32, 52, 42, 0.12);
+  border-right: 1px solid rgba(32, 52, 42, 0.12);
+  background:
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 10px,
+      rgba(176, 141, 47, 0.06) 10px,
+      rgba(176, 141, 47, 0.06) 11px
+    );
+}
+
+.ss-rank-value {
+  font-family: "Alegreya", Georgia, serif;
+  font-weight: 800;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ss-pine-deep);
+}
+
+.ss-rank-cap {
+  font-family: "Alegreya SC", "Alegreya", Georgia, serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ss-moss);
+}
+
 .ss-label {
   font-family: "Alegreya SC", "Alegreya", Georgia, serif;
   font-weight: 700;

@@ -10,4 +10,7 @@
   {% else %}
     {{ shown_count }} shown — more to load.
   {% endif %}
+  {% if expand_equivalents and shown_count %}
+    <span class="ss-legend-note">Every equivalent piece is its own set.</span>
+  {% endif %}
 </p>

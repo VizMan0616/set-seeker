@@ -16,7 +16,10 @@ def index(request: Request) -> HTMLResponse:
     games = catalog.list_games()
     default_game = games[0]["code"] if games else "mhfu"
     catalogs = {g["code"]: catalog.list_search_catalog(g["code"]) for g in games}
-    default_catalog = catalogs.get(default_game, {"categories": [], "skills": []})
+    default_catalog = catalogs.get(default_game, {
+        "categories": [], "skills": [],
+        "progression": {"guild_rank": 9, "village_stars": 9},
+    })
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -27,5 +30,8 @@ def index(request: Request) -> HTMLResponse:
             "categories": default_catalog["categories"],
             "catalogs": catalogs,
             "max_skill_picks": MAX_SKILL_PICKS,
+            "progression": default_catalog.get(
+                "progression", {"guild_rank": 9, "village_stars": 9}
+            ),
         },
     )

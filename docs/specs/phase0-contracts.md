@@ -101,6 +101,7 @@ class Query:
     forced_piece_ids: tuple[int, ...] = ()
     forced_decoration_ids: tuple[int, ...] = ()
     sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
+    expand_equivalents: bool = False     # list every equivalent set, not grouped alts
 
 @dataclass(frozen=True)
 class DecorationAssignment:

@@ -109,9 +109,11 @@ Hard constraints:
   (`¬(head=hᵢ ∧ body=bᵢ ∧ arms=aᵢ ∧ waist=wᵢ ∧ legs=lᵢ ∧ charm=cᵢ)` over representatives).
   On this data size each re-solve is milliseconds; there is no solution pool and no 100k
   result buffer.
-- Equivalence representatives are expanded to their member lists **at render time**, so
-  "same stats, different look" variants appear as one result with alternates, not as N
-  near-duplicate rows.
+- Equivalence representatives are expanded to their member lists **at render time**.
+  Default listing groups them as one result with alternates. Query flag
+  `expand_equivalents` lists every member combination as its own card (Athena’s
+  post-match expansion) so a user can compare the full dump. Pagination still
+  walks representatives.
 - Search state (model + exclusions) lives server-side keyed by the anonymous session +
   search id; htmx "load more" posts the search id.
 

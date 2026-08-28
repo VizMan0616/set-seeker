@@ -98,15 +98,53 @@
   </fieldset>
 
   <fieldset class="card-body border-top">
-    <legend class="ss-legend">Progression <span class="ss-legend-note">leave blank for uncapped</span></legend>
+    <legend class="ss-legend">Progression <span class="ss-legend-note">this game’s rank ceiling</span></legend>
     <div class="row g-3">
-      <div class="col-6 col-md-3">
-        <label class="form-label ss-label" for="hr">HR up to</label>
-        <input id="hr" class="form-control" type="number" name="hr" min="1" max="999" placeholder="Uncapped">
+      <div class="col-12 col-sm-6">
+        <p class="form-label ss-label" id="guild-rank-label">Guild rank</p>
+        <p class="ss-hint mb-2">Hunter Rank. Open means every guild quest is legal.</p>
+        <div class="ss-rank" role="group" aria-labelledby="guild-rank-label">
+          <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', -1)"
+                  :disabled="hr === null" aria-label="Lower guild rank">−</button>
+          <div class="ss-rank-face" aria-live="polite">
+            <span class="ss-rank-value" x-text="hr === null ? 'Open' : hr"></span>
+            <span class="ss-rank-cap" x-show="hr !== null" x-text="' / ' + caps.guild_rank"></span>
+          </div>
+          <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', 1)"
+                  :disabled="hr === caps.guild_rank" aria-label="Raise guild rank">+</button>
+        </div>
+        <template x-if="true">
+          <input type="hidden" name="hr" :value="hr === null ? '' : hr">
+        </template>
+        <select class="form-select ss-ssr-rank mt-2" name="hr" aria-label="Guild rank">
+          <option value="">Uncapped</option>
+          {% for n in range(1, progression.guild_rank + 1) %}
+          <option value="{{ n }}">{{ n }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="col-6 col-md-3">
-        <label class="form-label ss-label" for="village-stars">Village ★ up to</label>
-        <input id="village-stars" class="form-control" type="number" name="village_stars" min="1" max="99" placeholder="Uncapped">
+      <div class="col-12 col-sm-6">
+        <p class="form-label ss-label" id="village-rank-label">Village rank</p>
+        <p class="ss-hint mb-2">Village quest stars. Open means every village quest is legal.</p>
+        <div class="ss-rank" role="group" aria-labelledby="village-rank-label">
+          <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', -1)"
+                  :disabled="villageStars === null" aria-label="Lower village rank">−</button>
+          <div class="ss-rank-face" aria-live="polite">
+            <span class="ss-rank-value" x-text="villageStars === null ? 'Open' : villageStars"></span>
+            <span class="ss-rank-cap" x-show="villageStars !== null" x-text="' / ' + caps.village_stars"></span>
+          </div>
+          <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', 1)"
+                  :disabled="villageStars === caps.village_stars" aria-label="Raise village rank">+</button>
+        </div>
+        <template x-if="true">
+          <input type="hidden" name="village_stars" :value="villageStars === null ? '' : villageStars">
+        </template>
+        <select class="form-select ss-ssr-rank mt-2" name="village_stars" aria-label="Village rank">
+          <option value="">Uncapped</option>
+          {% for n in range(1, progression.village_stars + 1) %}
+          <option value="{{ n }}">{{ n }}</option>
+          {% endfor %}
+        </select>
       </div>
       <div class="col-12 col-md-6">
         <label class="form-label ss-label" for="sort">Tie-break by</label>
@@ -139,6 +177,28 @@
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
           <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <p class="form-label ss-label" id="list-mode-label">How to list sets</p>
+        <p class="ss-hint mb-2">Grouping hides pieces that share the same skills and slots.</p>
+        <div class="ss-chip-row" role="radiogroup" aria-labelledby="list-mode-label">
+          <button type="button" class="btn btn-sm ss-chip"
+                  :class="{ 'ss-chip-on': !expandEquivalents }"
+                  :aria-pressed="!expandEquivalents"
+                  @click="expandEquivalents = false">Group lookalikes</button>
+          <button type="button" class="btn btn-sm ss-chip"
+                  :class="{ 'ss-chip-on': expandEquivalents }"
+                  :aria-pressed="expandEquivalents"
+                  @click="expandEquivalents = true">List every set</button>
+        </div>
+        <template x-if="true">
+          <input type="hidden" name="expand_equivalents" :value="expandEquivalents ? 'on' : ''">
+        </template>
+        <div class="form-check ss-ssr-rank mt-2">
+          <input class="form-check-input" type="checkbox" id="expand-equivalents-ssr"
+                 name="expand_equivalents">
+          <label class="form-check-label" for="expand-equivalents-ssr">List every equivalent set separately</label>
         </div>
       </div>
     </div>
@@ -202,13 +262,23 @@ function searchForm() {
     advancedFilter: "",
     advancedTab: "head",
     excludeCount: 0,
+    hr: null,
+    villageStars: null,
+    expandEquivalents: false,
     get currentCatalog() {
-      return this.catalogs[this.game] || { categories: [], skills: [] };
+      return this.catalogs[this.game] || {
+        categories: [], skills: [],
+        progression: { guild_rank: 9, village_stars: 9 },
+      };
+    },
+    get caps() {
+      return this.currentCatalog.progression || { guild_rank: 9, village_stars: 9 };
     },
     init() {
       document.querySelectorAll(".ss-ssr-chip").forEach((el) => el.remove());
+      document.querySelectorAll(".ss-ssr-rank").forEach((el) => el.remove());
       this.$watch("category", () => this.applySkillFilter());
-      this.$watch("game", () => this.rebuildSkillOptions());
+      this.$watch("game", () => { this.rebuildSkillOptions(); this.clampRanks(); });
       this.applySkillFilter();
       this.$el.addEventListener("change", (e) => {
         const name = e.target && e.target.name;
@@ -272,6 +342,26 @@ function searchForm() {
         const text = (label && label.textContent || "").toLowerCase();
         row.hidden = Boolean(q) && !text.includes(q);
       });
+    },
+    clampRanks() {
+      if (this.hr !== null && this.hr > this.caps.guild_rank) this.hr = this.caps.guild_rank;
+      if (this.villageStars !== null && this.villageStars > this.caps.village_stars) {
+        this.villageStars = this.caps.village_stars;
+      }
+    },
+    nudgeRank(which, delta) {
+      const max = which === "hr" ? this.caps.guild_rank : this.caps.village_stars;
+      let value = which === "hr" ? this.hr : this.villageStars;
+      if (value === null) {
+        value = delta > 0 ? 1 : null;
+      } else {
+        value += delta;
+        if (value < 1) value = null;
+        if (value > max) value = max;
+      }
+      if (which === "hr") this.hr = value;
+      else this.villageStars = value;
+      this.invalidateAdvanced();
     },
     skillMatches(categories) {
       if (this.category === "all") return true;

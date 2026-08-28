@@ -38,6 +38,7 @@ def _query_to_json(query: Query) -> str:
             "forced_piece_ids": list(query.forced_piece_ids),
             "forced_decoration_ids": list(query.forced_decoration_ids),
             "sort": query.sort,
+            "expand_equivalents": query.expand_equivalents,
         }
     )
 
@@ -72,6 +73,7 @@ def _query_from_json(payload: str) -> Query:
         forced_piece_ids=tuple(d.get("forced_piece_ids") or ()),
         forced_decoration_ids=tuple(d.get("forced_decoration_ids") or ()),
         sort=d["sort"],
+        expand_equivalents=bool(d.get("expand_equivalents", False)),
     )
 
 

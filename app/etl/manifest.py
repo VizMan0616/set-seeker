@@ -36,6 +36,7 @@ class PackManifest:
     source_repo: str
     data_dir: str
     features: dict[str, bool]
+    progression: dict[str, int]      # guild_rank, village_stars — per-pack caps
     formats: dict[str, Any]
     locales: list[str]
     pack_dir: Path
@@ -56,7 +57,7 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         raise ManifestError(f"{path}: manifest must be a mapping")
 
     for key in ("id", "name", "generation", "source_repo", "data_dir", "features",
-                "formats", "locales"):
+                "progression", "formats", "locales"):
         if key not in raw:
             raise ManifestError(f"{path}: missing required key {key!r}")
 
@@ -70,6 +71,14 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         if key not in formats:
             raise ManifestError(f"{path}: formats.{key} is required")
 
+    progression = raw["progression"]
+    if not isinstance(progression, dict):
+        raise ManifestError(f"{path}: progression must be a mapping")
+    for key in ("guild_rank", "village_stars"):
+        value = progression.get(key)
+        if not isinstance(value, int) or value < 1:
+            raise ManifestError(f"{path}: progression.{key} must be an integer ≥ 1")
+
     manifest = PackManifest(
         id=str(raw["id"]),
         name=str(raw["name"]),
@@ -77,6 +86,8 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         source_repo=str(raw["source_repo"]),
         data_dir=str(raw["data_dir"]),
         features={k: bool(v) for k, v in features.items()},
+        progression={"guild_rank": int(progression["guild_rank"]),
+                     "village_stars": int(progression["village_stars"])},
         formats=dict(formats),
         locales=[str(loc) for loc in raw["locales"]],
         pack_dir=pack_dir,

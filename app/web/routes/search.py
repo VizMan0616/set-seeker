@@ -17,6 +17,7 @@ from app.engine.pruning import apply_rel_checks, prune
 from app.repository.game_data import GameDataRepository
 from app.web.present import advanced_columns, page_context
 from app.web.render import templates
+from app.web.resolvers import progression_caps
 
 router = APIRouter()
 
@@ -108,14 +109,22 @@ def _parse_query(
     if gender not in ("m", "f") or hunter_type not in ("blademaster", "gunner"):
         raise HTTPException(status_code=422, detail="Invalid hunter filters.")
 
+    caps = progression_caps(game_row["features"])
+    hr = _optional_int(fields, "hr")
+    village = _optional_int(fields, "village_stars")
+    if hr is not None and not 1 <= hr <= caps["guild_rank"]:
+        raise HTTPException(status_code=422, detail="Guild rank is outside this game's cap.")
+    if village is not None and not 1 <= village <= caps["village_stars"]:
+        raise HTTPException(status_code=422, detail="Village rank is outside this game's cap.")
+
     query = Query(
         game=game,
         skills=tuple(skills),
         weapon_slots=weapon_slots,
         gender=gender,
         hunter_type=hunter_type,
-        hr=_optional_int(fields, "hr"),
-        village_stars=_optional_int(fields, "village_stars"),
+        hr=hr,
+        village_stars=village,
         allow_event=_first(fields, "allow_event") == "on",
         allow_bad_skills=_first(fields, "allow_bad_skills") == "on",
         allow_torso_inc=_first(fields, "allow_torso_inc") == "on",
@@ -125,6 +134,7 @@ def _parse_query(
         forced_piece_ids=_int_ids(fields, "forced_piece_id"),
         forced_decoration_ids=_int_ids(fields, "forced_decoration_id"),
         sort=_first(fields, "sort", "defense"),
+        expand_equivalents=_first(fields, "expand_equivalents") == "on",
     )
     if pack_loader is not None and _first(fields, "advanced_domain") == "1":
         query = apply_rel_checks(
@@ -143,6 +153,7 @@ def _search_page_context(request: Request, game: str, query: Query, page) -> dic
         page,
         request.app.state.name_resolver,
         advanced=advanced_columns(pack, pruned, query, request.app.state.name_resolver),
+        expand_equivalents=query.expand_equivalents,
     )
 
 
@@ -163,7 +174,14 @@ async def start_search(request: Request, game: str) -> HTMLResponse:
 @router.post("/search/{search_id}/more", response_class=HTMLResponse)
 async def load_more(request: Request, search_id: str) -> HTMLResponse:
     page = request.app.state.search_service.load_more(request.state.session_id, search_id)
-    context = page_context(page, request.app.state.name_resolver)
+    query = request.app.state.search_service.get_search_query(
+        request.state.session_id, search_id
+    )
+    context = page_context(
+        page,
+        request.app.state.name_resolver,
+        expand_equivalents=bool(query and query.expand_equivalents),
+    )
     return templates.TemplateResponse(request, "search/more.html", context)
 
 

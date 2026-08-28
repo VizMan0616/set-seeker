@@ -16,6 +16,16 @@ EXPECTED_COUNTS = {
 }
 
 
+def test_pack_stores_progression_caps(etl_db):
+    import json
+
+    repo, game_id, _ = etl_db
+    game = repo.get_game(game_id)
+    features = json.loads(game["features"])
+    assert features["guild_rank_max"] == 9
+    assert features["village_stars_max"] == 9
+
+
 def test_loaded_row_counts(etl_db):
     repo, game_id, counts = etl_db
     assert counts == EXPECTED_COUNTS

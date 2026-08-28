@@ -12,6 +12,9 @@ features:
   charm_up: false                   # MHGU: double charm skills
   skill_plus_two: false             # MHGU: +2 to all trees
   compound_skills: false            # gen4+: one tree grants several others
+progression:
+  guild_rank: 9                     # HR / guild quest cap (G-rank); 10 is the ETL sentinel
+  village_stars: 9                  # village / Elder★ cap
 formats:
   armor_file_ext: csv               # MHFU uses .csv; all others .txt
   armor_header_lines: 2             # MHFU: 2 header lines; others: comment headers

@@ -125,7 +125,14 @@ class PackWriter:
         the game id, reusing the existing `games` row when present so user-table
         references survive a rebuild."""
         repo = self._repo
-        features = json.dumps(manifest.features, sort_keys=True)
+        features = json.dumps(
+            {
+                **manifest.features,
+                "guild_rank_max": manifest.progression["guild_rank"],
+                "village_stars_max": manifest.progression["village_stars"],
+            },
+            sort_keys=True,
+        )
         game = repo.get_game_by_code(manifest.id)
         if game is None:
             return repo.create_game(code=manifest.id, name=manifest.name,

@@ -6,9 +6,19 @@ only (ADR 0004); hot lookups are memoized because result rendering resolves
 the same ids repeatedly.
 """
 
+import json
 from typing import Any
 
 from app.repository.game_data import GameDataRepository
+
+
+def progression_caps(features_json: str | None) -> dict[str, int]:
+    """Guild HR and village ★ ceilings from games.features (pack manifest)."""
+    data = json.loads(features_json or "{}")
+    return {
+        "guild_rank": int(data.get("guild_rank_max") or 9),
+        "village_stars": int(data.get("village_stars_max") or 9),
+    }
 
 
 class RepositoryNameResolver:
@@ -77,10 +87,15 @@ class RepositoryCatalog:
         """Skills and pack-scoped categories for the search form."""
         row = self._repo.get_game_by_code(game)
         if row is None:
-            return {"categories": [], "skills": []}
+            return {
+                "categories": [],
+                "skills": [],
+                "progression": {"guild_rank": 9, "village_stars": 9},
+            }
         game_id = row["id"]
         return {
             "categories": [c["tag"] for c in self._repo.list_skill_categories(game_id)],
+            "progression": progression_caps(row["features"]),
             "skills": [
                 {
                     "id": s["id"],

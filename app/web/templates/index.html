@@ -100,53 +100,59 @@
   <fieldset class="card-body border-top">
     <legend class="ss-legend">Progression <span class="ss-legend-note">this game’s rank ceiling</span></legend>
     <div class="row g-3">
-      <div class="col-12 col-sm-6">
-        <p class="form-label ss-label" id="guild-rank-label">Guild rank</p>
-        <p class="ss-hint mb-2">Hunter Rank. Open means every guild quest is legal.</p>
-        <div class="ss-rank" role="group" aria-labelledby="guild-rank-label">
-          <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', -1)"
-                  :disabled="hr === null" aria-label="Lower guild rank">−</button>
-          <div class="ss-rank-face" aria-live="polite">
-            <span class="ss-rank-value" x-text="hr === null ? 'Open' : hr"></span>
-            <span class="ss-rank-cap" x-show="hr !== null" x-text="' / ' + caps.guild_rank"></span>
+      <div class="col-12 col-md-auto">
+        <div class="ss-rank-stack">
+          <div>
+            <p class="form-label ss-label" id="guild-rank-label">Guild rank</p>
+            <div class="ss-rank" role="group" aria-labelledby="guild-rank-label">
+              <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', -1)"
+                      :disabled="hr === null" aria-label="Lower guild rank">−</button>
+              <div class="ss-rank-face" aria-live="polite">
+                <span class="ss-rank-value" :class="{ 'ss-rank-muted': hr === null }"
+                      x-text="hr === null ? 'Uncapped' : hr"></span>
+                <span class="ss-rank-cap" x-show="hr !== null" x-text="' / ' + caps.guild_rank"></span>
+              </div>
+              <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', 1)"
+                      :disabled="hr === caps.guild_rank" aria-label="Raise guild rank">+</button>
+            </div>
+            <template x-if="true">
+              <input type="hidden" name="hr" :value="hr === null ? '' : hr">
+            </template>
+            <select class="form-select ss-ssr-rank mt-2" name="hr" aria-label="Guild rank">
+              <option value="">Uncapped</option>
+              {% for n in range(1, progression.guild_rank + 1) %}
+              <option value="{{ n }}">{{ n }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <button type="button" class="btn ss-rank-step" @click="nudgeRank('hr', 1)"
-                  :disabled="hr === caps.guild_rank" aria-label="Raise guild rank">+</button>
-        </div>
-        <template x-if="true">
-          <input type="hidden" name="hr" :value="hr === null ? '' : hr">
-        </template>
-        <select class="form-select ss-ssr-rank mt-2" name="hr" aria-label="Guild rank">
-          <option value="">Uncapped</option>
-          {% for n in range(1, progression.guild_rank + 1) %}
-          <option value="{{ n }}">{{ n }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-12 col-sm-6">
-        <p class="form-label ss-label" id="village-rank-label">Village rank</p>
-        <p class="ss-hint mb-2">Village quest stars. Open means every village quest is legal.</p>
-        <div class="ss-rank" role="group" aria-labelledby="village-rank-label">
-          <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', -1)"
-                  :disabled="villageStars === null" aria-label="Lower village rank">−</button>
-          <div class="ss-rank-face" aria-live="polite">
-            <span class="ss-rank-value" x-text="villageStars === null ? 'Open' : villageStars"></span>
-            <span class="ss-rank-cap" x-show="villageStars !== null" x-text="' / ' + caps.village_stars"></span>
+          <div>
+            <p class="form-label ss-label" id="village-rank-label">Village rank</p>
+            <div class="ss-rank" role="group" aria-labelledby="village-rank-label">
+              <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', -1)"
+                      :disabled="villageStars === null" aria-label="Lower village rank">−</button>
+              <div class="ss-rank-face" aria-live="polite">
+                <span class="ss-rank-value" :class="{ 'ss-rank-muted': villageStars === null }"
+                      x-text="villageStars === null ? 'Uncapped' : villageStars"></span>
+                <span class="ss-rank-cap" x-show="villageStars !== null"
+                      x-text="' / ' + caps.village_stars"></span>
+              </div>
+              <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', 1)"
+                      :disabled="villageStars === caps.village_stars"
+                      aria-label="Raise village rank">+</button>
+            </div>
+            <template x-if="true">
+              <input type="hidden" name="village_stars" :value="villageStars === null ? '' : villageStars">
+            </template>
+            <select class="form-select ss-ssr-rank mt-2" name="village_stars" aria-label="Village rank">
+              <option value="">Uncapped</option>
+              {% for n in range(1, progression.village_stars + 1) %}
+              <option value="{{ n }}">{{ n }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <button type="button" class="btn ss-rank-step" @click="nudgeRank('village', 1)"
-                  :disabled="villageStars === caps.village_stars" aria-label="Raise village rank">+</button>
         </div>
-        <template x-if="true">
-          <input type="hidden" name="village_stars" :value="villageStars === null ? '' : villageStars">
-        </template>
-        <select class="form-select ss-ssr-rank mt-2" name="village_stars" aria-label="Village rank">
-          <option value="">Uncapped</option>
-          {% for n in range(1, progression.village_stars + 1) %}
-          <option value="{{ n }}">{{ n }}</option>
-          {% endfor %}
-        </select>
       </div>
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-md">
         <label class="form-label ss-label" for="sort">Tie-break by</label>
         <select id="sort" class="form-select" name="sort" aria-describedby="sort-help">
           <option value="defense">None</option>
@@ -159,6 +165,25 @@
         </select>
         <div id="sort-help" class="form-text ss-legend-note">
           Sets are always ranked by spare slots, then defense (best first) — this only breaks ties.
+        </div>
+        <p class="form-label ss-label mt-3" id="list-mode-label">How to list sets</p>
+        <div class="ss-chip-row" role="radiogroup" aria-labelledby="list-mode-label">
+          <button type="button" class="btn btn-sm ss-chip"
+                  :class="{ 'ss-chip-on': !expandEquivalents }"
+                  :aria-pressed="!expandEquivalents"
+                  @click="expandEquivalents = false">Group lookalikes</button>
+          <button type="button" class="btn btn-sm ss-chip"
+                  :class="{ 'ss-chip-on': expandEquivalents }"
+                  :aria-pressed="expandEquivalents"
+                  @click="expandEquivalents = true">List every set</button>
+        </div>
+        <template x-if="true">
+          <input type="hidden" name="expand_equivalents" :value="expandEquivalents ? 'on' : ''">
+        </template>
+        <div class="form-check ss-ssr-rank mt-2">
+          <input class="form-check-input" type="checkbox" id="expand-equivalents-ssr"
+                 name="expand_equivalents">
+          <label class="form-check-label" for="expand-equivalents-ssr">List every equivalent set separately</label>
         </div>
       </div>
       <div class="col-12">
@@ -177,28 +202,6 @@
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
           <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
-        </div>
-      </div>
-      <div class="col-12">
-        <p class="form-label ss-label" id="list-mode-label">How to list sets</p>
-        <p class="ss-hint mb-2">Grouping hides pieces that share the same skills and slots.</p>
-        <div class="ss-chip-row" role="radiogroup" aria-labelledby="list-mode-label">
-          <button type="button" class="btn btn-sm ss-chip"
-                  :class="{ 'ss-chip-on': !expandEquivalents }"
-                  :aria-pressed="!expandEquivalents"
-                  @click="expandEquivalents = false">Group lookalikes</button>
-          <button type="button" class="btn btn-sm ss-chip"
-                  :class="{ 'ss-chip-on': expandEquivalents }"
-                  :aria-pressed="expandEquivalents"
-                  @click="expandEquivalents = true">List every set</button>
-        </div>
-        <template x-if="true">
-          <input type="hidden" name="expand_equivalents" :value="expandEquivalents ? 'on' : ''">
-        </template>
-        <div class="form-check ss-ssr-rank mt-2">
-          <input class="form-check-input" type="checkbox" id="expand-equivalents-ssr"
-                 name="expand_equivalents">
-          <label class="form-check-label" for="expand-equivalents-ssr">List every equivalent set separately</label>
         </div>
       </div>
     </div>

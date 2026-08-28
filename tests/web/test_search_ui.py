@@ -173,6 +173,15 @@ def test_search_lists_every_equivalent_when_requested(client: TestClient):
     )
     assert response.status_code == 200
     assert "Every equivalent piece is its own set." in response.text
+    cards = _cards(response.text)
+    assert cards
+    summary = unescape(response.text)
+    if "shown —" in summary:
+        shown = int(re.search(r"(\d+) shown", summary).group(1))
+        assert shown == len(cards)
+    elif "found." in summary:
+        shown = int(re.search(r"(\d+) sets? found", summary).group(1))
+        assert shown == len(cards)
 
 
 def test_search_rejects_rank_above_pack_cap(client: TestClient):

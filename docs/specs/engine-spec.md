@@ -115,7 +115,8 @@ Hard constraints:
   Default listing groups them as one result with alternates. Query flag
   `expand_equivalents` lists every member combination as its own card (Athena’s
   post-match expansion) so a user can compare the full dump. Pagination still
-  walks representatives.
+  walks representatives; `shown_count` / `remaining_count` count expanded cards
+  so “N shown — M more” matches the list.
 - Search state (model + exclusions) lives server-side keyed by the anonymous session +
   search id; htmx "load more" posts the search id.
 

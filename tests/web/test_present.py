@@ -51,5 +51,6 @@ def test_page_context_expanded_splits_lookalikes():
     )
     ctx = page_context(page, _Resolver(), expand_equivalents=True)
     assert len(ctx["results"]) == 2
+    assert ctx["shown_count"] == 1  # engine tally; present does not re-count
     assert {c["pieces"][0]["name"] for c in ctx["results"]} == {"Piece 1", "Piece 2"}
     assert all(len(c["pieces"][0]["alternates"]) == 1 for c in ctx["results"])

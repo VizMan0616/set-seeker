@@ -46,13 +46,20 @@ class ArmorSetResult:
     spare_slots: tuple[int, int, int]            # remaining size-1/2/3 slots
     defense: int
 
+    def equivalent_count(self) -> int:
+        """How many concrete sets this representative expands to."""
+        n = 1
+        for alts in self.alternates:
+            n *= len(alts) if alts else 1
+        return n
+
 @dataclass(frozen=True)
 class SearchPage:
     search_id: str
     results: tuple[ArmorSetResult, ...]  # len <= PAGE_SIZE
     partial: bool                        # solver hit its time budget
     exhausted: bool                      # no further solutions exist
-    shown_count: int = 0                 # sets delivered so far (all pages)
+    shown_count: int = 0                 # cards delivered so far (expanded when listing every set)
     remaining_count: int | None = None   # None = more exist but the tail was not counted
 
 PAGE_SIZE = 10

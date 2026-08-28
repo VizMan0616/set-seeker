@@ -43,15 +43,30 @@ def _query_to_json(query: Query) -> str:
     )
 
 
-def _with_found_total(query_json: str, found_total: int) -> str:
+def _with_tally(
+    query_json: str, *, delivered: int, found_total: int | None = None
+) -> str:
     payload = json.loads(query_json)
-    payload["found_total"] = found_total
+    payload["delivered"] = delivered
+    if found_total is not None:
+        payload["found_total"] = found_total
     return json.dumps(payload)
 
 
 def _found_total(query_json: str) -> int | None:
     value = json.loads(query_json).get("found_total")
     return int(value) if value is not None else None
+
+
+def _delivered(query_json: str, fallback: int) -> int:
+    value = json.loads(query_json).get("delivered")
+    return int(value) if value is not None else fallback
+
+
+def _page_units(query: Query, results: list[ArmorSetResult]) -> int:
+    if query.expand_equivalents:
+        return sum(r.equivalent_count() for r in results)
+    return len(results)
 
 
 def _query_from_json(payload: str) -> Query:
@@ -126,26 +141,29 @@ class CpSatSearchService:
         results, new_exclusions, partial, exhausted = self._solve_page(query, [])
         if new_exclusions:
             self._user_data.append_exclusions(state["id"], new_exclusions)
-        shown = len(results)
+        shown = _page_units(query, results)
         remaining: int | None
+        tally = state["query_json"]
         if exhausted:
             remaining = 0
-            self._user_data.update_search_query_json(
-                state["id"], _with_found_total(state["query_json"], shown)
-            )
+            tally = _with_tally(tally, delivered=shown, found_total=shown)
         elif not results:
             remaining = None
+            tally = _with_tally(tally, delivered=shown)
         else:
             extra, exact = self._count_further(
                 query, [tuple(e) for e in new_exclusions]
             )
             if exact:
                 remaining = extra
-                self._user_data.update_search_query_json(
-                    state["id"], _with_found_total(state["query_json"], shown + extra)
+                tally = _with_tally(
+                    tally, delivered=shown, found_total=shown + extra
                 )
             else:
                 remaining = None
+                tally = _with_tally(tally, delivered=shown)
+        if tally != state["query_json"]:
+            self._user_data.update_search_query_json(state["id"], tally)
         return SearchPage(
             search_id=state["id"],
             results=tuple(results),
@@ -175,9 +193,19 @@ class CpSatSearchService:
         results, new_exclusions, partial, exhausted = self._solve_page(query, exclusions)
         if new_exclusions:
             self._user_data.append_exclusions(search_id, new_exclusions)
-        shown = len(exclusions) + len(results)
+        shown = _delivered(state["query_json"], len(exclusions)) + _page_units(
+            query, results
+        )
         total = _found_total(state["query_json"])
         remaining = 0 if exhausted else (None if total is None else max(total - shown, 0))
+        self._user_data.update_search_query_json(
+            search_id,
+            _with_tally(
+                state["query_json"],
+                delivered=shown,
+                found_total=total if total is not None else None,
+            ),
+        )
         return SearchPage(
             search_id=search_id,
             results=tuple(results),
@@ -229,10 +257,12 @@ class CpSatSearchService:
     def _count_further(
         self, query: Query, exclusions: list[tuple[int, int, int, int, int]]
     ) -> tuple[int, bool]:
-        """How many more representative sets exist after ``exclusions``.
+        """How many more result units exist after ``exclusions``.
 
-        Walks iterate-and-exclude without keeping cards. ``exact`` is False
-        when the budget or ``_CENSUS_CAP`` stops the walk.
+        One unit per representative, or per equivalent combination when
+        ``query.expand_equivalents``. Walks iterate-and-exclude without
+        keeping cards. ``exact`` is False when the budget or
+        ``_CENSUS_CAP`` stops the walk.
         """
         pack = self._pack_loader(query.game)
         pruned: PrunedPack = prune(pack, query)
@@ -252,7 +282,11 @@ class CpSatSearchService:
             if outcome.result is None:
                 return extra, False
             working.append(tuple(outcome.result.piece_ids))
-            extra += 1
+            extra += (
+                outcome.result.equivalent_count()
+                if query.expand_equivalents
+                else 1
+            )
             if outcome.status == "feasible":
                 return extra, False
         return extra, False

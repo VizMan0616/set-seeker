@@ -73,6 +73,19 @@ def test_assertion_3_load_more_never_repeats_piece_ids(search_service):
     assert all(len(p.results) <= PAGE_SIZE for p in pages)
 
 
+def test_expand_equivalents_counts_cards_not_representatives(search_service):
+    query = make_query(min_points=10, expand_equivalents=True)
+    page = search_service.start_search("s-expand", query)
+    page_cards = sum(r.equivalent_count() for r in page.results)
+    assert page.shown_count == page_cards
+    if page.remaining_count is not None:
+        more = search_service.load_more("s-expand", page.search_id)
+        more_cards = sum(r.equivalent_count() for r in more.results)
+        assert more.shown_count == page.shown_count + more_cards
+        if more.remaining_count is not None:
+            assert more.remaining_count == page.remaining_count - more_cards
+
+
 def test_assertion_4_impossible_query_is_exhausted_not_an_exception(search_service):
     page = search_service.start_search("s4", make_query(min_points=99))
 

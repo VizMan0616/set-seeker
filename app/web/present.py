@@ -15,20 +15,6 @@ from app.engine.pruning import PrunedPack, domain_snapshot
 
 SLOT_ORDER = ("head", "body", "arms", "waist", "legs")
 
-
-def _format_charm(slots: int, skills: tuple[tuple[int, int], ...], resolver: NameResolver) -> str:
-    pips = "O" * slots + "-" * (3 - slots)
-    if not skills:
-        return f"{pips} (slots)"
-    parts = [f"{resolver.skill_tree_name(tree)} {pts:+d}" for tree, pts in skills]
-    return f"{', '.join(parts)} {pips}"
-
-
-def _charm_label(result: ArmorSetResult, resolver: NameResolver) -> str | None:
-    if result.charm_id is None:
-        return None
-    return _format_charm(result.charm_slots, result.charm_skills, resolver)
-
 KIND_LABELS = {
     "head": "Head",
     "body": "Chest",
@@ -61,6 +47,20 @@ class Catalog(Protocol):
     def list_skill_trees(self, game: str) -> list[dict[str, Any]]: ...
 
     def list_search_catalog(self, game: str) -> dict[str, Any]: ...
+
+
+def _format_charm(slots: int, skills: tuple[tuple[int, int], ...], resolver: NameResolver) -> str:
+    pips = "O" * slots + "-" * (3 - slots)
+    if not skills:
+        return f"{pips} (slots)"
+    parts = [f"{resolver.skill_tree_name(tree)} {pts:+d}" for tree, pts in skills]
+    return f"{', '.join(parts)} {pips}"
+
+
+def _charm_label(result: ArmorSetResult, resolver: NameResolver) -> str | None:
+    if result.charm_id is None:
+        return None
+    return _format_charm(result.charm_slots, result.charm_skills, resolver)
 
 
 def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str, Any]:

@@ -1,0 +1,62 @@
+skill_tree,min_points,max_points
+Stun,-10,13
+HearProtct,-3,3
+WindPress,-10,3
+Attack,-10,10
+Expert,-10,10
+Status,-10,4
+Elemental,-3,3
+Fire Atk,-10,9
+Water Atk,-10,9
+Thundr Atk,-10,9
+Ice Attack,-10,9
+Dragon Atk,-10,9
+Debilitate,-3,3
+Slam,-3,3
+Loading,-3,3
+FastCharge,-3,3
+Awaken,-3,4
+KO,-3,4
+FatigueAtk,-3,4
+Potential,-3,4
+BombStrUp,-10,10
+Horn,-10,10
+Gunnery,-10,10
+Defense,-10,10
+Blight Res,-3,3
+Fire Res,-10,13
+Water Res,-10,13
+ThunderRes,-10,13
+Ice Res,-10,13
+Dragon Res,-10,13
+Protection,-10,9
+Health,-10,13
+Rec Speed,-10,12
+Rec Level,-3,4
+Evasion,-3,4
+Evade Dist,-3,4
+Sheathe,-10,4
+Eating,-3,3
+Stamina,-3,3
+Constitutn,-3,4
+Will Recov,-3,4
+Hunger,-10,10
+Fate,-3,3
+Rewards,-3,3
+Carving,-3,3
+Wide Area,-10,12
+Psychic,-10,12
+Artisan,-3,3
+Fencing,-3,3
+Sharpness,-3,3
+Crit Draw,-3,3
+PunishDraw,-3,3
+Guard,-3,4
+Guard Up,-3,4
+Sharpener,-10,8
+NormalS Up,-3,3
+PierceS Up,-3,3
+PelletS Up,-3,3
+Rapid Fire,-3,3
+Reload Spd,-3,4
+Recoil,-3,3

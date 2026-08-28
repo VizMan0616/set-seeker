@@ -13,6 +13,9 @@ EXPECTED_COUNTS = {
     "armor_skills": 7142,
     "decorations": 168,
     "decoration_skills": 281,
+    "charm_types": 0,
+    "charm_skill_ranges": 0,
+    "charm_slot_thresholds": 0,
 }
 
 

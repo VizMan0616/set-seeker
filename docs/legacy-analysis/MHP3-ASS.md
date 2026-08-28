@@ -63,7 +63,8 @@ O(C·n⁵).
 | `mycharms.txt` | `#Format: NumSlots,Skill1,Points1,Skill2,Points2` | `CharmDatabase::LoadCustom` (~108–168) |
 | `Languages/*/` | Localized overlays | Language loaders |
 
-Approx: ~210–230 armor rows/slot, ~165 decorations, ~211 skill rows, ~259 mycharms lines.
+Approx: ~210–230 armor rows/slot (~1080 after name-only dedup), 164 decorations, 210
+skill data rows (209 thresholds + Torso Inc), ~259 mycharms lines.
 
 ## Talismans (central to this game)
 
@@ -104,8 +105,11 @@ message; the search itself no longer stops at 1000.
 - Second vertical slice after MHFU: adds the charm dimension (inventory + generated legal
   charms) to the solver model.
 - ETL (2026-08): confirmed armor/decoration slots are **integers**, not `O--`; gender/type
-  are Athena `0/1/2` (both/male/female and both/blade/gunner). Duplicate armor is **name-only**
-  (`ArmorExists`, `Armor.cpp:10-16`) — 26 later gender-twin rows dropped. Charm RNG tables
-  extracted from `OmaSkill::SKILL` / `FURUSLO` / `tableinit` into
-  `packs/mhp3/charm_generation/` (mystery / shining / timeworn). English names remain fan
-  translations (`translation: fan`).
+  are Athena `0/1/2` (both/male/female and both/blade/gunner), remapped to schema
+  0=male/blade, 1=female/gunner, 2=both. Duplicate armor is **name-only**
+  (`ArmorExists`, `Armor.cpp:10-16`) — 26 later gender-twin rows dropped
+  (1080 pieces kept). `skills.txt` is tabular with **no leading index columns**
+  (unlike MH3U); empty ability column is Torso Inc. Charm RNG tables extracted
+  from UTF-16 `CharmDatabase.cpp` (`OmaSkill::SKILL` / `FURUSLO` / `tableinit[12]`)
+  into `packs/mhp3/charm_generation/` (mystery / shining / timeworn). English names
+  remain fan translations (`translation: fan`). Closed village path uses sentinel 99.

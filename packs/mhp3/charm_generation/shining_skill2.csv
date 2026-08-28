@@ -1,0 +1,55 @@
+skill_tree,min_points,max_points
+Stun,-10,10
+Paralysis,-10,7
+Sleep,-10,7
+Poison,-10,7
+Fortitude,-10,8
+Anti-Theft,-10,10
+Mud/Snow,-10,8
+Antiseptic,-10,8
+Quake Res,-10,8
+Heat Res,-10,10
+Cold Res,-10,10
+Attack,-7,7
+Expert,-7,7
+Status,-4,4
+BombStrUp,-8,8
+Horn,-8,8
+Gunnery,-8,8
+Defense,-7,7
+Fire Res,-10,10
+Water Res,-10,10
+ThunderRes,-10,10
+Ice Res,-10,10
+Dragon Res,-10,10
+Health,-10,10
+Rec Speed,-4,4
+SpeedSetup,-10,10
+Hunger,-10,10
+Gluttony,-10,13
+Backpackng,-10,10
+Gathering,-10,13
+HiSpdGathr,-10,10
+Whim,-10,13
+Wide Area,-10,10
+Psychic,-10,10
+Combo Rate,-10,13
+Shot Mix,-10,10
+LastingPwr,-10,10
+Perception,-10,10
+DungMaster,-10,10
+Huntsman,-10,10
+Sense,-10,10
+NormalSAdd,-8,8
+PierceSAdd,-10,10
+PelletSAdd,-10,10
+Crag S Add,-10,10
+ClustS Add,-10,10
+CutterSAdd,-10,10
+Precision,-10,10
+ParalyCAdd,-10,10
+SleepCAdd,-10,10
+PoisonCAdd,-10,10
+PowerCAdd,-10,10
+RazorCAdd,-10,10
+FatigeCAdd,-10,10

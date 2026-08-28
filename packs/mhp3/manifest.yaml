@@ -1,0 +1,23 @@
+id: mhp3
+name: "Monster Hunter Portable 3rd"
+generation: 3
+source_repo: sources/MHP3-ASS
+data_dir: "Run/Data"
+translation: fan                 # ADR 0009: never officially localized
+features:
+  talismans: true
+  charm_tables: true             # 12 seeded RNG tables (not MH3U's 17)
+  charm_generation: false        # CSVs are extracted facts; not gen4+ live gen
+  excavated_gear: false
+  weapon_search: false
+  charm_up: false
+  skill_plus_two: false
+  compound_skills: false
+progression:
+  guild_rank: 6                  # Athena nudHR max (Form1.h:655)
+  village_stars: 6               # Athena nudElder max (Form1.h:708)
+formats:
+  armor_file_ext: txt
+  armor_header_lines: 0          # `#` comment headers skipped by the loader
+  skills_leading_index_columns: 0
+locales: [en, ja]

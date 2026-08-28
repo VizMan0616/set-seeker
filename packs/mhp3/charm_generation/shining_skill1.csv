@@ -1,0 +1,56 @@
+skill_tree,min_points,max_points
+Stun,0,8
+Paralysis,0,5
+Sleep,0,5
+Poison,0,5
+Fortitude,0,7
+Mud/Snow,0,7
+Antiseptic,0,7
+Quake Res,0,7
+WindPress,0,4
+Attack,0,4
+Expert,0,4
+Status,0,4
+Fire Atk,0,7
+Water Atk,0,7
+Thundr Atk,0,7
+Ice Attack,0,7
+Dragon Atk,0,7
+KO,0,6
+FatigueAtk,0,6
+Potential,0,6
+BombStrUp,0,6
+Horn,0,6
+Gunnery,0,6
+Defense,0,4
+Fire Res,0,6
+Water Res,0,6
+ThunderRes,0,6
+Ice Res,0,6
+Dragon Res,0,6
+Protection,0,7
+Health,0,8
+Rec Speed,0,7
+Rec Level,0,6
+Evasion,0,6
+Evade Dist,0,6
+Sheathe,0,6
+SpeedSetup,0,8
+Eating,0,4
+Constitutn,0,6
+Will Recov,0,6
+Hunger,0,8
+Backpackng,0,8
+Wide Area,0,8
+Psychic,0,8
+Guard,0,6
+Guard Up,0,4
+Sharpener,0,4
+NormalSAdd,0,6
+PierceSAdd,0,6
+PelletSAdd,0,6
+Crag S Add,0,6
+ClustS Add,0,6
+CutterSAdd,0,6
+Reload Spd,0,4
+Precision,0,6

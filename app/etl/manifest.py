@@ -40,6 +40,7 @@ class PackManifest:
     formats: dict[str, Any]
     locales: list[str]
     pack_dir: Path
+    translation: str | None = None  # ADR 0009: "fan" for unofficial English names
 
     @property
     def source_data_path(self) -> Path:
@@ -91,6 +92,7 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         formats=dict(formats),
         locales=[str(loc) for loc in raw["locales"]],
         pack_dir=pack_dir,
+        translation=str(raw["translation"]) if raw.get("translation") else None,
     )
     if not manifest.source_data_path.is_dir():
         raise ManifestError(

@@ -1,0 +1,105 @@
+# MHP3 known-query validation suite (data-pack-spec.md).
+# Property-based until solver replay lands: spot checks against sources/MHP3-ASS
+# @ a22f3ac2, exact row counts, and tree-coverage feasibility.
+pack: mhp3
+
+row_counts:
+  skill_trees: 100              # 99 trees + Torso Inc marker
+  skills: 209
+  armor_pieces: 1080            # name-only dedup (Armor.cpp:10-16); 26 later twins dropped
+  armor_skills: 4078
+  decorations: 164
+  decoration_skills: 284
+  charm_types: 3                # mystery / shining / timeworn
+  charm_skill_ranges: 265
+  charm_slot_thresholds: 53
+
+queries:
+  - name: "Attack tree thresholds"
+    type: skill_threshold
+    tree: "Attack"
+    skill: "Attack Up [Lg]"
+    expect: { points: 20, is_negative: false }
+
+  - name: "Attack negative threshold"
+    type: skill_threshold
+    tree: "Attack"
+    skill: "Attack Down [Lg]"
+    expect: { points: -20, is_negative: true }
+
+  - name: "Sharpness tree threshold"
+    type: skill_threshold
+    tree: "Sharpness"
+    skill: "Sharp Sword"
+    expect: { points: 10, is_negative: false }
+
+  - name: "Chain Helm spot check (head.txt)"
+    type: armor_piece
+    slot: head
+    name_en: "Chain Helm"
+    expect:
+      rarity: 1
+      slots: 1
+      defense: 2
+      gender: both
+      hunter_type: both
+      hr_required: 1
+      village_stars: 1
+      res_fire: 2
+      res_water: 1
+      res_ice: 1
+      res_thunder: -2
+      res_dragon: 0
+      torso_inc: false
+      skills: { "Health": 2, "Combo Rate": 4, "Shot Mix": 1 }
+
+  - name: "Skull Face is Torso Inc with no skill rows"
+    type: armor_piece
+    slot: head
+    name_en: "Skull Face"
+    expect:
+      torso_inc: true
+      skills: { }
+
+  - name: "Attack Jewel[1] dual-skill spot check"
+    type: decoration
+    name_en: "Attack Jewel[1]"
+    expect:
+      size: 1
+      hr_required: 1
+      village_stars: 2
+      skills: { "Attack": 1, "Defense": -1 }
+
+  # Sentinel: village path closed (99); HR path must survive.
+  - name: "Earplug Jwl[3] keeps its HR path (village sentinel 99)"
+    type: decoration
+    name_en: "Earplug Jwl[3]"
+    expect:
+      size: 3
+      hr_required: 6
+      village_stars: 99
+      skills: { "HearProtct": 4, "Protection": -2 }
+
+  - name: "Attack Up [Lg] + Sharp Sword blademaster, uncapped"
+    type: tree_coverage
+    hunter_type: blademaster
+    gender: m
+    hr: null
+    village_stars: null
+    trees: { "Attack": 20, "Sharpness": 10 }
+
+  - name: "Attack Up [Med] blademaster, HR4-capped"
+    type: tree_coverage
+    hunter_type: blademaster
+    gender: m
+    hr: 4
+    village_stars: 0
+    trees: { "Attack": 15 }
+
+  - name: "Reckless Abandon +1 gunner, village 6-star-capped"
+    type: tree_coverage
+    hunter_type: gunner
+    gender: f
+    hr: 0
+    village_stars: 6
+    trees: { "Expert": 10 }

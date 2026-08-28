@@ -1,0 +1,44 @@
+skill_tree,min_points,max_points
+HearProtct,0,5
+WindPress,0,5
+Status,0,6
+Elemental,0,5
+Fire Atk,0,7
+Water Atk,0,7
+Thundr Atk,0,7
+Ice Attack,0,7
+Dragon Atk,0,7
+Debilitate,0,5
+Slam,0,5
+Loading,0,6
+FastCharge,0,5
+Awaken,0,6
+KO,0,6
+FatigueAtk,0,6
+Potential,0,6
+Blight Res,0,5
+Protection,0,7
+Rec Level,0,6
+Evasion,0,6
+Evade Dist,0,6
+Sheathe,0,6
+Eating,0,5
+Stamina,0,5
+Constitutn,0,6
+Will Recov,0,6
+Fate,0,5
+Rewards,0,5
+Carving,0,5
+Artisan,0,5
+Fencing,0,5
+Sharpness,0,5
+Crit Draw,0,5
+PunishDraw,0,5
+Guard,0,6
+Guard Up,0,6
+NormalS Up,0,5
+PierceS Up,0,5
+PelletS Up,0,5
+Rapid Fire,0,5
+Reload Spd,0,6
+Recoil,0,5

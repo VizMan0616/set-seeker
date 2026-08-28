@@ -80,4 +80,6 @@ charm inventories per game.
 
 ## Current state
 
-Documentation/knowledge base only. No application code exists yet.
+Phase 0/1 is implemented: FastAPI + Jinja2/Bootstrap/htmx, SQLite via SQLAlchemy Core,
+MHFU ETL + CP-SAT search, Advanced Search, multi-stage Dockerfile. Only `packs/mhfu/`
+ships today. Next: MHP3 (charms) per `docs/roadmap.md`.

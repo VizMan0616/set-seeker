@@ -11,8 +11,8 @@ Read `CONTEXT.md` first. It defines the domain language and the hard constraints
 | Why the legacy tool is slow / what patterns to avoid | `docs/legacy-analysis/overview.md` |
 | A specific legacy repo's algorithm or data format | `docs/legacy-analysis/<GAME>-ASS.md` |
 | Implementing or changing the armor search engine | `docs/specs/engine-spec.md` + the relevant `docs/legacy-analysis/<GAME>-ASS.md` |
-| Phase 0/1 implementation work (foundation, ETL, solver, UI) | `docs/specs/phase0-contracts.md` — interfaces and file ownership are settled there |
-| Adding a new game / generation | `docs/specs/data-pack-spec.md` + `docs/roadmap.md` |
+| Adding a new game / generation | `docs/prompts/README.md` then `docs/prompts/implement.md` (or `review.md`) |
+| Historical Phase 0/1 parallel-build interfaces | `docs/specs/phase0-contracts.md` — as-built is `app/` |
 | Village / guild rank caps for a pack | `CONTEXT.md` (table) — do not re-scan ASS |
 | Database schema, ETL, queries, swapping SQLite→MariaDB | `docs/specs/database-schema.md` |
 | Why a decision was made | `docs/adr/` (each ADR is self-contained) |
@@ -46,5 +46,7 @@ Committed under `.cursor/skills/` — apply them when their trigger matches:
 
 ## Current state
 
-This repo is a knowledge base. Application code does not exist yet; implementation follows
-`docs/roadmap.md`, starting with the MHFU game pack.
+MHFU (Phase 0/1) is implemented. Application code lives under `app/`; the only shipped
+pack is `packs/mhfu/`. Adding a generation: use the `add-game-pack` skill (and
+`extend-solver-model` when the pack turns on a mechanic the engine does not yet model).
+Reviewer sessions use the same skills to grill against ADRs and specs, not to rewrite.

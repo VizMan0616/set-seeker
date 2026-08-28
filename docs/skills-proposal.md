@@ -11,7 +11,7 @@ file instead of re-deriving workflows from three specs.
 
 | Skill | Trigger | Token saving |
 |---|---|---|
-| `add-game-pack` | "add support for MH4U", "create the mhgu pack", starting a roadmap phase | Encodes the phase checklist + manifest format + "no per-game engine branches" rule; agent skips re-reading three specs to start |
+| `add-game-pack` | "add support for MH4U", "create the mhgu pack", starting a roadmap phase | Encodes the phase checklist + manifest format + "no per-game engine branches" rule; agent skips re-reading three specs to start. Invoked from `docs/prompts/implement.md` (`SCOPE: etl`). |
 | `extend-solver-model` | "add Charm Up to the solver", "model excavated weapons", "search results look wrong" | Encodes the variable/constraint/objective contract and the banned legacy patterns; prevents re-reading the whole legacy analysis |
 | `run-etl` | "rebuild the database", "mhp3 data looks wrong", Docker build data steps | Encodes the per-pack column-map rule (the most likely agent error) and the validation gate |
 | `legacy-oracle` | "is this result correct?", "how did Athena's tool do X?" | The file:line index into six C++/CLI repos; agents stop bulk-searching `sources/` |

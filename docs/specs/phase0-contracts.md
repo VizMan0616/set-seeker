@@ -1,6 +1,11 @@
 # Phase 0 contracts — parallel-work keystone
 
-This document is the **single source of truth for interfaces** during the Phase 0 / Phase 1
+> **Historical.** Written so four MHFU agents could work in parallel. Phase 0/1 is
+> implemented: treat `app/domain/models.py`, `app/engine/`, and `app/web/` as
+> as-built. New generations use `docs/prompts/` (one implementer per SCOPE, then a
+> reviewer). Do not re-open this file as a live ownership matrix.
+
+This document was the **single source of truth for interfaces** during the Phase 0 / Phase 1
 (MHFU) build. It exists so that foundation, ETL, solver, and UI work can proceed without
 negotiating with each other. If code and this document disagree, the code is wrong — or the
 disagreement is surfaced and this document is updated deliberately, in one commit.

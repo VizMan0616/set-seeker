@@ -5,6 +5,11 @@ description: Extend or modify the set-seeker CP-SAT search model (new mechanics 
 
 # Extend Solver Model
 
+## How this is invoked
+
+The user pastes `docs/prompts/implement.md` with `SCOPE: engine-ui` after the pack's
+ETL is merged. Do not invent a new pack or column map in this session.
+
 ## Rules (non-negotiable)
 
 1. The engine is CP-SAT (OR-Tools). **Never reintroduce brute-force enumeration, per-charm

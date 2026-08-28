@@ -15,6 +15,11 @@ description: Add support for a new Monster Hunter generation (game pack) to set-
 3. A pack is done only when its known-query suite passes against the legacy tool
    (`docs/specs/engine-spec.md` §7).
 
+## How this is invoked
+
+The user pastes `docs/prompts/implement.md` with `SCOPE: etl` (or a reviewer pastes
+`docs/prompts/review.md`). Do not start engine-ui work in an etl session.
+
 ## Workflow
 
 1. Read `docs/specs/data-pack-spec.md` — manifest format, source file formats, ETL rules.

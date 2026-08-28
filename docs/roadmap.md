@@ -1,10 +1,17 @@
 # Roadmap — generation rollout
 
 Order and rationale are decided in `docs/adr/0008`. Generations are built **sequentially,
-never in parallel**. Each phase ships a fully working vertical slice: ETL → solver model → UI
-→ validation against the legacy tool.
+never in parallel**. Each phase: implementer `SCOPE: etl` → reviewer → (if new engine
+flags) implementer `SCOPE: engine-ui` → reviewer → integration reviewer. Prompts:
+`docs/prompts/`.
 
-## Phase 0 — Walking skeleton (prerequisite for everything)
+## Phase 0 — Walking skeleton (done)
+
+Shipped with Phase 1. As-built: `app/`, `Dockerfile`, `alembic/`. The parallel-agent
+contract in `docs/specs/phase0-contracts.md` is historical; new generations use
+`docs/prompts/`.
+
+## Phase 0 (original checklist, kept for provenance)
 
 - FastAPI app shell: Jinja2 + Bootstrap + htmx, anonymous session middleware.
 - SQLAlchemy Core + Alembic + repository layer (`docs/specs/database-schema.md` — portability
@@ -13,7 +20,12 @@ never in parallel**. Each phase ships a fully working vertical slice: ETL → so
 - CP-SAT engine skeleton implementing `docs/specs/engine-spec.md` end to end for one slot set.
 - Dockerfile: multi-stage, ETL at build time, single runtime container.
 
-## Phase 1 — MHFU (gen 2)
+## Phase 1 — MHFU (gen 2) — done
+
+Shipped: ETL, CP-SAT search, Advanced Search, set-mix / known-query gates, Docker.
+Only remaining MHFU work is optional (more known queries from live Athena runs).
+
+## Phase 1 (original checklist)
 
 - **Why first:** no charm dimension, smallest dataset (~410 pieces/slot), simplest model.
 - Pack flags: `talismans: false`, everything else off.

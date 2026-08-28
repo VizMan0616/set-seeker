@@ -57,7 +57,7 @@ O(C·n⁵).
 |---|---|---|
 | `head.txt` … `legs.txt` | `#` comment header: engname, 名前, gender(0/1/2), type(0/1/2), rarity, slots, HR, village★, def, max def, 5 resists, 5×(skill,pts), 4×(mat,qty) | `Armor::Load` (`Armor.cpp:18-103`) |
 | `decorations.txt` | eng, jap, rarity, slots, HR, village★, skill1,pts, skill2,pts, 4× craft A, 4× craft B | `Decoration::Load` (`Decoration.cpp:8-80`) |
-| `skills.txt` | eng-name, Skill(jap), eng-ability, Skill-Tree, Points, Type, tag, order | `Skill::Load` (`Skill.cpp:64+`) |
+| `skills.txt` | **no leading index columns** (unlike MH3U): eng-name, Skill(jap), eng-ability, Skill-Tree, Points, Type, tag, order. `#` comment header. Empty ability column = Torso Inc. | `Skill::Load` (`Skill.cpp:64-131`) |
 | `tags.txt` | Tag names (Offensive, Defensive, …) | `SkillTag::Load` |
 | `components.txt` | Material names | Materials loader |
 | `mycharms.txt` | `#Format: NumSlots,Skill1,Points1,Skill2,Points2` | `CharmDatabase::LoadCustom` (~108–168) |
@@ -103,3 +103,9 @@ message; the search itself no longer stops at 1000.
   `docs/adr/0006` and the per-generation deferral note.
 - Second vertical slice after MHFU: adds the charm dimension (inventory + generated legal
   charms) to the solver model.
+- ETL (2026-08): confirmed armor/decoration slots are **integers**, not `O--`; gender/type
+  are Athena `0/1/2` (both/male/female and both/blade/gunner). Duplicate armor is **name-only**
+  (`ArmorExists`, `Armor.cpp:10-16`) — 26 later gender-twin rows dropped. Charm RNG tables
+  extracted from `OmaSkill::SKILL` / `FURUSLO` / `tableinit` into
+  `packs/mhp3/charm_generation/` (mystery / shining / timeworn). English names remain fan
+  translations (`translation: fan`).

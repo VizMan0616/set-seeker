@@ -80,6 +80,7 @@ charm inventories per game.
 
 ## Current state
 
-Phase 0/1 is implemented: FastAPI + Jinja2/Bootstrap/htmx, SQLite via SQLAlchemy Core,
-MHFU ETL + CP-SAT search, Advanced Search, multi-stage Dockerfile. Only `packs/mhfu/`
-ships today. Next: MHP3 (charms) per `docs/roadmap.md`.
+Phase 0/1 (MHFU) and Phase 2 (MHP3) ship in one image: FastAPI + Jinja2/Bootstrap/htmx,
+SQLite via SQLAlchemy Core, CP-SAT search, Advanced Search, charm inventory (MHP3),
+multi-stage Dockerfile that ETLs `packs/mhfu/` and `packs/mhp3/`. Next: MHGU
+per `docs/roadmap.md`.

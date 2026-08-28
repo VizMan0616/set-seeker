@@ -58,6 +58,18 @@ class SkillThreshold:
 
 
 @dataclass(frozen=True)
+class CharmTypeSpec:
+    """Legal envelopes for one charm rarity/type (extracted RNG / CSV tables)."""
+
+    code: str
+    max_slots: int
+    skill1: tuple[tuple[int, int, int], ...] = ()  # (tree_id, min_points, max_points)
+    skill2: tuple[tuple[int, int, int], ...] = ()
+    # (fulfillment, max_slots) from *_slots.csv / charm_slot_thresholds.
+    slot_thresholds: tuple[tuple[int, int], ...] = ()
+
+
+@dataclass(frozen=True)
 class PackData:
     game: str                            # pack id, e.g. "mhfu"
     game_id: int                         # games.id, for search_states rows
@@ -66,3 +78,4 @@ class PackData:
     skills: tuple[SkillThreshold, ...] = ()
     talismans: bool = False              # pack flag; False for mhfu
     weapon_search: bool = False          # pack flag; weapons as a 6th search dimension
+    charm_types: tuple[CharmTypeSpec, ...] = ()

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}My talismans — {{ game.name }}{% endblock %}
+{% block content %}
+<header class="ss-hero mb-4">
+  <p class="ss-eyebrow">{{ game.name }}</p>
+  <h1 class="ss-title">My talismans</h1>
+  <p class="ss-lede">
+    Type the charms you own. Searches use this list plus legal generated charms,
+    and prefer the weakest charm that still completes the set.
+  </p>
+</header>
+
+<form class="card ss-form mb-4" method="post" action="/games/{{ game.code }}/charms">
+  <div class="card-body">
+    <legend class="ss-legend">Add a charm</legend>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="charm-slots">Slots</label>
+        <select id="charm-slots" class="form-select" name="slots">
+          <option value="0">---</option>
+          <option value="1">O--</option>
+          <option value="2">OO-</option>
+          <option value="3">OOO</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="skill1-tree">Skill 1</label>
+        <select id="skill1-tree" class="form-select" name="skill1_tree">
+          <option value="">—</option>
+          {% for tree in trees %}
+          <option value="{{ tree.id }}">{{ tree.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="skill1-points">Points</label>
+        <select id="skill1-points" class="form-select" name="skill1_points">
+          {% for n in range(1, 11) %}
+          <option value="{{ n }}"{% if n == 4 %} selected{% endif %}>+{{ n }}</option>
+          {% endfor %}
+          {% for n in range(1, 6) %}
+          <option value="-{{ n }}">-{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="skill2-tree">Skill 2</label>
+        <select id="skill2-tree" class="form-select" name="skill2_tree">
+          <option value="">—</option>
+          {% for tree in trees %}
+          <option value="{{ tree.id }}">{{ tree.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label ss-label" for="skill2-points">Points</label>
+        <select id="skill2-points" class="form-select" name="skill2_points">
+          {% for n in range(1, 8) %}
+          <option value="{{ n }}"{% if n == 2 %} selected{% endif %}>+{{ n }}</option>
+          {% endfor %}
+          {% for n in range(1, 6) %}
+          <option value="-{{ n }}">-{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label ss-label" for="charm-note">Note <span class="ss-legend-note">optional</span></label>
+        <input id="charm-note" class="form-control" name="note" maxlength="128"
+               placeholder="e.g. table 7 farm">
+      </div>
+    </div>
+  </div>
+  <div class="card-body border-top">
+    <button type="submit" class="btn ss-btn-brass">Add talisman</button>
+    <a class="btn btn-outline-secondary ms-2" href="/">Back to search</a>
+  </div>
+</form>
+
+{% if charms %}
+<ul class="list-group ss-charm-list mb-4">
+  {% for charm in charms %}
+  <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+    <div>
+      <span class="ss-piece-name">{{ charm.label }}</span>
+      {% if charm.note %}<span class="ss-hint d-block">{{ charm.note }}</span>{% endif %}
+    </div>
+    <form method="post" action="/games/{{ game.code }}/charms/{{ charm.id }}/delete">
+      <button type="submit" class="btn btn-sm btn-outline-secondary">Remove</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="ss-hint">No charms yet — add one above. Generated legal charms still appear in search.</p>
+{% endif %}
+{% endblock %}

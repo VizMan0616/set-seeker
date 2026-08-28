@@ -17,8 +17,9 @@ data
 tests
 docs
 
-# Legacy source clones: only the MHFU pack data is needed at build time
-# (phase 0). Their .git dirs never enter the build context.
+# Legacy source clones: only shipped packs' data enter the build context.
+# Their .git dirs never enter the context.
 sources/*/.git
 sources/*
 !sources/MHFU-ASS
+!sources/MHP3-ASS

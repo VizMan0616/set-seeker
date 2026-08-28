@@ -15,6 +15,9 @@ class _Resolver:
     def skill_name(self, skill_id: int) -> str:
         return "Attack Up (S)"
 
+    def skill_tree_name(self, tree_id: int) -> str:
+        return "Attack"
+
 
 def _grouped() -> ArmorSetResult:
     return ArmorSetResult(

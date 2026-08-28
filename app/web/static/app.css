@@ -88,6 +88,16 @@ h1, h2, h3, .ss-card-title {
   color: var(--ss-pine-deep);
 }
 
+.ss-inline-link {
+  display: inline-block;
+  margin-left: 0.35rem;
+  color: var(--ss-brass);
+}
+
+.ss-charm-list .ss-piece-name {
+  font-weight: 600;
+}
+
 .ss-lede {
   max-width: 42rem;
   color: rgba(35, 42, 36, 0.8);

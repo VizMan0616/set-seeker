@@ -11,7 +11,7 @@ from app.repository.game_data import GameDataRepository
 from app.repository.user_data import UserDataRepository
 from app.sessions import SessionMiddleware
 from app.web.resolvers import RepositoryCatalog, RepositoryNameResolver
-from app.web.routes import pages, search
+from app.web.routes import charms, pages, search
 
 
 def create_app() -> FastAPI:
@@ -19,6 +19,7 @@ def create_app() -> FastAPI:
     app.add_middleware(SessionMiddleware)
     app.include_router(pages.router)
     app.include_router(search.router)
+    app.include_router(charms.router)
     app.mount(
         "/static",
         StaticFiles(directory=Path(__file__).parent / "web" / "static"),
@@ -35,12 +36,14 @@ def create_app() -> FastAPI:
     except Exception as exc:
         raise RuntimeError(
             f"cannot read game data from {settings.DATABASE_URL!r} — "
-            "run `python -m app.etl --pack mhfu` to build the database first"
+            "run `python -m app.etl --pack mhfu` then "
+            "`python -m app.etl --pack mhp3` to build the database first"
         ) from exc
     if not games:
         raise RuntimeError(
             f"no game packs loaded in {settings.DATABASE_URL!r} — "
-            "run `python -m app.etl --pack mhfu` first"
+            "run `python -m app.etl --pack mhfu` then "
+            "`python -m app.etl --pack mhp3` first"
         )
 
     # Pack data is loaded once at startup and cached for the process lifetime.
@@ -49,6 +52,7 @@ def create_app() -> FastAPI:
         pack_loader(game["code"])
 
     app.state.pack_loader = pack_loader
+    app.state.user_data = user_data
     app.state.search_service = CpSatSearchService(
         user_data,
         pack_loader,

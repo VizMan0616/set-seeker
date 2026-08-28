@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # set-seeker — single-container build (CONTEXT.md hard constraint).
-# Stage 1 installs dependencies and runs the MHFU data ETL (roadmap Phase 0:
-# "multi-stage, ETL at build time, single runtime container"). Stage 2 is the
-# runtime: app source (for templates/static), the built SQLite DB, uvicorn.
+# Stage 1 installs dependencies and runs every shipped pack's ETL (MHFU +
+# MHP3) into one SQLite DB. Stage 2 is the runtime: app source (templates/
+# static), the built DB, uvicorn.
 
 FROM python:3.12-slim AS build
 
@@ -19,11 +19,14 @@ COPY packs ./packs
 COPY alembic ./alembic
 COPY alembic.ini ./
 COPY sources/MHFU-ASS ./sources/MHFU-ASS
+COPY sources/MHP3-ASS ./sources/MHP3-ASS
 
-# Build the SQLite game database (migrations + pack load + validation gate;
-# the build fails if the gate fails).
+# Build the SQLite game database (migrations + each pack + validation gate;
+# the build fails if a gate fails). Packs share one DB so list_games() is
+# the picker source of truth (phase0-contracts.md §8–§9, ADR 0001).
 RUN mkdir -p /data \
-    && python -m app.etl --pack mhfu --database-url sqlite:////data/setseeker.db
+    && python -m app.etl --pack mhfu --database-url sqlite:////data/setseeker.db \
+    && python -m app.etl --pack mhp3 --database-url sqlite:////data/setseeker.db
 
 
 FROM python:3.12-slim AS runtime

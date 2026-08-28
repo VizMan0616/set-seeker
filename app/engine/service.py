@@ -7,8 +7,17 @@ stateless re-solve (ADR 0005). Infeasible is a result, never an exception.
 
 import json
 from collections.abc import Callable
+from dataclasses import replace
 
-from app.domain.models import PAGE_SIZE, ArmorSetResult, Query, SearchPage, SkillRequest
+from app.domain.models import (
+    NONE_CHARM_ID,
+    PAGE_SIZE,
+    ArmorSetResult,
+    CharmSpec,
+    Query,
+    SearchPage,
+    SkillRequest,
+)
 
 # Tail census after the first page so the UI can say "N more to load".
 # Only representative ids are walked; cards stay page-sized (ADR 0005).
@@ -35,10 +44,17 @@ def _query_to_json(query: Query) -> str:
             "allow_dummy": query.allow_dummy,
             "excluded_piece_ids": list(query.excluded_piece_ids),
             "excluded_decoration_ids": list(query.excluded_decoration_ids),
+            "excluded_charm_ids": list(query.excluded_charm_ids),
             "forced_piece_ids": list(query.forced_piece_ids),
             "forced_decoration_ids": list(query.forced_decoration_ids),
+            "forced_charm_ids": list(query.forced_charm_ids),
             "sort": query.sort,
             "expand_equivalents": query.expand_equivalents,
+            "use_generated_charms": query.use_generated_charms,
+            "user_charms": [
+                {"id": c.id, "slots": c.slots, "skills": [list(p) for p in c.skills]}
+                for c in query.user_charms
+            ],
         }
     )
 
@@ -85,16 +101,41 @@ def _query_from_json(payload: str) -> Query:
         allow_dummy=d.get("allow_dummy", False),
         excluded_piece_ids=tuple(d.get("excluded_piece_ids") or ()),
         excluded_decoration_ids=tuple(d.get("excluded_decoration_ids") or ()),
+        excluded_charm_ids=tuple(d.get("excluded_charm_ids") or ()),
         forced_piece_ids=tuple(d.get("forced_piece_ids") or ()),
         forced_decoration_ids=tuple(d.get("forced_decoration_ids") or ()),
+        forced_charm_ids=tuple(d.get("forced_charm_ids") or ()),
         sort=d["sort"],
         expand_equivalents=bool(d.get("expand_equivalents", False)),
+        use_generated_charms=bool(d.get("use_generated_charms", True)),
+        user_charms=tuple(
+            CharmSpec(
+                id=c["id"],
+                slots=c["slots"],
+                skills=tuple((int(a), int(b)) for a, b in c["skills"]),
+            )
+            for c in d.get("user_charms") or ()
+        ),
     )
 
 
 def query_from_json(payload: str) -> Query:
     """Public loader for search_states.query_json (ignores snapshot extras)."""
     return _query_from_json(payload)
+
+
+def _charm_skills_from_row(row: dict) -> tuple[tuple[int, int], ...]:
+    skills = []
+    if row.get("skill1_tree") is not None and row.get("skill1_points") is not None:
+        skills.append((int(row["skill1_tree"]), int(row["skill1_points"])))
+    if row.get("skill2_tree") is not None and row.get("skill2_points") is not None:
+        skills.append((int(row["skill2_tree"]), int(row["skill2_points"])))
+    return tuple(skills)
+
+
+def _exclusion_tuple(result: ArmorSetResult) -> list[int]:
+    charm = NONE_CHARM_ID if result.charm_id is None else result.charm_id
+    return [*result.piece_ids, charm]
 
 
 def _with_domain_snapshot(query_json: str, snapshot: dict) -> str:
@@ -130,6 +171,7 @@ class CpSatSearchService:
         # A new search from the same session invalidates its prior states.
         self._user_data.delete_search_states_for_session(session_id)
         pack = self._pack_loader(query.game)
+        query = self._with_inventory(session_id, pack, query)
         pruned = prune(pack, query)
         state = self._user_data.create_search_state(
             session_id=session_id,
@@ -215,8 +257,24 @@ class CpSatSearchService:
             remaining_count=remaining,
         )
 
+    def _with_inventory(self, session_id: str, pack: PackData, query: Query) -> Query:
+        if not pack.talismans or query.user_charms:
+            return query
+        rows = self._user_data.list_charms(session_id, pack.game_id)
+        return replace(
+            query,
+            user_charms=tuple(
+                CharmSpec(
+                    id=row["id"],
+                    slots=row["slots"],
+                    skills=_charm_skills_from_row(row),
+                )
+                for row in rows
+            ),
+        )
+
     def _solve_page(
-        self, query: Query, exclusions: list[tuple[int, int, int, int, int]]
+        self, query: Query, exclusions: list[tuple[int, ...]]
     ) -> tuple[list[ArmorSetResult], list[list[int]], bool, bool]:
         pack = self._pack_loader(query.game)
         pruned: PrunedPack = prune(pack, query)  # cached per (pack, query)
@@ -243,7 +301,7 @@ class CpSatSearchService:
                 partial = True
                 break
             results.append(outcome.result)
-            exclusion = list(outcome.result.piece_ids)
+            exclusion = _exclusion_tuple(outcome.result)
             new_exclusions.append(exclusion)
             working.append(tuple(exclusion))
             if outcome.status == "feasible":
@@ -255,7 +313,7 @@ class CpSatSearchService:
         return results, new_exclusions, partial, exhausted
 
     def _count_further(
-        self, query: Query, exclusions: list[tuple[int, int, int, int, int]]
+        self, query: Query, exclusions: list[tuple[int, ...]]
     ) -> tuple[int, bool]:
         """How many more result units exist after ``exclusions``.
 
@@ -281,7 +339,7 @@ class CpSatSearchService:
                 return extra, True
             if outcome.result is None:
                 return extra, False
-            working.append(tuple(outcome.result.piece_ids))
+            working.append(tuple(_exclusion_tuple(outcome.result)))
             extra += (
                 outcome.result.equivalent_count()
                 if query.expand_equivalents

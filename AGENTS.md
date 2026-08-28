@@ -46,7 +46,8 @@ Committed under `.cursor/skills/` — apply them when their trigger matches:
 
 ## Current state
 
-MHFU (Phase 0/1) is implemented. Application code lives under `app/`; the only shipped
-pack is `packs/mhfu/`. Adding a generation: use the `add-game-pack` skill (and
-`extend-solver-model` when the pack turns on a mechanic the engine does not yet model).
-Reviewer sessions use the same skills to grill against ADRs and specs, not to rewrite.
+MHFU (Phase 0/1) and MHP3 (Phase 2) ship. Application code lives under `app/`;
+shipped packs are `packs/mhfu/` and `packs/mhp3/`. Adding a generation: use the
+`add-game-pack` skill (and `extend-solver-model` when the pack turns on a mechanic
+the engine does not yet model). Reviewer sessions use the same skills to grill
+against ADRs and specs, not to rewrite.

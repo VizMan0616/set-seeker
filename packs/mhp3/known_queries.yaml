@@ -103,3 +103,17 @@ queries:
     hr: 0
     village_stars: 6
     trees: { "Expert": 10 }
+
+  # engine-spec.md §7: replay a charm-bearing set (generated legal talisman).
+  - name: "Attack Up [Lg] + Sharp Sword needs a generated charm at village 1"
+    type: solver_set
+    hunter_type: blademaster
+    gender: m
+    hr: 1
+    village_stars: 1
+    weapon_slots: 0
+    use_generated_charms: true
+    trees: { "Attack": 20, "Sharpness": 10 }
+    expect:
+      charm: generated
+      charm_points_at_most: { "Attack": 10, "Sharpness": 10 }

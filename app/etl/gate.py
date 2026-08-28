@@ -158,6 +158,57 @@ class Gate:
                     f"(per-slot max {per_slot_max}, best jewel {best_deco})")
         return GateResult(query["name"], not problems, "; ".join(problems))
 
+    def _check_solver_set(self, query: dict[str, Any]) -> GateResult:
+        """Replay a charm-bearing (or charm-free) set through the CP-SAT engine."""
+        from app.domain.models import Query, SkillRequest
+        from app.engine.pruning import prune
+        from app.engine.solver import solve_one
+        from app.pack_loader import PackLoader
+
+        game = self._repo.get_game(self._game_id)
+        if game is None:
+            return GateResult(query["name"], False, "game row missing")
+        pack = PackLoader(self._repo)(game["code"])
+        skills: list[SkillRequest] = []
+        for tree_name, threshold in query["trees"].items():
+            tree_id = self._tree_ids.get(tree_name)
+            if tree_id is None:
+                return GateResult(query["name"], False, f"tree {tree_name!r} not found")
+            skills.append(SkillRequest(tree_id=tree_id, min_points=threshold))
+        q = Query(
+            game=game["code"],
+            skills=tuple(skills),
+            weapon_slots=int(query.get("weapon_slots", 0)),
+            gender=query.get("gender", "m"),
+            hunter_type=query.get("hunter_type", "blademaster"),
+            hr=query.get("hr"),
+            village_stars=query.get("village_stars"),
+            use_generated_charms=bool(query.get("use_generated_charms", True)),
+        )
+        outcome = solve_one(
+            pack=pack, pruned=prune(pack, q), query=q, exclusions=[], time_limit_ms=5000
+        )
+        expect = query.get("expect", {})
+        if outcome.result is None:
+            return GateResult(query["name"], False, f"no set ({outcome.status})")
+        charm_id = outcome.result.charm_id
+        want_charm = expect.get("charm")
+        if want_charm == "generated" and (charm_id is None or charm_id >= 0):
+            return GateResult(query["name"], False, f"expected generated charm, got {charm_id}")
+        if want_charm == "none" and charm_id is not None:
+            return GateResult(query["name"], False, f"expected no charm, got {charm_id}")
+        caps = expect.get("charm_points_at_most") or {}
+        actual = dict(outcome.result.charm_skills)
+        for tree_name, cap in caps.items():
+            tree_id = self._tree_ids[tree_name]
+            pts = actual.get(tree_id, 0)
+            if pts > cap:
+                return GateResult(
+                    query["name"], False,
+                    f"{tree_name} charm points {pts} exceed envelope {cap}",
+                )
+        return GateResult(query["name"], True)
+
     # --- helpers ---
 
     def _tree_name(self, tree_id: int) -> str:

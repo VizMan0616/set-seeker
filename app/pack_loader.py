@@ -9,7 +9,7 @@ the web layer loads every pack once at startup.
 
 import json
 
-from app.engine.data import ArmorPiece, Decoration, PackData, SkillThreshold
+from app.engine.data import ArmorPiece, CharmTypeSpec, Decoration, PackData, SkillThreshold
 from app.repository.game_data import GameDataRepository
 
 
@@ -90,6 +90,27 @@ class PackLoader:
             for s in self._repo.list_skills_for_tree(tree["id"])
         )
         features = json.loads(row["features"])
+        charm_types = tuple(
+            CharmTypeSpec(
+                code=kind["code"],
+                max_slots=kind["max_slots"],
+                skill1=tuple(
+                    (r["tree_id"], r["min_points"], r["max_points"])
+                    for r in self._repo.list_charm_skill_ranges(kind["id"])
+                    if r["skill_slot"] == 1
+                ),
+                skill2=tuple(
+                    (r["tree_id"], r["min_points"], r["max_points"])
+                    for r in self._repo.list_charm_skill_ranges(kind["id"])
+                    if r["skill_slot"] == 2
+                ),
+                slot_thresholds=tuple(
+                    (row["fulfillment"], row["slots"])
+                    for row in self._repo.list_charm_slot_thresholds(kind["id"])
+                ),
+            )
+            for kind in self._repo.list_charm_types(game_id)
+        )
         return PackData(
             game=game,
             game_id=game_id,
@@ -98,4 +119,5 @@ class PackLoader:
             skills=skills,
             talismans=bool(features.get("talismans", False)),
             weapon_search=bool(features.get("weapon_search", False)),
+            charm_types=charm_types,
         )

@@ -131,10 +131,13 @@ def _parse_query(
         allow_dummy=_first(fields, "allow_dummy") == "on",
         excluded_piece_ids=_int_ids(fields, "excluded_piece_id"),
         excluded_decoration_ids=_int_ids(fields, "excluded_decoration_id"),
+        excluded_charm_ids=_int_ids(fields, "excluded_charm_id"),
         forced_piece_ids=_int_ids(fields, "forced_piece_id"),
         forced_decoration_ids=_int_ids(fields, "forced_decoration_id"),
+        forced_charm_ids=_int_ids(fields, "forced_charm_id"),
         sort=_first(fields, "sort", "defense"),
         expand_equivalents=_first(fields, "expand_equivalents") == "on",
+        use_generated_charms=_first(fields, "use_generated_charms", "on") == "on",
     )
     if pack_loader is not None and _first(fields, "advanced_domain") == "1":
         query = apply_rel_checks(
@@ -142,12 +145,17 @@ def _parse_query(
             pack_loader(game),
             _int_ids(fields, "rel_piece_id"),
             _int_ids(fields, "rel_decoration_id"),
+            _int_ids(fields, "rel_charm_id"),
         )
     return query
 
 
 def _search_page_context(request: Request, game: str, query: Query, page) -> dict:
     pack = request.app.state.pack_loader(game)
+    stored = request.app.state.search_service.get_search_query(
+        request.state.session_id, page.search_id
+    )
+    query = stored or query
     pruned = prune(pack, query)
     return page_context(
         page,

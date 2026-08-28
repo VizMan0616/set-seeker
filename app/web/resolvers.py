@@ -27,6 +27,7 @@ class RepositoryNameResolver:
         self._pieces: dict[int, dict[str, Any]] = {}
         self._deco_names: dict[int, str] = {}
         self._skill_names: dict[int, str] = {}
+        self._tree_names: dict[int, str] = {}
 
     def armor_piece(self, piece_id: int) -> dict[str, Any]:
         if piece_id not in self._pieces:
@@ -55,6 +56,14 @@ class RepositoryNameResolver:
                 raise KeyError(f"unknown skill id {skill_id}")
             self._skill_names[skill_id] = row["name_en"]
         return self._skill_names[skill_id]
+
+    def skill_tree_name(self, tree_id: int) -> str:
+        if tree_id not in self._tree_names:
+            row = self._repo.get_skill_tree(tree_id)
+            if row is None:
+                raise KeyError(f"unknown skill tree id {tree_id}")
+            self._tree_names[tree_id] = row["name_en"]
+        return self._tree_names[tree_id]
 
 
 class RepositoryCatalog:
@@ -90,11 +99,13 @@ class RepositoryCatalog:
             return {
                 "categories": [],
                 "skills": [],
+                "talismans": False,
                 "progression": {"guild_rank": 9, "village_stars": 9},
             }
         game_id = row["id"]
         return {
             "categories": [c["tag"] for c in self._repo.list_skill_categories(game_id)],
+            "talismans": bool(json.loads(row["features"] or "{}").get("talismans", False)),
             "progression": progression_caps(row["features"]),
             "skills": [
                 {

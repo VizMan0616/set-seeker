@@ -19,6 +19,7 @@ def index(request: Request) -> HTMLResponse:
     default_catalog = catalogs.get(default_game, {
         "categories": [], "skills": [],
         "progression": {"guild_rank": 9, "village_stars": 9},
+        "talismans": False,
     })
     return templates.TemplateResponse(
         request,

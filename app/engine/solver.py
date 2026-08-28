@@ -4,11 +4,11 @@ One index variable per armor slot over the pruned equivalence-class
 representatives, decoration count/placement variables with per-piece slot
 capacity, skill thresholds, and the no-bad-skills constraint. Each call
 solves for exactly one ranked set; enumeration lives in service.py as
-iterate-and-exclude (ADR 0005). No charm variable for MHFU
-(pack flag ``talismans: false``).
+iterate-and-exclude (ADR 0005). Charm variable is present when pack flag ``talismans`` is true
+(inventory ∪ generated legal envelopes ∪ none).
 
 Objective order (settled; changing it requires superseding ADR 0005):
-1. minimize required charm strength — trivially none for MHFU, no term;
+1. minimize required charm strength — constant 0 when there is only none;
 2. maximize spare slots; 3. maximize defense; 4. query sort tie-breakers.
 Implemented as a single weighted sum with bounds derived from the pruned
 data so the lexicographic order is exact.
@@ -18,11 +18,19 @@ from dataclasses import dataclass
 
 from ortools.sat.python import cp_model
 
-from app.domain.models import ArmorSetResult, DecorationAssignment, Query
+from app.domain.models import (
+    NONE_CHARM_ID,
+    ArmorSetResult,
+    CharmSpec,
+    DecorationAssignment,
+    Query,
+)
+from app.engine.charms import charm_strength
 from app.engine.data import BODY, SLOT_COUNT, PackData
 from app.engine.pruning import PrunedPack
 
 WEAPON_BUCKET = SLOT_COUNT  # decoration placement bucket index for the weapon
+CHARM_BUCKET = SLOT_COUNT + 1
 
 _RES_ATTR = {
     "res_fire": "res_fire",
@@ -44,7 +52,7 @@ def solve_one(
     pack: PackData,
     pruned: PrunedPack,
     query: Query,
-    exclusions: list[tuple[int, int, int, int, int]],
+    exclusions: list[tuple[int, ...]],
     time_limit_ms: int,
     num_workers: int = 1,
 ) -> SolveOutcome:
@@ -75,10 +83,13 @@ def solve_one(
     ]
     reps = [[c.representative for c in classes] for classes in pruned.classes]
 
-    def element(s: int, vals: list[int], name: str) -> cp_model.IntVar:
+    def element_of(index: cp_model.IntVar, vals: list[int], name: str) -> cp_model.IntVar:
         v = model.new_int_var(min(vals), max(vals), name)
-        model.add_element(x[s], vals, v)
+        model.add_element(index, vals, v)
         return v
+
+    def element(s: int, vals: list[int], name: str) -> cp_model.IntVar:
+        return element_of(x[s], vals, name)
 
     slots_var = [element(s, [r.slots for r in reps[s]], f"slots_{s}") for s in range(SLOT_COUNT)]
     defense_var = [
@@ -95,20 +106,35 @@ def solve_one(
         BODY, [1 if r.torso_inc else 0 for r in reps[BODY]], "torso_inc"
     )
 
+    charms = pruned.charms or ()
+    if not charms:
+        charms = (CharmSpec(id=NONE_CHARM_ID),)
+    charm_x = model.new_int_var(0, len(charms) - 1, "charm")
+    charm_slots_var = element_of(charm_x, [c.slots for c in charms], "charm_slots")
+    charm_strength_var = element_of(
+        charm_x, [charm_strength(c.slots, c.skills) for c in charms], "charm_strength"
+    )
+    charm_pts = {
+        t: element_of(
+            charm_x, [dict(c.skills).get(t, 0) for c in charms], f"charm_pts_{t}"
+        )
+        for t in trees
+    }
+
     # --- decoration counts and per-bucket placement ---
     # A jewel of size k occupies k sockets on a single piece (or the weapon);
     # per-piece capacity makes "smaller jewel fits larger slot" unnecessary to
     # model explicitly — sockets are generic.
     decos = pruned.decorations
     deco_skills = {d.id: dict(d.skills) for d in decos}
-    max_sockets = 3 * SLOT_COUNT + 3
+    max_sockets = 3 * SLOT_COUNT + 6
     deco_count: dict[int, cp_model.IntVar] = {}
     place: dict[tuple[int, int], cp_model.IntVar] = {}
     for d in decos:
         count = model.new_int_var(0, max_sockets // d.size, f"deco_count_{d.id}")
         deco_count[d.id] = count
         bucket_vars = []
-        for b in range(SLOT_COUNT + 1):
+        for b in range(SLOT_COUNT + 2):
             pv = model.new_int_var(0, 3, f"place_{d.id}_{b}")
             place[d.id, b] = pv
             bucket_vars.append(pv)
@@ -118,6 +144,9 @@ def solve_one(
         model.add(sum(d.size * place[d.id, s] for d in decos) <= slots_var[s])
     model.add(
         sum(d.size * place[d.id, WEAPON_BUCKET] for d in decos) <= query.weapon_slots
+    )
+    model.add(
+        sum(d.size * place[d.id, CHARM_BUCKET] for d in decos) <= charm_slots_var
     )
 
     # --- points per tracked tree (body piece and body-socketed jewels doubled
@@ -129,7 +158,11 @@ def solve_one(
     max_deco = max(
         (abs(v) for d in decos for v in deco_skills[d.id].values()), default=0
     )
-    bound = 2 * SLOT_COUNT * max_piece + 2 * max_sockets * max_deco + 1
+    max_charm = max(
+        (abs(p) for c in charms for _, p in c.skills),
+        default=0,
+    )
+    bound = 2 * SLOT_COUNT * max_piece + 2 * max_sockets * max_deco + max_charm + 1
 
     points: dict[int, cp_model.IntVar] = {}
     for t in trees:
@@ -141,7 +174,7 @@ def solve_one(
                 terms.append(piece_pts[s, t] + extra)
             else:
                 terms.append(piece_pts[s, t])
-        for b in range(SLOT_COUNT + 1):
+        for b in range(SLOT_COUNT + 2):
             expr = sum(deco_skills[d.id].get(t, 0) * place[d.id, b] for d in decos)
             if isinstance(expr, int):
                 continue  # no decoration grants this tree
@@ -151,6 +184,7 @@ def solve_one(
                 terms.append(expr + extra)
             else:
                 terms.append(expr)
+        terms.append(charm_pts[t])
         total = model.new_int_var(-bound, bound, f"points_{t}")
         model.add(total == sum(terms))
         points[t] = total
@@ -165,20 +199,29 @@ def solve_one(
     id_to_idx = [
         {r.id: i for i, r in enumerate(reps[s])} for s in range(SLOT_COUNT)
     ]
+    charm_id_to_idx = {c.id: i for i, c in enumerate(charms)}
     for n, excl in enumerate(exclusions):
+        padded = tuple(excl) + (NONE_CHARM_ID,) if len(excl) == SLOT_COUNT else tuple(excl)
         lits = []
         for s in range(SLOT_COUNT):
-            idx = id_to_idx[s].get(excl[s])
+            idx = id_to_idx[s].get(padded[s])
             if idx is None:
                 break  # stale exclusion against a re-pruned domain; cannot recur
             lit = model.new_bool_var(f"excl_{n}_{s}")
             model.add(x[s] != idx).only_enforce_if(lit)
             lits.append(lit)
         else:
+            if len(padded) > SLOT_COUNT:
+                cidx = charm_id_to_idx.get(padded[SLOT_COUNT])
+                if cidx is None:
+                    continue
+                lit = model.new_bool_var(f"excl_{n}_charm")
+                model.add(charm_x != cidx).only_enforce_if(lit)
+                lits.append(lit)
             model.add_bool_or(lits)
 
     # --- lexicographic objective as one weighted sum ---
-    sockets_total = sum(slots_var) + query.weapon_slots
+    sockets_total = sum(slots_var) + query.weapon_slots + charm_slots_var
     sockets_used = sum(d.size * deco_count[d.id] for d in decos)
     spare = sockets_total - sockets_used
     defense = sum(defense_var)
@@ -204,7 +247,17 @@ def solve_one(
         tie = 0
         tie_bound = 1
 
-    model.maximize(spare * (max_defense + 1) * tie_bound + defense * tie_bound + tie)
+    max_spare = 3 * SLOT_COUNT + 6
+    mid_weight = (max_defense + 1) * tie_bound
+    charm_weight = (max_spare + 1) * mid_weight
+    max_str = max(charm_strength(c.slots, c.skills) for c in charms)
+    weak_charm = max_str - charm_strength_var
+    model.maximize(
+        weak_charm * charm_weight
+        + spare * mid_weight
+        + defense * tie_bound
+        + tie
+    )
 
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = time_limit_ms / 1000.0
@@ -221,7 +274,9 @@ def solve_one(
     if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         return SolveOutcome("unknown", None)
 
-    result = _extract(solver, pruned, query, x, deco_count, place, points, decos)
+    result = _extract(
+        solver, pruned, query, x, deco_count, place, points, decos, charms, charm_x
+    )
     return SolveOutcome("optimal" if status == cp_model.OPTIMAL else "feasible", result)
 
 
@@ -234,6 +289,8 @@ def _extract(
     place: dict[tuple[int, int], cp_model.IntVar],
     points: dict[int, cp_model.IntVar],
     decos,
+    charms,
+    charm_x: cp_model.IntVar,
 ) -> ArmorSetResult:
     chosen = [pruned.classes[s][solver.value(x[s])] for s in range(SLOT_COUNT)]
 
@@ -245,8 +302,14 @@ def _extract(
 
     # Spare sockets per bucket, grouped by the largest jewel size they fit.
     spare = [0, 0, 0]
-    for b in range(SLOT_COUNT + 1):
-        cap = chosen[b].representative.slots if b < SLOT_COUNT else query.weapon_slots
+    chosen_charm = charms[solver.value(charm_x)]
+    for b in range(SLOT_COUNT + 2):
+        if b < SLOT_COUNT:
+            cap = chosen[b].representative.slots
+        elif b == WEAPON_BUCKET:
+            cap = query.weapon_slots
+        else:
+            cap = chosen_charm.slots
         used = sum(solver.value(place[d.id, b]) * d.size for d in decos)
         remaining = cap - used
         if 1 <= remaining <= 3:
@@ -268,8 +331,10 @@ def _extract(
         piece_ids=tuple(c.representative.id for c in chosen),
         alternates=tuple(tuple(m.id for m in c.members) for c in chosen),
         decorations=decorations,
-        charm_id=None,  # mhfu: pack flag talismans is false
+        charm_id=None if chosen_charm.id == NONE_CHARM_ID else chosen_charm.id,
         active_skills=tuple(active),
         spare_slots=tuple(spare),
         defense=sum(c.representative.defense for c in chosen),
+        charm_slots=chosen_charm.slots,
+        charm_skills=chosen_charm.skills,
     )

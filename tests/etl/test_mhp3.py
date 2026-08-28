@@ -133,6 +133,35 @@ def test_writer_counts_and_progression(etl_db):
     assert table_counts(repo, game_id)["charm_skill_ranges"] == 265
 
 
+def test_pack_loader_applies_slot_thresholds_to_generated_charms(etl_db):
+    from app.domain.models import Query, SkillRequest
+    from app.engine.charms import charm_candidates
+    from app.pack_loader import PackLoader
+
+    repo, game_id, _ = etl_db
+    pack = PackLoader(repo)("mhp3")
+    assert sum(len(k.slot_thresholds) for k in pack.charm_types) == 53
+    trees = {t["name_en"]: t["id"] for t in repo.list_skill_trees(game_id)}
+    attack = trees["Attack"]
+    query = Query(
+        game="mhp3",
+        skills=(SkillRequest(tree_id=attack, min_points=20),),
+        weapon_slots=0,
+        gender="m",
+        hunter_type="blademaster",
+        hr=None,
+        village_stars=None,
+    )
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0]
+    attack_pts = [dict(c.skills).get(attack, 0) for c in generated if c.skills]
+    assert attack_pts
+    assert max(attack_pts) <= 10
+    # Mystery Attack max is 4; 3-slot +4 is not a legal FURUSLO pairing.
+    assert not any(
+        c.slots == 3 and c.skills == ((attack, 4),) for c in generated
+    )
+
+
 def test_cli_end_to_end(tmp_path):
     import subprocess
     import sys

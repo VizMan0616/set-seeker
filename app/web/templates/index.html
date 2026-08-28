@@ -31,6 +31,9 @@
       <option value="{{ g.code }}">{{ g.name }}</option>
       {% endfor %}
     </select>
+    <p class="ss-hint mt-2 mb-0" x-show="currentCatalog.talismans">
+      <a class="ss-inline-link" :href="'/games/' + game + '/charms'">My talismans</a>
+    </p>
   </div>
 
   <fieldset class="card-body border-top">
@@ -203,6 +206,13 @@
           <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
           <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
         </div>
+        <div class="form-check" x-show="currentCatalog.talismans">
+          <input type="hidden" name="use_generated_charms"
+                 :value="useGeneratedCharms ? 'on' : 'off'">
+          <input class="form-check-input" type="checkbox" id="use-generated-charms"
+                 x-model="useGeneratedCharms">
+          <label class="form-check-label" for="use-generated-charms">Use legal generated charms</label>
+        </div>
       </div>
     </div>
   </fieldset>
@@ -268,10 +278,12 @@ function searchForm() {
     hr: null,
     villageStars: null,
     expandEquivalents: false,
+    useGeneratedCharms: true,
     get currentCatalog() {
       return this.catalogs[this.game] || {
         categories: [], skills: [],
         progression: { guild_rank: 9, village_stars: 9 },
+        talismans: false,
       };
     },
     get caps() {

@@ -15,6 +15,20 @@ from app.engine.pruning import PrunedPack, domain_snapshot
 
 SLOT_ORDER = ("head", "body", "arms", "waist", "legs")
 
+
+def _format_charm(slots: int, skills: tuple[tuple[int, int], ...], resolver: NameResolver) -> str:
+    pips = "O" * slots + "-" * (3 - slots)
+    if not skills:
+        return f"{pips} (slots)"
+    parts = [f"{resolver.skill_tree_name(tree)} {pts:+d}" for tree, pts in skills]
+    return f"{', '.join(parts)} {pips}"
+
+
+def _charm_label(result: ArmorSetResult, resolver: NameResolver) -> str | None:
+    if result.charm_id is None:
+        return None
+    return _format_charm(result.charm_slots, result.charm_skills, resolver)
+
 KIND_LABELS = {
     "head": "Head",
     "body": "Chest",
@@ -35,6 +49,8 @@ class NameResolver(Protocol):
     def decoration_name(self, decoration_id: int) -> str: ...
 
     def skill_name(self, skill_id: int) -> str: ...
+
+    def skill_tree_name(self, tree_id: int) -> str: ...
 
 
 class Catalog(Protocol):
@@ -71,7 +87,7 @@ def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str,
             {"name": resolver.decoration_name(d.decoration_id), "count": d.count}
             for d in result.decorations
         ],
-        "charm": None,  # mhfu: always None (pack flag talismans: false)
+        "charm": _charm_label(result, resolver),
         "active_skills": [
             {"name": resolver.skill_name(skill_id), "points": points}
             for skill_id, points in result.active_skills
@@ -141,6 +157,28 @@ def advanced_columns(
                             or deco_id in forced_d
                         ),
                         "skyline": deco_id in skyline,
+                    }
+                )
+        elif kind == "charms":
+            input_name = "rel_charm_id"
+            excluded_c = set(query.excluded_charm_ids)
+            forced_c = set(query.forced_charm_ids)
+            by_id = {c.id: c for c in pruned.catalog_charms or pruned.charms}
+            for charm_id in ids["inf_ids"]:
+                spec = by_id.get(charm_id)
+                items.append(
+                    {
+                        "id": charm_id,
+                        "name": _format_charm(
+                            spec.slots if spec else 0,
+                            spec.skills if spec else (),
+                            resolver,
+                        ),
+                        "checked": (
+                            (charm_id in skyline and charm_id not in excluded_c)
+                            or charm_id in forced_c
+                        ),
+                        "skyline": charm_id in skyline,
                     }
                 )
         else:

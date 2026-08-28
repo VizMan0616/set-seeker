@@ -8,7 +8,8 @@ cached per (pack, query); both are frozen dataclasses and hashable.
 from dataclasses import dataclass, replace
 from functools import lru_cache
 
-from app.domain.models import Query
+from app.domain.models import CharmSpec, Query
+from app.engine.charms import charm_candidates
 from app.engine.data import (
     ARMOR_SLOT_KINDS,
     SLOT_COUNT,
@@ -42,6 +43,10 @@ class PrunedPack:
     skyline_piece_ids: tuple[tuple[int, ...], ...] = ()
     inf_decoration_ids: tuple[int, ...] = ()
     skyline_decoration_ids: tuple[int, ...] = ()
+    charms: tuple[CharmSpec, ...] = ()
+    catalog_charms: tuple[CharmSpec, ...] = ()
+    inf_charm_ids: tuple[int, ...] = ()
+    skyline_charm_ids: tuple[int, ...] = ()
 
 
 def _within_progression_caps(hr_required: int, village_stars: int, query: Query) -> bool:
@@ -213,6 +218,14 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
             if sk.is_negative:
                 bad[sk.tree_id] = max(sk.points, bad.get(sk.tree_id, sk.points))
 
+    base_charms = charm_candidates(
+        pack,
+        replace(query, excluded_charm_ids=(), forced_charm_ids=()),
+    )
+    inf_charm_ids = tuple(c.id for c in base_charms if c.id != 0)
+    skyline_charm_ids = inf_charm_ids
+    charms = charm_candidates(pack, query)
+
     return PrunedPack(
         classes=tuple(classes_per_slot),
         decorations=tuple(rel_decos),
@@ -223,6 +236,10 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
         skyline_piece_ids=tuple(skyline_piece_ids),
         inf_decoration_ids=tuple(sorted(d.id for d in inf_decos)),
         skyline_decoration_ids=tuple(sorted(d.id for d in skyline_decos)),
+        charms=charms,
+        catalog_charms=base_charms,
+        inf_charm_ids=inf_charm_ids,
+        skyline_charm_ids=skyline_charm_ids,
     )
 
 
@@ -239,7 +256,10 @@ def domain_snapshot(pack: PackData, pruned: PrunedPack) -> dict:
         "rel_ids": list(pruned.skyline_decoration_ids),
     }
     if pack.talismans:
-        kinds["charms"] = {"inf_ids": [], "rel_ids": []}
+        kinds["charms"] = {
+            "inf_ids": list(pruned.inf_charm_ids),
+            "rel_ids": list(pruned.skyline_charm_ids),
+        }
     if pack.weapon_search:
         kinds["weapons"] = {"inf_ids": [], "rel_ids": []}
     return {"kinds": kinds}
@@ -250,26 +270,34 @@ def apply_rel_checks(
     pack: PackData,
     checked_piece_ids: tuple[int, ...],
     checked_decoration_ids: tuple[int, ...],
+    checked_charm_ids: tuple[int, ...] = (),
 ) -> Query:
     """Map Advanced checks onto excluded_* / forced_* against current inf/skyline."""
     base = replace(
         query,
         excluded_piece_ids=(),
         excluded_decoration_ids=(),
+        excluded_charm_ids=(),
         forced_piece_ids=(),
         forced_decoration_ids=(),
+        forced_charm_ids=(),
     )
     pruned = prune(pack, base)
     inf_p = {pid for slot in pruned.inf_piece_ids for pid in slot}
     sky_p = {pid for slot in pruned.skyline_piece_ids for pid in slot}
     inf_d = set(pruned.inf_decoration_ids)
     sky_d = set(pruned.skyline_decoration_ids)
+    inf_c = set(pruned.inf_charm_ids)
+    sky_c = set(pruned.skyline_charm_ids)
     checked_p = set(checked_piece_ids) & inf_p
     checked_d = set(checked_decoration_ids) & inf_d
+    checked_c = set(checked_charm_ids) & inf_c
     return replace(
         query,
         excluded_piece_ids=tuple(sorted(inf_p - checked_p)),
         excluded_decoration_ids=tuple(sorted(inf_d - checked_d)),
+        excluded_charm_ids=tuple(sorted(inf_c - checked_c)),
         forced_piece_ids=tuple(sorted(checked_p - sky_p)),
         forced_decoration_ids=tuple(sorted(checked_d - sky_d)),
+        forced_charm_ids=tuple(sorted(checked_c - sky_c)),
     )

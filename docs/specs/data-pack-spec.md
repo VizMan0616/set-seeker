@@ -128,7 +128,9 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 - `Languages/*/` — localized name overlays applied at ETL. For MHFU, **`name_en` is the
   official Freedom Unite English pack** (`Languages/English MHFU/`), not the CSV strings
   (those match TeamHGG's P2G fan translation: "Speed Fire", "All Shots Up", "SpeedFire Jewel").
-  Japanese and other locales remain future overlays. Dummy pieces are flagged from overlay
+  For MHP3, **`name_en` is Team Maverick One** (`Languages/English (TMO)/`); CSV English
+  stays Athena/TeamHGG and is used only as parse keys and overlay fallback. Japanese
+  `name_ja` is always the Athena CSV Japanese column. Dummy pieces are flagged from overlay
   names that contain `(dummy)`; the marker is not stored in `name_en`.
 - `mycharms.txt` — **not** ETL'd; it is user data. Our equivalent lives in the `user_charms`
   table (same logical shape: `slots, skill1, points1, skill2, points2`).
@@ -138,9 +140,10 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 1. **Per-pack column maps.** Never share positional parsing across packs; each manifest
    declares its format quirks (header lines, index columns, slot notation).
 2. **Names are bilingual from day one** (`name_en`, `name_ja`). For MHFU, `name_en` comes
-   from `Languages/English MHFU` (official localization). Missing translations fall back
-   to the other language with a `translation: fan` marker where applicable (MHP3 English
-   names are fan translations — see `docs/adr/0009`).
+   from `Languages/English MHFU` (official localization). For MHP3, `name_en` comes from
+   `Languages/English (TMO)` (Team Maverick One fan pack). A blank overlay row falls
+   back to the CSV English string and is counted. MHP3 stays `translation: fan`
+   (see `docs/adr/0009`) — TMO is not an official localization.
 3. **Skill trees are normalized** into `skill_trees` + `skills` (threshold rows) +
    `armor_skills` / `decoration_skills` junction rows. Never store skill points as packed
    columns in relational tables.

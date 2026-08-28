@@ -29,7 +29,7 @@ def _tree_options(request: Request, game: str) -> list[dict]:
     return [
         tree
         for tree in request.app.state.catalog.list_skill_trees(game)
-        if tree["name"] != "Torso Inc"
+        if tree["name"] not in {"Torso Inc", "Torso Up"}
     ]
 
 

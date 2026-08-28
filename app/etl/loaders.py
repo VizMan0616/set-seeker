@@ -6,9 +6,12 @@ Field positions come exclusively from the pack's column map module
 
 import csv
 import importlib
+import logging
 import re
 from dataclasses import dataclass, field, replace
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 from app.etl.manifest import PackManifest
 
@@ -84,6 +87,7 @@ class PackData:
     decorations: tuple[DecorationRow, ...]
     duplicates_skipped: tuple[str, ...] = field(default_factory=tuple)
     charm_types: tuple[CharmTypeData, ...] = field(default_factory=tuple)
+    english_overlay_unmapped: int = 0
 
 
 def load_skill_blocks(path: Path) -> list[SkillTreeBlock]:
@@ -309,8 +313,14 @@ def _read_locale_names(path: Path) -> list[str]:
     return lines
 
 
-def _read_skill_overlay(path: Path) -> tuple[list[str], list[str]]:
-    """English skills.txt: tree names, then ``;Resulting Skills`` threshold names."""
+def _read_skill_overlay(
+    path: Path, expected_trees: int | None = None,
+) -> tuple[list[str], list[str]]:
+    """English skills.txt: tree names, then ``;Resulting Skills`` threshold names.
+
+    MHP3 ``Languages/English (TMO)`` lists trees then resulting skills with no
+    section marker (100 trees + 209 thresholds = 309 lines).
+    """
     raw = path.read_bytes()
     text = raw.decode("utf-16") if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else raw.decode("utf-8-sig")
     trees: list[str] = []
@@ -324,7 +334,9 @@ def _read_skill_overlay(path: Path) -> tuple[list[str], list[str]]:
         if not stripped or stripped.startswith(";"):
             continue
         (resulting if in_resulting else trees).append(stripped)
-    return trees, resulting
+    if resulting or expected_trees is None or len(trees) == expected_trees:
+        return trees, resulting
+    return trees[:expected_trees], trees[expected_trees:]
 
 
 def _strip_dummy_mark(name: str, mark: str) -> tuple[str, bool]:
@@ -345,28 +357,72 @@ def _require_len(kind: str, got: int, expected: int) -> None:
         )
 
 
+def _armor_keep_indices(path: Path, cmap, header_lines: int) -> list[int]:
+    """Source-row indices kept after the same dedup as ``load_armor_file``."""
+    cols = cmap.ARMOR
+    kept: list[int] = []
+    seen: set[tuple] = set()
+    dedup = getattr(cmap, "ARMOR_DEDUP", "name_gender")
+    index = 0
+    with _open_csv(path) as fh:
+        reader = csv.reader(fh)
+        for _ in range(header_lines):
+            next(reader, None)
+        for fields in reader:
+            if not fields or _is_comment_row(fields) or not fields[cols["name"]].strip():
+                continue
+            gender = cmap.parse_gender(fields[cols["gender"]])
+            name = fields[cols["name"]].strip()
+            key = (name,) if dedup == "name" else (name, gender)
+            if key not in seen:
+                seen.add(key)
+                kept.append(index)
+            index += 1
+    return kept
+
+
+def _pick_overlay_name(overlay: str, fallback: str, kind: str) -> tuple[str, int]:
+    """Use the locale string; fall back to the CSV name if that row is blank."""
+    cleaned = overlay.strip()
+    if cleaned:
+        return cleaned, 0
+    log.warning("English overlay missing %s name; keeping %r", kind, fallback)
+    return fallback, 1
+
+
 def apply_official_english_overlay(
     skill_trees: tuple[SkillTreeBlock, ...],
     armor: tuple[ArmorRow, ...],
     decorations: tuple[DecorationRow, ...],
     data_dir: Path,
     cmap,
-) -> tuple[tuple[SkillTreeBlock, ...], tuple[ArmorRow, ...], tuple[DecorationRow, ...]]:
-    """Replace CSV/TeamHGG name_en with Languages/English MHFU (official EN).
+    header_lines: int = 0,
+    armor_ext: str = "csv",
+) -> tuple[
+    tuple[SkillTreeBlock, ...],
+    tuple[ArmorRow, ...],
+    tuple[DecorationRow, ...],
+    dict[str, str],
+    int,
+]:
+    """Replace CSV English ``name_en`` with the pack's ``Languages/`` overlay.
 
-    Athena ``LoadLanguage`` overlays names positionally. MHFU CSV strings follow
-    the TeamHGG P2G fan pack; official Freedom Unite English lives in the
-    English MHFU folder (AutoReload, Normal S All LV Add, Cont. Fire Jewel, …).
+    Athena ``LoadLanguage`` overlays names positionally. MHFU uses official
+    Freedom Unite English (``English MHFU``). MHP3 uses Team Maverick One
+    (``English (TMO)``). Japanese ``name_ja`` is left as parsed from the CSV.
     """
     locale_rel = getattr(cmap, "ENGLISH_LOCALE_DIR", None)
     if not locale_rel:
-        return skill_trees, armor, decorations
+        return skill_trees, armor, decorations, {}, 0
     locale_dir = data_dir / locale_rel
     if not locale_dir.is_dir():
-        raise RuntimeError(f"official English overlay missing: {locale_dir}")
+        raise RuntimeError(f"English overlay missing: {locale_dir}")
 
     mark = getattr(cmap, "DUMMY_MARK", "(dummy)")
-    tree_names, skill_names = _read_skill_overlay(locale_dir / "skills.txt")
+    unmapped = 0
+    tree_names, skill_names = _read_skill_overlay(
+        locale_dir / "skills.txt", expected_trees=len(skill_trees),
+    )
     _require_len("skill trees", len(tree_names), len(skill_trees))
     n_thresholds = sum(len(block.thresholds) for block in skill_trees)
     _require_len("resulting skills", len(skill_names), n_thresholds)
@@ -379,20 +435,30 @@ def apply_official_english_overlay(
     cursor = 0
     for block, official_tree in zip(skill_trees, tree_names, strict=True):
         count = len(block.thresholds)
-        new_thresholds = tuple(
-            (points, skill_names[cursor + i])
-            for i, (points, _) in enumerate(block.thresholds)
-        )
+        new_thresholds = []
+        for i, (points, csv_name) in enumerate(block.thresholds):
+            name, miss = _pick_overlay_name(skill_names[cursor + i], csv_name, "skill")
+            unmapped += miss
+            new_thresholds.append((points, name))
         cursor += count
-        remapped_trees.append(replace(block, name=official_tree, thresholds=new_thresholds))
+        remapped_trees.append(
+            replace(block, name=official_tree or block.name, thresholds=tuple(new_thresholds))
+        )
 
     remapped_armor: list[ArmorRow] = []
     for slot, stem in enumerate(SLOT_FILES):
         names = _read_locale_names(locale_dir / f"{stem}.txt")
         pieces = [row for row in armor if row.slot == slot]
+        if len(names) != len(pieces):
+            kept = _armor_keep_indices(
+                data_dir / f"{stem}.{armor_ext}", cmap, header_lines,
+            )
+            names = [names[i] for i in kept]
         _require_len(stem, len(names), len(pieces))
         for row, overlay_name in zip(pieces, names, strict=True):
-            cleaned, dummy = _strip_dummy_mark(overlay_name, mark)
+            picked, miss = _pick_overlay_name(overlay_name, row.name_en, stem)
+            unmapped += miss
+            cleaned, dummy = _strip_dummy_mark(picked, mark)
             remapped_armor.append(
                 replace(
                     row,
@@ -404,15 +470,43 @@ def apply_official_english_overlay(
 
     deco_names = _read_locale_names(locale_dir / "decorations.txt")
     _require_len("decorations", len(deco_names), len(decorations))
-    remapped_decos = tuple(
-        replace(
-            row,
-            name_en=name,
-            skills=tuple((tree_map.get(tree, tree), pts) for tree, pts in row.skills),
+    remapped_decos = []
+    for row, name in zip(decorations, deco_names, strict=True):
+        picked, miss = _pick_overlay_name(name, row.name_en, "decoration")
+        unmapped += miss
+        remapped_decos.append(
+            replace(
+                row,
+                name_en=picked,
+                skills=tuple((tree_map.get(tree, tree), pts) for tree, pts in row.skills),
+            )
         )
-        for row, name in zip(decorations, deco_names, strict=True)
+    if unmapped:
+        log.warning("English overlay left %s names on CSV fallback", unmapped)
+    return (
+        tuple(remapped_trees),
+        tuple(remapped_armor),
+        tuple(remapped_decos),
+        tree_map,
+        unmapped,
     )
-    return tuple(remapped_trees), tuple(remapped_armor), remapped_decos
+
+
+def _remap_charm_trees(
+    charm_types: tuple[CharmTypeData, ...], tree_map: dict[str, str],
+) -> tuple[CharmTypeData, ...]:
+    if not tree_map:
+        return charm_types
+    return tuple(
+        replace(
+            kind,
+            ranges=tuple(
+                replace(rng, tree=tree_map.get(rng.tree, rng.tree))
+                for rng in kind.ranges
+            ),
+        )
+        for kind in charm_types
+    )
 
 
 def load_charm_generation(pack_dir: Path) -> tuple[CharmTypeData, ...]:
@@ -484,12 +578,16 @@ def load_pack(manifest: PackManifest) -> PackData:
     else:
         raw_trees = tuple(load_skill_blocks(data_dir / "skills.txt"))
 
-    skill_trees, armor_rows, decorations = apply_official_english_overlay(
-        raw_trees,
-        tuple(armor),
-        tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
-        data_dir,
-        cmap,
+    skill_trees, armor_rows, decorations, tree_map, unmapped = (
+        apply_official_english_overlay(
+            raw_trees,
+            tuple(armor),
+            tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
+            data_dir,
+            cmap,
+            header_lines=header_lines,
+            armor_ext=ext,
+        )
     )
     return PackData(
         manifest=manifest,
@@ -497,5 +595,8 @@ def load_pack(manifest: PackManifest) -> PackData:
         armor=armor_rows,
         decorations=decorations,
         duplicates_skipped=tuple(skipped),
-        charm_types=load_charm_generation(manifest.pack_dir),
+        charm_types=_remap_charm_trees(
+            load_charm_generation(manifest.pack_dir), tree_map,
+        ),
+        english_overlay_unmapped=unmapped,
     )

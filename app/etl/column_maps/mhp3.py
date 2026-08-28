@@ -64,6 +64,10 @@ SKILLS = {
 
 TORSO_INC_TREE = "Torso Inc"
 
+# Athena Languages/English (TMO) — Team Maverick One fan names (ADR 0009).
+ENGLISH_LOCALE_DIR = "Languages/English (TMO)"
+DUMMY_MARK = "(dummy)"
+
 # Athena 0/1/2 → schema 0=male/blade, 1=female/gunner, 2=both
 _ATHENA_GENDER = {"1": 0, "2": 1}       # else both
 _ATHENA_TYPE = {"1": 0, "2": 1}

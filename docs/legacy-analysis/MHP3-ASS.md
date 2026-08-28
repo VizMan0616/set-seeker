@@ -61,7 +61,7 @@ O(C·n⁵).
 | `tags.txt` | Tag names (Offensive, Defensive, …) | `SkillTag::Load` |
 | `components.txt` | Material names | Materials loader |
 | `mycharms.txt` | `#Format: NumSlots,Skill1,Points1,Skill2,Points2` | `CharmDatabase::LoadCustom` (~108–168) |
-| `Languages/*/` | Localized overlays | Language loaders |
+| `Languages/*/` | Localized overlays. set-seeker ETL stores **`English (TMO)`** (Team Maverick One) as `name_en`; CSV columns stay TeamHGG/Athena English as parse keys. Japanese `name_ja` comes from the CSVs. | Language loaders |
 
 Approx: ~210–230 armor rows/slot (~1080 after name-only dedup), 164 decorations, 210
 skill data rows (209 thresholds + Torso Inc), ~259 mycharms lines.
@@ -98,8 +98,9 @@ message; the search itself no longer stops at 1000.
 
 ## Rewrite notes
 
-- MHP3 was never officially localized: English armor/skill names in the data are **fan
-  translations**. This is a data caveat, not a UI concern (see `docs/adr/0009`).
+- MHP3 was never officially localized: English armor/skill names are **fan
+  translations** (`translation: fan`, ADR 0009). Display English is Team Maverick
+  One from `Languages/English (TMO)/`, not the Athena/TeamHGG CSV strings.
 - The PSP save decryption (`PSPCryptoEngine.cpp`) is explicitly out of v1 scope; see
   `docs/adr/0006` and the per-generation deferral note.
 - Second vertical slice after MHFU: adds the charm dimension (inventory + generated legal
@@ -111,5 +112,6 @@ message; the search itself no longer stops at 1000.
   (1080 pieces kept). `skills.txt` is tabular with **no leading index columns**
   (unlike MH3U); empty ability column is Torso Inc. Charm RNG tables extracted
   from UTF-16 `CharmDatabase.cpp` (`OmaSkill::SKILL` / `FURUSLO` / `tableinit[12]`)
-  into `packs/mhp3/charm_generation/` (mystery / shining / timeworn). English names
-  remain fan translations (`translation: fan`). Closed village path uses sentinel 99.
+  into `packs/mhp3/charm_generation/` (mystery / shining / timeworn; tree
+  columns keep Athena English and are remapped to TMO at ETL). Closed village
+  path uses sentinel 99.

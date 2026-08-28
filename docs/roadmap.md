@@ -41,7 +41,7 @@ Only remaining MHFU work is optional (more known queries from live Athena runs).
 - ETL: `.txt` armor files, skills with Japanese columns, charm RNG table data extraction from
   `CharmDatabase.cpp` into pack data.
 - Data caveat: English names are fan translations (`translation: fan` in manifest,
-  `docs/adr/0009`).
+  `docs/adr/0009`). Display English is Team Maverick One (`Languages/English (TMO)`).
 - Save import (PSP decryption, `PSPCryptoEngine.cpp`): **deferred** — evaluate when this phase
   ships; not required for the phase to be complete.
 

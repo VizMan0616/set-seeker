@@ -17,6 +17,10 @@ published by AthenaADP under the MIT License:
 The full MIT license text ships with each vendored copy under `sources/<REPO>/LICENSE`
 and applies to the game data files derived from those repositories.
 
+MHP3 English display names come from Athena's `Run/Data/Languages/English (TMO)/`
+overlay (Team Maverick One fan translation), shipped in AthenaADP/MHP3-ASS. That
+overlay is name lists only — not the TMO game patch binaries.
+
 set-seeker itself is licensed under the GNU Affero General Public License v3
 (see LICENSE). The MIT license of the upstream projects is permissive and compatible
 with this choice; their copyright notice is preserved here as required.

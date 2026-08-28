@@ -44,6 +44,7 @@ def test_column_map_is_pack_scoped():
     assert cmap.ARMOR["slots"] == 5
     assert cmap.DECORATION["skill1_tree"] == 6
     assert cmap.ARMOR_DEDUP == "name"
+    assert cmap.ENGLISH_LOCALE_DIR == "Languages/English (TMO)"
 
 
 def test_athena_012_gender_and_type():
@@ -107,11 +108,26 @@ def test_load_pack_charms_and_fan_names(pack_data, manifest):
     assert manifest.progression == {"guild_rank": 6, "village_stars": 6}
     assert len(pack_data.armor) == 1080
     assert len(pack_data.duplicates_skipped) == 26
+    assert pack_data.english_overlay_unmapped == 0
     assert {c.code for c in pack_data.charm_types} == {"mystery", "shining", "timeworn"}
     trees = {b.name for b in pack_data.skill_trees}
+    assert "Handicraft" in trees
+    assert "Artisan" not in trees
+    assert "Torso Up" in trees
+    assert "Torso Inc" not in trees
+    helm = next(r for r in pack_data.armor if r.name_en == "Chainmail Headgear")
+    assert helm.name_ja == "チェーンヘッド"
+    assert helm.skills == (("Health", 2), ("Combo Rate", 4), ("Combo Plus", 1))
+    jewel = next(d for d in pack_data.decorations if d.name_en == "Attack Jewel 1")
+    assert jewel.skills == (("Attack", 1), ("Defense", -1))
+    skills = {name for b in pack_data.skill_trees for _, name in b.thresholds}
+    assert "Attack Up (L)" in skills
+    assert "Attack Up [Lg]" not in skills
     for charm in pack_data.charm_types:
         for rng in charm.ranges:
             assert rng.tree in trees
+    assert any(rng.tree == "Hearing" for c in pack_data.charm_types for rng in c.ranges)
+    assert not any(rng.tree == "HearProtct" for c in pack_data.charm_types for rng in c.ranges)
 
 
 def test_writer_counts_and_progression(etl_db):
@@ -127,7 +143,7 @@ def test_writer_counts_and_progression(etl_db):
     assert features["charm_tables"] is True
     assert features["translation"] == "fan"
     helm = next(p for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
-                if p["name_en"] == "Chain Helm")
+                if p["name_en"] == "Chainmail Headgear")
     assert helm["name_ja"] == "チェーンヘッド"
     assert helm["max_defense"] == 22
     assert table_counts(repo, game_id)["charm_skill_ranges"] == 265

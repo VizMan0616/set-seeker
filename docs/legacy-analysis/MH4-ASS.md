@@ -16,7 +16,8 @@ Source root: `sources/MH4-ASS/`. Solution: `MH4 ASS.sln` (both `.vcproj` .NET 3.
 
 ## Search algorithm
 
-Same architecture as MH3U; worker at `Form1.h:2182-2274`.
+Same architecture as MH3U; worker at `Form1.h:2182-2274`. Query skill combos:
+`NumSkills = 6` (`Form1.h:80`).
 
 **Key difference — 6 nested loops**: head×body×arms×waist×legs×**weapons**
 (`Form1.h:2207-2270`), active when excavated weapons are relevant

@@ -20,7 +20,8 @@ Win 8.1 SDK).
 Same shared engine: `StartSearch` / `backgroundWorker1_DoWork` (`Form1.h:~2627+`),
 `LoadedData::GetRelevantData` (~243–319), `Solution::MatchesQuery` (`Solution.cpp:~967-1059`).
 
-Pipeline identical to MH4U minus the weapon loop and excavated gear: query → relevance +
+Pipeline identical to MH4U minus the weapon loop and excavated gear: query
+(`NumSkills = 7`, `Form1.h:87`) → relevance +
 dominance prune → one worker per charm template → 5 nested armor loops → per-combo greedy
 decoration fill → threshold check → optional fixes. Results hash-deduped,
 `MaxSolutions = 100000`.

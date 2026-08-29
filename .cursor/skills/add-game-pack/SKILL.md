@@ -35,17 +35,22 @@ The user pastes `docs/prompts/implement.md` with `SCOPE: etl` (or a reviewer pas
    files** (armor uses sentinel 10 / 99 for a closed path). If Athena ships
    `Languages/` overlays, store **official localized English** as `name_en` (MHFU:
    `English MHFU`, not TeamHGG CSV strings). Fan-only packs (MHP3) keep the fan
-   marker from ADR 0009.
+   marker from ADR 0009 and overlay `Languages/English (TMO)` as `name_en`.
 
-   | Pack | Village ★ | Guild / HR |
-   |---|---|---|
-   | mhfu | 9 | 9 |
-   | mhp3 | 6 | 6 |
-   | mh3u | 10 | 8 |
-   | mh4 | 7 | 8 |
-   | mh4u | 10 | 12 |
-   | mhgen | 6 | 8 |
-   | mhgu | 10 | 13 |
+   | Pack | Village ★ | Guild / HR | Desired skills (`NumSkills`) |
+   |---|---|---|---|
+   | mhfu | 9 | 9 | 5 |
+   | mhp3 | 6 | 6 | 6 |
+   | mh3u | 10 | 8 | 6 |
+   | mh4 | 7 | 8 | 6 |
+   | mh4u | 10 | 12 | 7 |
+   | mhgen | 6 | 8 | 7 |
+   | mhgu | 10 | 13 | 7 |
+   Set `desired_skills_max` on the pack manifest to that `NumSkills` value. Talisman
+   packs also set `charm_points` (skill 1 vs skill 2 steppers — not a shared ±13).
+   ETL replaces `charm_points` with the union of pack charm-generation CSVs. Do
+   not invent a global skill-1 +7 (timeworn combat only) and do not special-case
+   village-gift charms in code.
 6. Add ≥3 known queries with expected legacy results to the pack's validation suite.
 7. Verify Advanced Search columns from the feature-flag matrix (`docs/specs/engine-spec.md`
    §1, `docs/specs/data-pack-spec.md` checklist item 8): armor slots + decorations, plus

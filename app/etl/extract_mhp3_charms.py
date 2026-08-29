@@ -17,6 +17,8 @@ OUT = REPO_ROOT / "packs" / "mhp3" / "charm_generation"
 
 # OmaSkill::SKILL indices (`CharmDatabase.cpp:176-180`) and Omaget mapping
 # (`CharmDatabase.cpp:538-550`): omakbn 0=timeworn, 1=shining, 2=mystery.
+# FURU1/HIKA1/NAZO1 = in-game skill 1 (modest maxima). FURU2/HIKA2 = skill 2
+# (can reach ±10, elemental res +12/+13). Do not swap these slots.
 TYPES = (
     ("timeworn", 0, 1),   # FURU1, FURU2
     ("shining", 2, 3),    # HIKA1, HIKA2

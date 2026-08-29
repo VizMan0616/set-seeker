@@ -67,6 +67,48 @@ def test_picker_lists_mhp3(dual_pack_db, monkeypatch):
     assert 'value="mhfu"' in html
     assert 'value="mhp3"' in html
     assert "Monster Hunter Portable 3rd" in html
+    assert '"has_dummy": false' in html or '"has_dummy":false' in html
+    # MHFU dummy pieces exist; MHP3 catalog must not claim them.
+    import json
+    import re
+    raw = re.search(r'id="ss-catalogs">(.+?)</script>', html, re.S)
+    catalogs = json.loads(raw.group(1))
+    assert catalogs["mhfu"]["has_dummy"] is True
+    assert catalogs["mhp3"]["has_dummy"] is False
+
+
+def test_stale_mhfu_search_url_follows_game_picker(dual_pack_db, monkeypatch):
+    """htmx used to keep POSTing /games/mhfu/search after switching packs."""
+    monkeypatch.setenv("DATABASE_URL", dual_pack_db)
+    get_settings.cache_clear()
+    get_engine.cache_clear()
+    try:
+        client = TestClient(create_app())
+        repo = GameDataRepository(create_engine(dual_pack_db))
+        game = repo.get_game_by_code("mhp3")
+        skill = next(
+            s for s in repo.list_skills_for_game(game["id"])
+            if s["name_en"] == "Attack Up (S)"
+        )
+        response = client.post(
+            "/games/mhfu/search",
+            data={
+                "game": "mhp3",
+                "skill_id": [str(skill["id"])],
+                "weapon_slots": "0",
+                "gender": "f",
+                "hunter_type": "blademaster",
+                "hr": "",
+                "village_stars": "",
+                "sort": "defense",
+                "allow_torso_inc": "on",
+            },
+        )
+        assert response.status_code == 200
+        assert "Skill is not in this game" not in response.text
+    finally:
+        get_settings.cache_clear()
+        get_engine.cache_clear()
 
 
 def test_one_real_mhp3_query(dual_pack_db):
@@ -103,3 +145,62 @@ def test_one_real_mhp3_query(dual_pack_db):
     }
     assert achieved[trees["Attack"]] >= 20
     assert achieved[trees["Sharpness"]] >= 10
+
+
+STRESS_SKILLS = (
+    "Water Atk +2",
+    "Attack Up (M)",
+    "Spirit's Whim",
+    "Recovery Up",
+    "Divine Blessing",
+    "Speed Sharpening",
+)
+
+
+def test_mhp3_six_skill_stress_search_is_not_422(dual_pack_db, monkeypatch):
+    """Real 6-skill MHP3 query + typed charm must parse (htmx 422 looks like no results)."""
+    monkeypatch.setenv("DATABASE_URL", dual_pack_db)
+    get_settings.cache_clear()
+    get_engine.cache_clear()
+    try:
+        client = TestClient(create_app())
+        client.get("/")
+        repo = GameDataRepository(create_engine(dual_pack_db))
+        game = repo.get_game_by_code("mhp3")
+        by_name = {s["name_en"]: s for s in repo.list_skills_for_game(game["id"])}
+        trees = {t["name_en"]: t["id"] for t in repo.list_skill_trees(game["id"])}
+        ids = [str(by_name[n]["id"]) for n in STRESS_SKILLS]
+        added = client.post(
+            "/games/mhp3/charms",
+            data={
+                "slots": "0",
+                "skill1_tree": str(trees["Water Atk"]),
+                "skill1_points": "5",
+                "skill2_tree": str(trees["Attack"]),
+                "skill2_points": "9",
+            },
+            headers={"HX-Request": "true"},
+        )
+        assert added.status_code == 200
+        response = client.post(
+            "/games/mhp3/search",
+            data={
+                "skill_id": ids,
+                "weapon_slots": "0",
+                "gender": "m",
+                "hunter_type": "blademaster",
+                "hr": "9",
+                "village_stars": "9",
+                "sort": "defense",
+                "allow_torso_inc": "on",
+                "use_generated_charms": "on",
+            },
+        )
+        assert response.status_code == 200
+        assert "Invalid" not in response.text
+        assert "Choose between" not in response.text
+        assert "Skill is not in this game" not in response.text
+        assert "ss-empty" in response.text or "ss-result" in response.text
+    finally:
+        get_settings.cache_clear()
+        get_engine.cache_clear()

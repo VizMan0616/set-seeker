@@ -6,7 +6,13 @@ import pytest
 from sqlalchemy import create_engine
 
 from app.etl.column_maps import mhp3 as cmap
-from app.etl.loaders import load_armor_file, load_decorations, load_pack, load_skill_table
+from app.etl.loaders import (
+    charm_point_union,
+    load_armor_file,
+    load_decorations,
+    load_pack,
+    load_skill_table,
+)
 from app.etl.manifest import load_manifest
 from app.etl.writer import PackWriter, table_counts
 from app.repository import tables
@@ -130,6 +136,19 @@ def test_load_pack_charms_and_fan_names(pack_data, manifest):
     assert not any(rng.tree == "HearProtct" for c in pack_data.charm_types for rng in c.ranges)
 
 
+def test_charm_point_union_is_csv_envelope_not_plus_seven(pack_data):
+    bounds = charm_point_union(pack_data.charm_types)
+    assert bounds == {
+        "skill1_min": 1, "skill1_max": 10,
+        "skill2_min": -10, "skill2_max": 13,
+    }
+    skill1_hi = max(
+        rng.max_points for c in pack_data.charm_types
+        for rng in c.ranges if rng.skill_slot == 1
+    )
+    assert skill1_hi == 10
+
+
 def test_writer_counts_and_progression(etl_db):
     import json
 
@@ -139,6 +158,10 @@ def test_writer_counts_and_progression(etl_db):
     features = json.loads(repo.get_game(game_id)["features"])
     assert features["guild_rank_max"] == 6
     assert features["village_stars_max"] == 6
+    assert features["desired_skills_max"] == 6
+    assert features["charm_points"]["skill1_max"] == 10
+    assert features["charm_points"]["skill2_max"] == 13
+    assert features["charm_points"]["skill2_min"] == -10
     assert features["talismans"] is True
     assert features["charm_tables"] is True
     assert features["translation"] == "fan"
@@ -171,8 +194,9 @@ def test_pack_loader_applies_slot_thresholds_to_generated_charms(etl_db):
     generated = [c for c in charm_candidates(pack, query) if c.id < 0]
     attack_pts = [dict(c.skills).get(attack, 0) for c in generated if c.skills]
     assert attack_pts
-    assert max(attack_pts) <= 10
-    # Mystery Attack max is 4; 3-slot +4 is not a legal FURUSLO pairing.
+    # Attack-only query: one-skill charms use skill1 (mystery/shining +4).
+    assert max(attack_pts) <= 4
+    # Mystery Attack +4 cannot pair with 3 slots under FURUSLO.
     assert not any(
         c.slots == 3 and c.skills == ((attack, 4),) for c in generated
     )

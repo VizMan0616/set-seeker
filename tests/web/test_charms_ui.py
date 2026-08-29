@@ -14,6 +14,11 @@ def test_talismans_flag_inventory_and_advanced_tab(packed_db):
         generation=3,
         features=json.dumps({
             "talismans": True, "guild_rank_max": 6, "village_stars_max": 6,
+            "desired_skills_max": 6,
+            "charm_points": {
+                "skill1_min": 1, "skill1_max": 10,
+                "skill2_min": -10, "skill2_max": 13,
+            },
         }),
     )
     packed_db.create_skill_tree(
@@ -56,19 +61,76 @@ def test_talismans_flag_inventory_and_advanced_tab(packed_db):
     assert "Use my charms" not in home.text
 
     assert client.get("/games/mhfu/charms").status_code == 404
+    bare = client.get("/games/mhp3/charms", follow_redirects=False)
+    assert bare.status_code == 303
 
-    inventory = client.get("/games/mhp3/charms")
+    home = client.get("/")
+    assert home.status_code == 200
+    assert "My talismans" in home.text
+    assert "My charms" in home.text
+    assert "Use legal generated charms" not in home.text
+    assert 'id="talismans-modal"' in home.text
+    assert "name=\"skill1_points\"" not in home.text
+    assert home.text.count('name="skill_id"') == 6
+
+    inventory = client.get("/games/mhp3/charms", headers={"HX-Request": "true"})
     assert inventory.status_code == 200
     assert "Add a charm" in inventory.text
-    assert "My talismans" in inventory.text
+    assert 'name="skill1_points"' in inventory.text
+    assert 'data-ss-pts-step' in inventory.text
+    assert "<select" in inventory.text
+    assert 'name="skill1_points"' in inventory.text
+    assert 'id="skill1-points"' not in inventory.text
 
     added = client.post(
         "/games/mhp3/charms",
         data={"slots": "1", "skill1_tree": "10", "skill1_points": "4", "skill2_tree": ""},
-        follow_redirects=True,
     )
     assert added.status_code == 200
     assert "Attack +4" in added.text
+    assert 'data-ss-pts-max="10"' in added.text
+    assert 'data-ss-pts-min="-10"' in added.text
+    assert 'data-ss-pts-max="13"' in added.text
+
+    skill1_at_union = client.post(
+        "/games/mhp3/charms",
+        data={"slots": "1", "skill1_tree": "10", "skill1_points": "10", "skill2_tree": ""},
+    )
+    assert skill1_at_union.status_code == 200
+    shared_range = client.post(
+        "/games/mhp3/charms",
+        data={"slots": "1", "skill1_tree": "10", "skill1_points": "13", "skill2_tree": ""},
+    )
+    assert shared_range.status_code == 422
+    packed_db.create_skill_tree(
+        id=11, game_id=2, name_en="Fire Res", name_ja="Fire Res",
+        category_tag="Resistance",
+    )
+    s2_legal = client.post(
+        "/games/mhp3/charms",
+        data={
+            "slots": "0", "skill1_tree": "10", "skill1_points": "4",
+            "skill2_tree": "11", "skill2_points": "13",
+        },
+    )
+    assert s2_legal.status_code == 200
+    assert "Fire Res +13" in s2_legal.text
+    s2_floor = client.post(
+        "/games/mhp3/charms",
+        data={
+            "slots": "0", "skill1_tree": "10", "skill1_points": "1",
+            "skill2_tree": "11", "skill2_points": "-10",
+        },
+    )
+    assert s2_floor.status_code == 200
+    s2_too_low = client.post(
+        "/games/mhp3/charms",
+        data={
+            "slots": "0", "skill1_tree": "10", "skill1_points": "1",
+            "skill2_tree": "11", "skill2_points": "-11",
+        },
+    )
+    assert s2_too_low.status_code == 422
 
     search = client.post(
         "/games/mhp3/search",
@@ -82,3 +144,20 @@ def test_talismans_flag_inventory_and_advanced_tab(packed_db):
     assert "Attack +5" not in search.text
     assert "Attack +4 OOO" not in search.text
     assert "Attack +4 OO-" not in search.text
+
+    extra_ids = []
+    for n in range(5):
+        tree_id = 20 + n
+        skill_id = 20 + n
+        packed_db.create_skill_tree(
+            id=tree_id, game_id=2, name_en=f"Tree{n}", name_ja=f"Tree{n}",
+        )
+        packed_db.create_skill(
+            id=skill_id, tree_id=tree_id, name_en=f"Skill {n}", points=10,
+        )
+        extra_ids.append(str(skill_id))
+    six = client.post(
+        "/games/mhp3/search",
+        data={**SEARCH_FORM, "skill_id": ["10", *extra_ids]},
+    )
+    assert six.status_code == 200

@@ -117,4 +117,6 @@ queries:
     trees: { "Attack": 20, "Sharpness": 10 }
     expect:
       charm: generated
-      charm_points_at_most: { "Attack": 10, "Sharpness": 10 }
+      # Attack +10 is legal only as skill 2 (timeworn FURU2). Skill 1 Attack
+      # tops out at mystery/shining +4. Sharpness (skill 1) max is +5.
+      charm_points_at_most: { "Attack": 10, "Sharpness": 5 }

@@ -44,6 +44,9 @@ Only remaining MHFU work is optional (more known queries from live Athena runs).
   `docs/adr/0009`). Display English is Team Maverick One (`Languages/English (TMO)`).
 - Save import (PSP decryption, `PSPCryptoEngine.cpp`): **deferred** — evaluate when this phase
   ships; not required for the phase to be complete.
+- **Open:** generated-charm CP-SAT domain vs 2 s budget (inventory-first + corner
+  points are palliatives). Analysis hook:
+  `docs/known-issues/generated-charm-domain-timeout.md`.
 
 ## Phase 3 — MHGU (gen "5-classic")
 

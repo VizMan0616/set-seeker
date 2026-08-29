@@ -4,10 +4,9 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app.web.render import templates
+from app.web.resolvers import DEFAULT_DESIRED_SKILLS_MAX
 
 router = APIRouter()
-
-MAX_SKILL_PICKS = 5
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -20,7 +19,13 @@ def index(request: Request) -> HTMLResponse:
         "categories": [], "skills": [],
         "progression": {"guild_rank": 9, "village_stars": 9},
         "talismans": False,
+        "has_dummy": False,
+        "desired_skills_max": DEFAULT_DESIRED_SKILLS_MAX,
     })
+    max_skill_picks = max(
+        (int(c.get("desired_skills_max") or DEFAULT_DESIRED_SKILLS_MAX) for c in catalogs.values()),
+        default=DEFAULT_DESIRED_SKILLS_MAX,
+    )
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -30,7 +35,7 @@ def index(request: Request) -> HTMLResponse:
             "skills": default_catalog["skills"],
             "categories": default_catalog["categories"],
             "catalogs": catalogs,
-            "max_skill_picks": MAX_SKILL_PICKS,
+            "max_skill_picks": max_skill_picks,
             "progression": default_catalog.get(
                 "progression", {"guild_rank": 9, "village_stars": 9}
             ),

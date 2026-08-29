@@ -113,7 +113,24 @@ def _emit_slots(consider, skills: tuple[tuple[int, int], ...], cap: int) -> None
         consider(CharmSpec(id=-1, slots=slots, skills=skills))
 
 
+def _positive_pts(lo: int, hi: int) -> range:
+    return range(max(lo, 1), hi + 1)
+
+
+def _corner_pts(lo: int, hi: int) -> tuple[int, ...]:
+    """Min/max of a legal range — not every integer (keeps the CP-SAT table small)."""
+    pos = list(_positive_pts(lo, hi))
+    if not pos:
+        extra = [lo] if lo < 0 else []
+        return tuple(extra)
+    corners = {pos[0], pos[-1]}
+    if lo < 0:
+        corners.add(lo)
+    return tuple(sorted(corners))
+
+
 def _generate_type(kind, requested: tuple[int, ...], consider, mode: str) -> None:
+    """One-skill charms use skill1 only; two-skill uses corners, not a full grid."""
     skill1 = {tree: (lo, hi) for tree, lo, hi in kind.skill1}
     skill2 = {tree: (lo, hi) for tree, lo, hi in kind.skill2}
 
@@ -127,7 +144,7 @@ def _generate_type(kind, requested: tuple[int, ...], consider, mode: str) -> Non
             if rng is None:
                 continue
             lo, hi = rng
-            for pts in range(max(lo, 1), hi + 1):
+            for pts in _positive_pts(lo, hi):
                 skills = ((tree, pts),)
                 _emit_slots(consider, skills, _slot_cap(kind, ((pts, hi),)))
         return
@@ -135,17 +152,14 @@ def _generate_type(kind, requested: tuple[int, ...], consider, mode: str) -> Non
     if not skill2 or len(requested) < 2:
         return
     for t1, t2 in combinations(requested, 2):
-        for tree_a, tree_b, map_a, map_b in (
-            (t1, t2, skill1, skill2),
-            (t2, t1, skill1, skill2),
-        ):
-            rng_a, rng_b = map_a.get(tree_a), map_b.get(tree_b)
+        for tree_a, tree_b in ((t1, t2), (t2, t1)):
+            rng_a, rng_b = skill1.get(tree_a), skill2.get(tree_b)
             if rng_a is None or rng_b is None:
                 continue
             lo_a, hi_a = rng_a
             lo_b, hi_b = rng_b
-            for pts_a in range(max(lo_a, 1), hi_a + 1):
-                for pts_b in range(max(lo_b, 1), hi_b + 1):
+            for pts_a in _corner_pts(lo_a, hi_a):
+                for pts_b in _corner_pts(lo_b, hi_b):
                     skills = ((tree_a, pts_a), (tree_b, pts_b))
                     cap = _slot_cap(kind, ((pts_a, hi_a), (pts_b, hi_b)))
                     _emit_slots(consider, skills, cap)

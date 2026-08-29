@@ -83,6 +83,54 @@ def test_generated_charm_from_type_envelope():
         assert outcome.result.charm_slots <= 1
 
 
+def test_one_skill_charms_ignore_skill2_envelope():
+    """Skill 2 maxima (+10) must not appear on a one-skill (skill-1) charm."""
+    other = 99
+    pack = _talisman_pack(
+        charm_types=(
+            CharmTypeSpec(
+                code="timeworn",
+                max_slots=0,
+                skill1=((other, 0, 6),),
+                skill2=((ATTACK_TREE, -10, 10),),
+            ),
+        )
+    )
+    query = make_query(min_points=10, game="mhp3", user_charms=())
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0]
+    assert all(not c.skills for c in generated)
+
+
+def test_two_skill_puts_high_max_on_slot_two():
+    other = 99
+    pack = _talisman_pack(
+        charm_types=(
+            CharmTypeSpec(
+                code="timeworn",
+                max_slots=0,
+                skill1=((other, 0, 6),),
+                skill2=((ATTACK_TREE, -10, 10),),
+            ),
+        )
+    )
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="two_skill",
+        user_charms=(),
+        skills=(
+            SkillRequest(tree_id=ATTACK_TREE, min_points=10),
+            SkillRequest(tree_id=other, min_points=1),
+        ),
+    )
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0 and len(c.skills) == 2]
+    assert generated
+    assert all(c.skills[0][0] == other and c.skills[1][0] == ATTACK_TREE for c in generated)
+    assert max(c.skills[1][1] for c in generated) == 10
+    assert max(c.skills[0][1] for c in generated) == 6
+    assert all(c.skills[1][1] in (-10, 1, 10) for c in generated)
+
+
 def test_generated_candidates_obey_max_and_slot_fulfillment():
     pack = _talisman_pack(
         charm_types=(
@@ -147,6 +195,30 @@ def test_domain_snapshot_lists_user_charms(tiny_pack_data):
     pruned = prune(pack, query)
     snap = domain_snapshot(pack, pruned)
     assert snap["kinds"]["charms"]["rel_ids"] == [9]
+
+
+def test_two_skill_domain_is_corners_not_full_grid():
+    trees = (ATTACK_TREE, 2, 3, 4, 5, 6)
+    pack = _talisman_pack(
+        charm_types=(
+            CharmTypeSpec(
+                code="timeworn",
+                max_slots=0,
+                skill1=tuple((t, 0, 7) for t in trees),
+                skill2=tuple((t, -10, 10) for t in trees),
+            ),
+        )
+    )
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="two_skill",
+        user_charms=(),
+        skills=tuple(SkillRequest(tree_id=t, min_points=10) for t in trees),
+    )
+    two = [c for c in charm_candidates(pack, query) if c.id < 0 and len(c.skills) == 2]
+    assert two
+    assert len(two) < 400
 
 
 def test_mhfu_pack_still_has_no_charm_kind(tiny_pack_data):

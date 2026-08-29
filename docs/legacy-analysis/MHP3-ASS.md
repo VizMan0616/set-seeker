@@ -19,7 +19,8 @@ Source root: `sources/MHP3-ASS/`. Solution: `Athena's ASS MHP3rd.sln`.
 Worker: `Form1.h` `backgroundWorker1_DoWork` (~1852–1930). Matching:
 `Solution::MatchesQuery` (`Solution.cpp` ~660–724).
 
-1. **Query** (`FormulateQuery` ~1192+): up to 6 skills, HR, village★, gender, type, weapon
+1. **Query** (`FormulateQuery` ~1192+): up to **6** skills (`NumSkills` at
+   `Form1.h:95` — six static combo boxes, no add/subtract), HR, village★, gender, type, weapon
    slots, allow event / low rank / bad skills.
 2. **Relevance + dominance prune** (`LoadedData.cpp:121-167`). **No equivalence classes**
    (unlike MHFU).
@@ -80,6 +81,22 @@ Sources:
    charms (`ReduceCharm`, `Solution.cpp:633-658`).
 
 UI: charm select mode + "Filter Results by Charm" combo (`cmbCharms`).
+Manage Charms inventory is a **wide clamp** (`CreateCharm` skill 1 `0…10`,
+skill 2 `−10…13`), not per-tree truncation.
+
+Identified rarity names (TMO Pawn…Dragon) are **not** seven Athena generators.
+Three unappraised types share envelopes:
+
+| Unappraised (Athena) | Identified (JP / TMO) |
+|---|---|
+| なぞ mystery (`NAZO1`) | 兵士 / 闘士 — Pawn / Bishop |
+| 光る shining (`HIKA1`/`HIKA2`) | 騎士 / 城塞 — Knight / Rook |
+| 古びた timeworn (`FURU1`/`FURU2`) | 女王 / 王 / 龍 — Queen / King / Dragon |
+
+A global skill-1 **+7** cap is wrong: that is typical timeworn *combat* trees;
+mystery skill 1 already reaches **+10** on several gathering/utility trees
+(`mystery_skill1.csv`). Village-gift 自動防御+10 is a wiki footnote for why
++7 failed as a rule — not a row we add and not a code exception.
 
 ## Decorations
 
@@ -113,5 +130,10 @@ message; the search itself no longer stops at 1000.
   (unlike MH3U); empty ability column is Torso Inc. Charm RNG tables extracted
   from UTF-16 `CharmDatabase.cpp` (`OmaSkill::SKILL` / `FURUSLO` / `tableinit[12]`)
   into `packs/mhp3/charm_generation/` (mystery / shining / timeworn; tree
-  columns keep Athena English and are remapped to TMO at ETL). Closed village
-  path uses sentinel 99.
+  columns keep Athena English and are remapped to TMO at ETL). FURU1/HIKA1/NAZO1
+  are skill 1; FURU2/HIKA2 are skill 2 (the slot that can roll ±10 / +13 res).
+  Inventory steppers use the **union** of those CSVs (skill 1 max +10, skill 2
+  −10…+13). Closed village path uses sentinel 99.
+- Generated-charm **point-grid** vs 2 s budget (6-skill Water Atk +2 / Attack Up (M)
+  stress): `docs/known-issues/generated-charm-domain-timeout.md`. Do not port
+  `Form1.h` charm-worker fan-out.

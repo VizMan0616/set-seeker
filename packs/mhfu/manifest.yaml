@@ -12,6 +12,7 @@ features:
   charm_up: false                   # MHGU: double charm skills
   skill_plus_two: false             # MHGU: +2 to all trees
   compound_skills: false            # gen4+: one tree grants several others
+desired_skills_max: 5               # Athena Form1.h NumSkills (MH Armor/Form1.h:85)
 progression:
   guild_rank: 9                     # Athena nudHR max (Form1.h:540); 10 is closed-path sentinel
   village_stars: 9                  # Athena nudElder max (Form1.h:593)

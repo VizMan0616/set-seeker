@@ -12,13 +12,48 @@ from typing import Any
 from app.repository.game_data import GameDataRepository
 
 
+DEFAULT_DESIRED_SKILLS_MAX = 5
+DEFAULT_CHARM_POINTS = {
+    "skill1_min": 1,
+    "skill1_max": 10,
+    "skill2_min": -10,
+    "skill2_max": 13,
+}
+
+
+def _features(features_json: str | None) -> dict:
+    return json.loads(features_json or "{}")
+
+
 def progression_caps(features_json: str | None) -> dict[str, int]:
     """Guild HR and village ★ ceilings from games.features (pack manifest)."""
-    data = json.loads(features_json or "{}")
+    data = _features(features_json)
     return {
         "guild_rank": int(data.get("guild_rank_max") or 9),
         "village_stars": int(data.get("village_stars_max") or 9),
     }
+
+
+def desired_skills_max(features_json: str | None) -> int:
+    """Athena Form1.h NumSkills, stored on games.features from the pack manifest."""
+    value = _features(features_json).get("desired_skills_max")
+    try:
+        n = int(value)
+    except (TypeError, ValueError):
+        return DEFAULT_DESIRED_SKILLS_MAX
+    return n if n >= 1 else DEFAULT_DESIRED_SKILLS_MAX
+
+
+def charm_point_bounds(features_json: str | None) -> dict[str, int]:
+    """Per-slot inventory stepper ranges (skill 1 ≠ skill 2)."""
+    data = _features(features_json).get("charm_points") or {}
+    out = dict(DEFAULT_CHARM_POINTS)
+    for key in DEFAULT_CHARM_POINTS:
+        try:
+            out[key] = int(data[key])
+        except (KeyError, TypeError, ValueError):
+            pass
+    return out
 
 
 class RepositoryNameResolver:
@@ -101,13 +136,17 @@ class RepositoryCatalog:
                 "categories": [],
                 "skills": [],
                 "talismans": False,
+                "has_dummy": False,
                 "progression": {"guild_rank": 9, "village_stars": 9},
+                "desired_skills_max": DEFAULT_DESIRED_SKILLS_MAX,
             }
         game_id = row["id"]
         return {
             "categories": [c["tag"] for c in self._repo.list_skill_categories(game_id)],
             "talismans": bool(json.loads(row["features"] or "{}").get("talismans", False)),
+            "has_dummy": self._repo.has_dummy_pieces(game_id),
             "progression": progression_caps(row["features"]),
+            "desired_skills_max": desired_skills_max(row["features"]),
             "skills": [
                 {
                     "id": s["id"],

@@ -19,6 +19,8 @@
   --bs-border-color: rgba(32, 52, 42, 0.18);
 }
 
+[x-cloak] { display: none !important; }
+
 body {
   font-family: var(--bs-body-font-family);
 }
@@ -92,6 +94,11 @@ h1, h2, h3, .ss-card-title {
   display: inline-block;
   margin-left: 0.35rem;
   color: var(--ss-brass);
+}
+
+button.ss-inline-link {
+  text-decoration: underline;
+  vertical-align: baseline;
 }
 
 .ss-charm-list .ss-piece-name {

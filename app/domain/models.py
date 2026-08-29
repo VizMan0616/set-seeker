@@ -36,7 +36,7 @@ class CharmSpec:
 @dataclass(frozen=True)
 class Query:
     game: str                            # pack id, e.g. "mhfu"
-    skills: tuple[SkillRequest, ...]     # 1..5 entries
+    skills: tuple[SkillRequest, ...]     # 1..desired_skills_max (pack manifest)
     weapon_slots: int                    # 0..3
     gender: str                          # "m" | "f"
     hunter_type: str                     # "blademaster" | "gunner"
@@ -106,3 +106,5 @@ class SearchPage:
 
 
 PAGE_SIZE = 10
+# Hard stop for iterate-and-exclude UI (ADR 0005): cards as shown, not CP-SAT hits.
+SHOWN_CAP = 1000

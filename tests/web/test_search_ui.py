@@ -50,6 +50,8 @@ def test_index_renders_search_form(client: TestClient):
     assert "Offensive" in html
     assert 'name="allow_torso_inc"' in html
     assert 'name="allow_dummy"' in html
+    assert 'hx-post="/search"' in html
+    assert 'name="game"' in html
     assert 'id="advanced-open"' in html
     assert 'id="advanced-modal"' in html
     assert 'disabled' in html.split('id="advanced-open"')[1].split(">")[0]
@@ -106,6 +108,13 @@ def test_start_search_returns_result_cards(client: TestClient):
     assert "free socket" in html
 
 
+def test_search_picker_route_uses_game_field(client: TestClient):
+    response = client.post("/search", data={**SEARCH_FORM, "game": "mhfu"})
+    assert response.status_code == 200
+    assert "ss-result" in response.text or "ss-empty" in response.text
+    assert "Unknown game" not in response.text
+
+
 def test_load_more_updates_remaining_count(client: TestClient):
     first = client.post("/games/mhfu/search", data=SEARCH_FORM)
     assert first.status_code == 200
@@ -119,6 +128,8 @@ def test_load_more_updates_remaining_count(client: TestClient):
     assert 'id="results-summary"' in more.text
     assert 'hx-swap-oob="true"' in more.text
     assert "more to load" in more.text or "found." in more.text
+    assert 'hx-trigger="revealed"' in first.text
+    assert "ss-scroll-sentinel" in first.text
 
 
 def test_load_more_pages_until_exhausted_without_repeats(client: TestClient):
@@ -189,19 +200,38 @@ def test_search_lists_every_equivalent_when_requested(client: TestClient):
         assert shown == len(cards)
 
 
-def test_search_rejects_rank_above_pack_cap(client: TestClient):
+def test_search_clamps_rank_above_pack_cap(client: TestClient):
     too_high = client.post("/games/mhfu/search", data={**SEARCH_FORM, "hr": "10"})
-    assert too_high.status_code == 422
+    assert too_high.status_code == 200
+    assert "ss-result" in too_high.text or "ss-empty" in too_high.text
     village = client.post("/games/mhfu/search", data={**SEARCH_FORM, "village_stars": "99"})
-    assert village.status_code == 422
+    assert village.status_code == 200
 
 
-def test_search_requires_at_least_one_skill(client: TestClient):
+def test_search_rejects_six_skills_on_mhfu(packed_db, client: TestClient):
+    ids = ["1"]
+    for n in range(5):
+        tree_id = 50 + n
+        skill_id = 50 + n
+        packed_db.create_skill_tree(
+            id=tree_id, game_id=1, name_en=f"Extra{n}", name_ja=f"Extra{n}",
+        )
+        packed_db.create_skill(
+            id=skill_id, tree_id=tree_id, name_en=f"Extra Skill {n}", points=10,
+        )
+        ids.append(str(skill_id))
+    too_many = client.post(
+        "/games/mhfu/search",
+        data={**SEARCH_FORM, "skill_id": ids},
+    )
+    assert too_many.status_code == 200
+    assert "Choose between 1 and 5 skills" in too_many.text
     response = client.post(
         "/games/mhfu/search",
         data={**SEARCH_FORM, "skill_id": ["", "", "", "", ""]},
     )
-    assert response.status_code == 422
+    assert response.status_code == 200
+    assert "Choose between 1 and 5 skills" in response.text
 
 
 def test_search_rejects_unknown_and_invented_skills(client: TestClient):
@@ -209,12 +239,14 @@ def test_search_rejects_unknown_and_invented_skills(client: TestClient):
         "/games/mhfu/search",
         data={**SEARCH_FORM, "skill_id": ["99999", "", "", "", ""]},
     )
-    assert unknown.status_code == 422
+    assert unknown.status_code == 200
+    assert "Unknown skill" in unknown.text
     garbage = client.post(
         "/games/mhfu/search",
         data={**SEARCH_FORM, "skill_id": ["nope", "", "", "", ""]},
     )
-    assert garbage.status_code == 422
+    assert garbage.status_code == 200
+    assert "Invalid skill" in garbage.text
 
 
 def test_search_excludes_omitted_pieces_from_results(client: TestClient):

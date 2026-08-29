@@ -27,6 +27,7 @@ def test_pack_stores_progression_caps(etl_db):
     features = json.loads(game["features"])
     assert features["guild_rank_max"] == 9
     assert features["village_stars_max"] == 9
+    assert features["desired_skills_max"] == 5
 
 
 def test_loaded_row_counts(etl_db):

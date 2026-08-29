@@ -15,7 +15,8 @@ Charm Up, Skill +2, compound skills); every other game is a subset.
   decorations grant signed points to trees.
 - **Skill**: a threshold on a tree, e.g. `Attack Up (L)` = 20 points in `Attack`. Thresholds
   can be negative (bad skills).
-- **Query**: the user's request — desired skills, filters (HR, village★, gender, hunter type,
+- **Query**: the user's request — desired skills (count capped by pack
+  `desired_skills_max` / Athena `NumSkills`), filters (HR, village★, gender, hunter type,
   rarity, event gear), weapon slots, charm policy, result options.
 
 ## Pipeline
@@ -101,8 +102,11 @@ Hard constraints:
    (`ReduceCharm`/`ReduceSlots`/`ReduceSkills`) becomes a first-class objective: prefer sets
    completable with the weakest legal charm (or none). This is the single biggest UX upgrade
    over the legacy tool and CP-SAT does it natively.
-2. **Maximize spare slots** (post-decoration), then **maximize defense**.
-3. Tie-breakers from the query's sort option (resists, rarity, difficulty).
+2. **Minimize active penalty skills** — trees at or below their negative threshold
+   (ADR 0011). When the query forbids bad skills this tier is constant (hard floor);
+   when it allows them, fixer jewels beat leftover sockets.
+3. **Maximize spare slots** (post-decoration), then **maximize defense**.
+4. Tie-breakers from the query's sort option (resists, rarity, difficulty).
 
 ### 4. Enumeration — iterate + exclude
 
@@ -129,6 +133,10 @@ Hard constraints:
   invalidates the old search id.
 - No unbounded work queues, no background fan-out per charm template, no result accumulation
   beyond the page being served.
+- **Known gap:** expanding MHP3 charm *envelopes* into a full two-skill point grid
+  can exhaust the 2 s budget on a 6-skill query even when a legal inventory charm
+  exists. Replay and follow-ups:
+  `docs/known-issues/generated-charm-domain-timeout.md`.
 
 ### 6. Per-generation model deltas
 

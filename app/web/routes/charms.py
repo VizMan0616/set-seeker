@@ -1,4 +1,4 @@
-"""Charm inventory pages (ADR 0006). Shown only when pack flag talismans is true."""
+"""Charm inventory fragments (ADR 0006). Shown only when pack flag talismans is true."""
 
 from urllib.parse import parse_qsl
 
@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.web.render import templates
-from app.web.resolvers import progression_caps
+from app.web.resolvers import charm_point_bounds
 
 router = APIRouter()
 
@@ -52,22 +52,28 @@ def _labeled_charms(request: Request, session_id: str, game_id: int) -> list[dic
     return labeled
 
 
-@router.get("/games/{game}/charms", response_class=HTMLResponse)
-def list_charms(request: Request, game: str) -> HTMLResponse:
-    row = _require_talisman_game(request, game)
+def _charm_fragment(request: Request, row: dict) -> HTMLResponse:
     user_data = request.app.state.user_data
     user_data.get_or_create_session(request.state.session_id)
+    bounds = charm_point_bounds(row.get("features"))
     return templates.TemplateResponse(
         request,
         "charms.html",
         {
             "game": row,
-            "trees": _tree_options(request, game),
+            "trees": _tree_options(request, row["code"]),
             "charms": _labeled_charms(request, request.state.session_id, row["id"]),
-            "progression": progression_caps(row["features"]),
-            "error": None,
+            "charm_points": bounds,
         },
     )
+
+
+@router.get("/games/{game}/charms", response_class=HTMLResponse)
+def list_charms(request: Request, game: str) -> HTMLResponse:
+    row = _require_talisman_game(request, game)
+    if request.headers.get("HX-Request") != "true":
+        return RedirectResponse(url="/", status_code=303)
+    return _charm_fragment(request, row)
 
 
 @router.post("/games/{game}/charms", response_class=HTMLResponse)
@@ -90,6 +96,7 @@ async def add_charm(request: Request, game: str) -> HTMLResponse:
         raise HTTPException(status_code=422, detail="Slots must be 0–3.")
 
     trees = {t["id"] for t in _tree_options(request, game)}
+    bounds = charm_point_bounds(row.get("features"))
 
     def skill_pair(prefix: str) -> tuple[int | None, int | None]:
         raw_tree = first(f"{prefix}_tree").strip()
@@ -103,7 +110,9 @@ async def add_charm(request: Request, game: str) -> HTMLResponse:
             raise HTTPException(status_code=422, detail="Invalid charm skill.") from exc
         if tree_id not in trees:
             raise HTTPException(status_code=422, detail="Skill tree is not in this game.")
-        if not -10 <= points <= 15 or points == 0:
+        lo = bounds[f"{prefix}_min"]
+        hi = bounds[f"{prefix}_max"]
+        if points == 0 or not lo <= points <= hi:
             raise HTTPException(status_code=422, detail="Charm points must be nonzero.")
         return tree_id, points
 
@@ -128,11 +137,11 @@ async def add_charm(request: Request, game: str) -> HTMLResponse:
         skill2_points=s2_pts,
         note=(first("note").strip() or None),
     )
-    return RedirectResponse(url=f"/games/{game}/charms", status_code=303)
+    return _charm_fragment(request, row)
 
 
-@router.post("/games/{game}/charms/{charm_id}/delete")
-def delete_charm(request: Request, game: str, charm_id: int) -> RedirectResponse:
+@router.post("/games/{game}/charms/{charm_id}/delete", response_class=HTMLResponse)
+def delete_charm(request: Request, game: str, charm_id: int) -> HTMLResponse:
     row = _require_talisman_game(request, game)
     user_data = request.app.state.user_data
     existing = user_data.get_charm(charm_id)
@@ -143,4 +152,4 @@ def delete_charm(request: Request, game: str, charm_id: int) -> RedirectResponse
     ):
         raise HTTPException(status_code=404, detail="Unknown talisman.")
     user_data.delete_charm(charm_id)
-    return RedirectResponse(url=f"/games/{game}/charms", status_code=303)
+    return _charm_fragment(request, row)

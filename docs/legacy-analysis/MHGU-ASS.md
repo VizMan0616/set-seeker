@@ -21,7 +21,7 @@ Orchestration: `Form1.h` `StartSearch` / `backgroundWorker1_DoWork` (~2757+), pl
 **`DoWork2` (~2706)** — a second worker path for Charm Up sets (fixed full-set searches over
 `charm_up_armors_*`). Otherwise the shared pipeline:
 
-1. Query → relevance + dominance prune (`LoadedData::GetRelevantData`).
+1. Query (`NumSkills = 7`, `Form1.h:87`; static combo boxes) → relevance + dominance prune (`LoadedData::GetRelevantData`).
 2. One worker per charm template.
 3. 5 nested armor loops (`Form1.h:~2779+`).
 4. `Solution::MatchesQuery` — same greedy decoration pipeline; **charm skills are doubled when

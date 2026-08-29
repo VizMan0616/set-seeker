@@ -15,10 +15,9 @@
 <form class="card ss-form mb-4"
       id="search-form"
       x-data="searchForm()"
-      action="/games/{{ games[0].code if games else 'mhfu' }}/search"
+      action="/search"
       method="post"
-      hx-post="/games/{{ games[0].code if games else 'mhfu' }}/search"
-      :hx-post="'/games/' + game + '/search'"
+      hx-post="/search"
       hx-target="#results"
       hx-swap="innerHTML"
       hx-indicator="#search-working"
@@ -26,18 +25,20 @@
 
   <div class="card-body">
     <label class="form-label ss-label" for="game">Game</label>
-    <select id="game" class="form-select" x-model="game">
+    <select id="game" class="form-select" name="game" x-model="game">
       {% for g in games %}
       <option value="{{ g.code }}">{{ g.name }}</option>
       {% endfor %}
     </select>
     <p class="ss-hint mt-2 mb-0" x-show="currentCatalog.talismans">
-      <a class="ss-inline-link" :href="'/games/' + game + '/charms'">My talismans</a>
+      <button type="button" class="btn btn-link ss-inline-link p-0 align-baseline"
+              data-bs-toggle="modal" data-bs-target="#talismans-modal"
+              @click="loadTalismans()">My talismans</button>
     </p>
   </div>
 
   <fieldset class="card-body border-top">
-    <legend class="ss-legend">Desired skills <span class="ss-legend-note">pick 1–{{ max_skill_picks }}</span></legend>
+    <legend class="ss-legend">Desired skills <span class="ss-legend-note">pick 1–<span x-text="skillCap">{{ max_skill_picks }}</span></span></legend>
     <div class="ss-chip-row mb-3" role="group" aria-label="Skill category">
       <button type="button" class="btn btn-sm ss-chip ss-chip-on"
               :class="{ 'ss-chip-on': category === 'all' }"
@@ -58,9 +59,10 @@
       {% endfor %}
     </div>
     {% for i in range(max_skill_picks) %}
-    <div class="mb-2">
+    <div class="mb-2" {% if i > 0 %}x-show="{{ i }} < skillCap"{% endif %}>
       <label class="visually-hidden" for="skill-id-{{ i }}">Skill {{ i + 1 }}</label>
-      <select id="skill-id-{{ i }}" class="form-select" name="skill_id">
+      <select id="skill-id-{{ i }}" class="form-select" name="skill_id"
+              :disabled="{{ i }} >= skillCap">
         <option value="">—</option>
         {% for skill in skills %}
         <option value="{{ skill.id }}"
@@ -202,8 +204,9 @@
           <input class="form-check-input" type="checkbox" id="allow-torso-inc" name="allow_torso_inc" checked>
           <label class="form-check-label" for="allow-torso-inc">Allow Torso Inc</label>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
+        <div class="form-check" x-show="currentCatalog.has_dummy" x-cloak>
+          <input class="form-check-input" type="checkbox" id="allow-dummy"
+                 name="allow_dummy" :disabled="!currentCatalog.has_dummy">
           <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
         </div>
         <fieldset class="mb-0" x-show="currentCatalog.talismans" x-cloak>
@@ -251,7 +254,8 @@
   </div>
 
   <div class="card-body border-top d-flex align-items-center gap-3">
-    <button type="submit" class="btn ss-btn-brass btn-lg">Find sets</button>
+    <button type="submit" class="btn ss-btn-brass btn-lg"
+            @click="invalidateAdvanced()">Find sets</button>
     <span id="search-working" class="htmx-indicator ss-working">
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       Searching…
@@ -281,6 +285,20 @@
   </div>
 </form>
 
+<div class="modal fade" id="talismans-modal" tabindex="-1" aria-labelledby="talismans-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title ss-card-title fs-5" id="talismans-modal-title">My talismans</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="talismans-modal-body">
+        <p class="ss-hint mb-0">Open this list to add the charms you own.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="results" aria-live="polite"></div>
 <script>
 function searchForm() {
@@ -306,7 +324,13 @@ function searchForm() {
         categories: [], skills: [],
         progression: { guild_rank: 9, village_stars: 9 },
         talismans: false,
+        has_dummy: false,
+        desired_skills_max: 5,
       };
+    },
+    get skillCap() {
+      const n = this.currentCatalog.desired_skills_max;
+      return (typeof n === "number" && n >= 1) ? n : 5;
     },
     get caps() {
       return this.currentCatalog.progression || { guild_rank: 9, village_stars: 9 };
@@ -314,8 +338,24 @@ function searchForm() {
     init() {
       document.querySelectorAll(".ss-ssr-chip").forEach((el) => el.remove());
       document.querySelectorAll(".ss-ssr-rank").forEach((el) => el.remove());
+      if (!document.body.dataset.ssSearchRoute) {
+        document.body.dataset.ssSearchRoute = "1";
+        document.body.addEventListener("htmx:configRequest", (evt) => {
+          const el = evt.detail.elt;
+          const form = el && (el.id === "search-form" ? el : el.closest && el.closest("#search-form"));
+          if (!form) return;
+          const code = form.querySelector("#game") && form.querySelector("#game").value;
+          if (!code) return;
+          evt.detail.path = "/games/" + encodeURIComponent(code) + "/search";
+        });
+      }
       this.$watch("category", () => this.applySkillFilter());
-      this.$watch("game", () => { this.rebuildSkillOptions(); this.clampRanks(); });
+      this.$watch("game", () => {
+        this.rebuildSkillOptions();
+        this.clampRanks();
+        this.clampSkillRows();
+        this.invalidateAdvanced();
+      });
       this.applySkillFilter();
       this.$el.addEventListener("change", (e) => {
         const name = e.target && e.target.name;
@@ -343,6 +383,35 @@ function searchForm() {
         this.showAdvancedTab();
         this.filterAdvanced();
         this.refreshExcludeCount();
+      });
+      document.body.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-ss-pts-step]");
+        if (!btn) return;
+        const wrap = btn.closest("[data-ss-pts]");
+        if (!wrap) return;
+        const input = wrap.querySelector("[data-ss-pts-input]");
+        const face = wrap.querySelector("[data-ss-pts-face]");
+        if (!input) return;
+        const min = parseInt(wrap.getAttribute("data-ss-pts-min"), 10);
+        const max = parseInt(wrap.getAttribute("data-ss-pts-max"), 10);
+        const lo = Number.isFinite(min) ? min : 1;
+        const hi = Number.isFinite(max) ? max : 7;
+        const delta = parseInt(btn.getAttribute("data-ss-pts-step"), 10);
+        let value = parseInt(input.value, 10) || 1;
+        value += delta;
+        if (value === 0) value += delta;
+        if (value < lo) value = lo;
+        if (value > hi) value = hi;
+        if (value === 0) value = delta > 0 ? 1 : -1;
+        input.value = String(value);
+        if (face) face.textContent = value > 0 ? "+" + value : String(value);
+      });
+    },
+    loadTalismans() {
+      if (!window.htmx) return;
+      htmx.ajax("GET", "/games/" + this.game + "/charms", {
+        target: "#talismans-modal-body",
+        swap: "innerHTML",
       });
     },
     showAdvancedTab() {
@@ -378,6 +447,12 @@ function searchForm() {
         const label = row.querySelector("label");
         const text = (label && label.textContent || "").toLowerCase();
         row.hidden = Boolean(q) && !text.includes(q);
+      });
+    },
+    clampSkillRows() {
+      const cap = this.skillCap;
+      this.$el.querySelectorAll("select[name=skill_id]").forEach((sel, i) => {
+        if (i >= cap) sel.value = "";
       });
     },
     clampRanks() {

@@ -7,7 +7,7 @@ domain-named wrappers over the private generic CRUD helpers.
 
 from typing import Any
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, exists, insert, select, update
 from sqlalchemy.engine import Engine
 
 from app.repository import tables as t
@@ -254,6 +254,15 @@ class GameDataRepository:
 
     def get_armor_piece(self, piece_id: int) -> dict[str, Any] | None:
         return self._get(t.armor_pieces, id=piece_id)
+
+    def has_dummy_pieces(self, game_id: int) -> bool:
+        with self._engine.begin() as conn:
+            return bool(conn.execute(
+                select(exists().where(
+                    t.armor_pieces.c.game_id == game_id,
+                    t.armor_pieces.c.is_dummy.is_(True),
+                ))
+            ).scalar())
 
     def list_armor_pieces(
         self,

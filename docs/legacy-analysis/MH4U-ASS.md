@@ -22,7 +22,8 @@ Orchestration: `Form1.h` `StartSearch` (~1720–1826), worker `backgroundWorker1
 (~2463–2562). Pruning: `LoadedData::GetRelevantData` (`LoadedData.cpp:~243-319`).
 Feasibility: `Solution::MatchesQuery` (`Solution.cpp:~967-1059`).
 
-1. **Query** (`FormulateQuery`, `Form1.h:~1552-1588`): skill combos, HR/VE, gender, hunter
+1. **Query** (`FormulateQuery`, `Form1.h:~1552-1588`): skill combos
+   (`NumSkills = 7`, `Form1.h:89`; static combo boxes, no add/subtract), HR/VE, gender, hunter
    type, options.
 2. **Prune**: relevant abilities → relevant decorations → armor filtered by
    HR/event/gender/type (`Armor::MatchesQuery` ~207–257), dominance prune via

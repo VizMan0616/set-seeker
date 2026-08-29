@@ -22,7 +22,8 @@ Worker: `Form1.h` `backgroundWorker1_DoWork` (**2114–2201**). Validation:
 `LoadedData::GetRelevantData` (`LoadedData.cpp:139-185`).
 
 1. **Query** (`FormulateQuery`, `Form1.h:1373-1407`): HR, village★, gender, hunter type,
-   weapon slots, **charm table index**, skill combos.
+   weapon slots, **charm table index**, skill combos (`NumSkills = 6`, `Form1.h:78`;
+   static combo boxes, no add/subtract).
 2. **Relevance pruning**: mark requested abilities; collect decorations granting them
    (`GetRelevantDecorations`, `LoadedData.cpp:113-129`); per slot keep armors matching filters
    and not strictly dominated (`AddToList`/`IsBetterThan`, `LoadedData.cpp:72-111`).

@@ -11,6 +11,7 @@ Read `CONTEXT.md` first. It defines the domain language and the hard constraints
 | Why the legacy tool is slow / what patterns to avoid | `docs/legacy-analysis/overview.md` |
 | A specific legacy repo's algorithm or data format | `docs/legacy-analysis/<GAME>-ASS.md` |
 | Implementing or changing the armor search engine | `docs/specs/engine-spec.md` + the relevant `docs/legacy-analysis/<GAME>-ASS.md` |
+| Generated-charm timeout / huge charm domain | `docs/known-issues/generated-charm-domain-timeout.md` |
 | Adding a new game / generation | `docs/prompts/README.md` then `docs/prompts/implement.md` (or `review.md`) |
 | Historical Phase 0/1 parallel-build interfaces | `docs/specs/phase0-contracts.md` — as-built is `app/` |
 | Village / guild rank caps for a pack | `CONTEXT.md` (table) — do not re-scan ASS |

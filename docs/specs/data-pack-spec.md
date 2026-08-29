@@ -32,7 +32,32 @@ formats:
   armor_header_lines: 2               # MHFU: 2 header lines; others: comment headers
   skills_leading_index_columns: 0     # MH3U skills.txt has 2 leading index columns
 locales: [en, ja]
+desired_skills_max: 5                 # Athena Form1.h NumSkills (fixed combo boxes)
 ```
+
+ETL copies `desired_skills_max` onto `games.features`. The search UI and query
+parser read that field — **do not hardcode 5** and do not `if game == …`.
+
+Athena has **no** add/subtract for desired skills. `NumSkills` is a compile-time
+count of combo boxes:
+
+| Pack | `desired_skills_max` | Athena |
+|---|---|---|
+| mhfu | 5 | `sources/MHFU-ASS/MH Armor/Form1.h:85` |
+| mhp3 | 6 | `sources/MHP3-ASS/Form1.h:95` |
+| mh3u | 6 | `sources/MH3U-ASS/Form1.h:78` |
+| mh4 | 6 | `sources/MH4-ASS/Form1.h:80` |
+| mh4u | 7 | `sources/MH4U-ASS/Form1.h:89` |
+| mhgen | 7 | `sources/MHGen-ASS/Form1.h:87` |
+| mhgu | 7 | `sources/MHGU-ASS/Form1.h:87` |
+
+Talisman packs declare inventory point steppers (`charm_points`). Do not share
+±13 across skill 1 and skill 2. ETL **overwrites** those keys with the union of
+all `charm_generation/*_skill1.csv` / `*_skill2.csv` envelopes (same bounds for
+every tree — no per-skill gift list). MHP3 union today: skill 1 `1…10`, skill 2
+`−10…13`. Athena `ManageCharms.h` `CreateCharm` is a similar wide clamp
+(`0…10` / `−10…13`), not per-tree truncation. Generated search charms still
+use the per-type CSV envelopes, not this union.
 
 Expected flag matrix (verify against each repo before ETL implementation):
 

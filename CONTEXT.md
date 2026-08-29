@@ -28,24 +28,27 @@ responsive, and is simple to deploy with Docker.
 | **Excavated gear** | MH4/MH4U randomized equipment ("relics") the user can register manually. |
 | **Charm Up / Skill +2** | MHGU mechanics that double charm skills or add +2 points to all skills. |
 | **HR / village★** | Athena **quest-star** gates (not in-game HR 1–999) that filter equipment. Caps are per pack — see below. |
+| **Desired skills max** | How many activated skills the search form may request. Athena `Form1.h` `NumSkills` (fixed combo boxes, **no** add/subtract). Per pack — see table. |
 | **Hunter type** | Blademaster or Gunner; most armor is type-specific. |
 | **Game pack** | Our abstraction: one generation's data (armor, skills, decorations, charm rules) + feature flags, consumed by a single shared search engine. |
 
 ### Progression caps (authoritative)
 
-Copied from Athena `nudHR` / `nudElder` maxima. Use these when writing a pack
-manifest; do not re-derive from armor rows (those store sentinel 10 or 99 for
-“closed path”). Full citations: `docs/specs/data-pack-spec.md`.
+Copied from Athena `nudHR` / `nudElder` maxima and `Form1.h` `NumSkills`.
+Use these when writing a pack manifest; do not re-derive from armor rows
+(those store sentinel 10 or 99 for “closed path”). Desired-skill count is
+Athena’s static combo-box count, not a later add/subtract UI. Full citations:
+`docs/specs/data-pack-spec.md`.
 
-| Pack | Village ★ | Guild / HR | Rank band |
-|---|---|---|---|
-| mhfu | 9 | 9 | G-rank |
-| mhp3 | 6 | 6 | High-rank |
-| mh3u | 10 | 8 | G-rank hub ★8, village 10★ |
-| mh4 | 7 | 8 | High-rank (hub ★8) |
-| mh4u | 10 | 12 | G-rank hub ★9–12 (G1–G4) |
-| mhgen | 6 | 8 | High-rank |
-| mhgu | 10 | 13 | G-rank hub ★9–13 |
+| Pack | Village ★ | Guild / HR | Desired skills | Rank band |
+|---|---|---|---|---|
+| mhfu | 9 | 9 | 5 | G-rank |
+| mhp3 | 6 | 6 | 6 | High-rank |
+| mh3u | 10 | 8 | 6 | G-rank hub ★8, village 10★ |
+| mh4 | 7 | 8 | 6 | High-rank (hub ★8) |
+| mh4u | 10 | 12 | 7 | G-rank hub ★9–12 (G1–G4) |
+| mhgen | 6 | 8 | 7 | High-rank |
+| mhgu | 10 | 13 | 7 | G-rank hub ★9–13 |
 
 ## Hard constraints
 

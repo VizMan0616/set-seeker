@@ -3,17 +3,21 @@
 Each page is at most PAGE_SIZE budgeted solves; every exclusion is persisted
 in ``search_states`` via the user-data repository so "load more" is a
 stateless re-solve (ADR 0005). Infeasible is a result, never an exception.
+At most one prefetched page sits in query_json (lookahead), never a 1000-set buffer.
 """
 
 import json
+import threading
 from collections.abc import Callable
 from dataclasses import replace
 
 from app.domain.models import (
     NONE_CHARM_ID,
     PAGE_SIZE,
+    SHOWN_CAP,
     ArmorSetResult,
     CharmSpec,
+    DecorationAssignment,
     Query,
     SearchPage,
     SkillRequest,
@@ -86,6 +90,66 @@ def _page_units(query: Query, results: list[ArmorSetResult]) -> int:
     if query.expand_equivalents:
         return sum(r.equivalent_count() for r in results)
     return len(results)
+
+
+def _result_to_json(result: ArmorSetResult) -> dict:
+    return {
+        "piece_ids": list(result.piece_ids),
+        "alternates": [list(a) for a in result.alternates],
+        "decorations": [
+            {"decoration_id": d.decoration_id, "count": d.count}
+            for d in result.decorations
+        ],
+        "charm_id": result.charm_id,
+        "active_skills": [list(p) for p in result.active_skills],
+        "spare_slots": list(result.spare_slots),
+        "defense": result.defense,
+        "charm_slots": result.charm_slots,
+        "charm_skills": [list(p) for p in result.charm_skills],
+    }
+
+
+def _result_from_json(d: dict) -> ArmorSetResult:
+    return ArmorSetResult(
+        piece_ids=tuple(d["piece_ids"]),
+        alternates=tuple(tuple(a) for a in d["alternates"]),
+        decorations=tuple(
+            DecorationAssignment(
+                decoration_id=x["decoration_id"], count=x["count"]
+            )
+            for x in d["decorations"]
+        ),
+        charm_id=d["charm_id"],
+        active_skills=tuple((int(a), int(b)) for a, b in d["active_skills"]),
+        spare_slots=tuple(d["spare_slots"]),
+        defense=d["defense"],
+        charm_slots=int(d.get("charm_slots") or 0),
+        charm_skills=tuple(
+            (int(a), int(b)) for a, b in d.get("charm_skills") or ()
+        ),
+    )
+
+
+def _shown_capped(query_json: str) -> bool:
+    return bool(json.loads(query_json).get("shown_capped"))
+
+
+def _lookahead_payload(query_json: str) -> dict | None:
+    raw = json.loads(query_json).get("lookahead")
+    return raw if isinstance(raw, dict) else None
+
+
+def _patch_query_json(query_json: str, **fields) -> str:
+    payload = json.loads(query_json)
+    for key, value in fields.items():
+        if value is _UNSET:
+            payload.pop(key, None)
+        else:
+            payload[key] = value
+    return json.dumps(payload)
+
+
+_UNSET = object()
 
 
 def _query_from_json(payload: str) -> Query:
@@ -162,6 +226,7 @@ class CpSatSearchService:
         time_limit_ms: int = 2000,
         page_size: int = PAGE_SIZE,
         num_workers: int = 8,
+        shown_cap: int = SHOWN_CAP,
     ) -> None:
         # time_limit_ms / num_workers are passed in by the web layer from
         # app.config; the engine does not import config. Single-threaded
@@ -172,55 +237,74 @@ class CpSatSearchService:
         self._time_limit_ms = time_limit_ms
         self._page_size = page_size
         self._num_workers = num_workers
+        self._shown_cap = shown_cap
+        self._lock = threading.Lock()
+        self._session_epoch: dict[str, int] = {}
 
     def start_search(self, session_id: str, query: Query) -> SearchPage:
-        self._user_data.get_or_create_session(session_id)
-        # A new search from the same session invalidates its prior states.
-        self._user_data.delete_search_states_for_session(session_id)
-        pack = self._pack_loader(query.game)
-        query = self._with_inventory(session_id, pack, query)
-        pruned = prune(pack, query)
-        state = self._user_data.create_search_state(
-            session_id=session_id,
-            game_id=pack.game_id,
-            query_json=_with_domain_snapshot(
-                _query_to_json(query), domain_snapshot(pack, pruned)
-            ),
-        )
-        results, new_exclusions, partial, exhausted = self._solve_page(query, [])
-        if new_exclusions:
-            self._user_data.append_exclusions(state["id"], new_exclusions)
-        shown = _page_units(query, results)
-        remaining: int | None
-        tally = state["query_json"]
-        if exhausted:
-            remaining = 0
-            tally = _with_tally(tally, delivered=shown, found_total=shown)
-        elif not results:
-            remaining = None
-            tally = _with_tally(tally, delivered=shown)
-        else:
-            extra, exact = self._count_further(
-                query, [tuple(e) for e in new_exclusions]
+        with self._lock:
+            epoch = self._session_epoch.get(session_id, 0) + 1
+            self._session_epoch[session_id] = epoch
+            self._user_data.get_or_create_session(session_id)
+            # A new search from the same session invalidates its prior states.
+            self._user_data.delete_search_states_for_session(session_id)
+            pack = self._pack_loader(query.game)
+            query = self._with_inventory(session_id, pack, query)
+            snap_query = (
+                replace(query, use_generated_charms=False)
+                if query.user_charms and query.use_generated_charms
+                else query
             )
-            if exact:
-                remaining = extra
-                tally = _with_tally(
-                    tally, delivered=shown, found_total=shown + extra
-                )
-            else:
+            pruned = prune(pack, snap_query)
+            state = self._user_data.create_search_state(
+                session_id=session_id,
+                game_id=pack.game_id,
+                query_json=_with_domain_snapshot(
+                    _query_to_json(query), domain_snapshot(pack, pruned)
+                ),
+            )
+            results, new_exclusions, partial, exhausted = self._solve_page(
+                query, [], shown_so_far=0
+            )
+            if new_exclusions:
+                self._user_data.append_exclusions(state["id"], new_exclusions)
+            shown = _page_units(query, results)
+            remaining: int | None
+            tally = state["query_json"]
+            capped = shown >= self._shown_cap
+            if exhausted or capped:
+                remaining = 0
+                exhausted = True
+                tally = _with_tally(tally, delivered=shown, found_total=shown)
+                tally = _patch_query_json(tally, shown_capped=capped)
+            elif not results:
                 remaining = None
                 tally = _with_tally(tally, delivered=shown)
-        if tally != state["query_json"]:
-            self._user_data.update_search_query_json(state["id"], tally)
-        return SearchPage(
-            search_id=state["id"],
-            results=tuple(results),
-            partial=partial,
-            exhausted=exhausted,
-            shown_count=shown,
-            remaining_count=remaining,
-        )
+            else:
+                extra, exact = self._count_further(
+                    snap_query, [tuple(e) for e in new_exclusions]
+                )
+                if exact:
+                    remaining = extra
+                    tally = _with_tally(
+                        tally, delivered=shown, found_total=shown + extra
+                    )
+                else:
+                    remaining = None
+                    tally = _with_tally(tally, delivered=shown)
+            if tally != state["query_json"]:
+                self._user_data.update_search_query_json(state["id"], tally)
+            page = SearchPage(
+                search_id=state["id"],
+                results=tuple(results),
+                partial=partial,
+                exhausted=exhausted,
+                shown_count=shown,
+                remaining_count=remaining,
+            )
+        if not page.exhausted:
+            self._schedule_prefetch(session_id, page.search_id, epoch)
+        return page
 
     def get_search_query(self, session_id: str, search_id: str) -> Query | None:
         state = self._user_data.get_search_state(search_id)
@@ -229,32 +313,63 @@ class CpSatSearchService:
         return _query_from_json(state["query_json"])
 
     def load_more(self, session_id: str, search_id: str) -> SearchPage:
+        with self._lock:
+            page = self._load_more_locked(session_id, search_id)
+            epoch = self._session_epoch.get(session_id, 0)
+        if not page.exhausted:
+            self._schedule_prefetch(session_id, search_id, epoch)
+        return page
+
+    def _load_more_locked(self, session_id: str, search_id: str) -> SearchPage:
         state = self._user_data.get_search_state(search_id)
         if state is None or state["session_id"] != session_id:
-            # Unknown or foreign search id (e.g. invalidated by a newer search):
-            # an empty exhausted page, never an exception.
             return SearchPage(
                 search_id=search_id, results=(), partial=False, exhausted=True,
                 shown_count=0, remaining_count=0,
             )
+        if _shown_capped(state["query_json"]):
+            shown = _delivered(state["query_json"], 0)
+            return SearchPage(
+                search_id=search_id,
+                results=(),
+                partial=False,
+                exhausted=True,
+                shown_count=shown,
+                remaining_count=0,
+            )
         query = _query_from_json(state["query_json"])
-        exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
-        results, new_exclusions, partial, exhausted = self._solve_page(query, exclusions)
-        if new_exclusions:
-            self._user_data.append_exclusions(search_id, new_exclusions)
-        shown = _delivered(state["query_json"], len(exclusions)) + _page_units(
-            query, results
-        )
+        ahead = _lookahead_payload(state["query_json"])
+        if ahead is not None:
+            results = [_result_from_json(r) for r in ahead["results"]]
+            partial = bool(ahead.get("partial"))
+            exhausted = bool(ahead.get("exhausted"))
+        else:
+            exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
+            shown_so_far = _delivered(state["query_json"], len(exclusions))
+            results, new_exclusions, partial, exhausted = self._solve_page(
+                query, exclusions, shown_so_far=shown_so_far
+            )
+            if new_exclusions:
+                self._user_data.append_exclusions(search_id, new_exclusions)
+        shown = _delivered(state["query_json"], 0) + _page_units(query, results)
         total = _found_total(state["query_json"])
-        remaining = 0 if exhausted else (None if total is None else max(total - shown, 0))
-        self._user_data.update_search_query_json(
-            search_id,
-            _with_tally(
-                state["query_json"],
-                delivered=shown,
-                found_total=total if total is not None else None,
-            ),
+        capped = shown >= self._shown_cap
+        if capped:
+            exhausted = True
+        remaining = 0 if exhausted else (
+            None if total is None else max(total - shown, 0)
         )
+        tally = _with_tally(
+            state["query_json"],
+            delivered=shown,
+            found_total=shown if capped else (total if total is not None else None),
+        )
+        tally = _patch_query_json(
+            tally,
+            lookahead=_UNSET,
+            shown_capped=capped,
+        )
+        self._user_data.update_search_query_json(search_id, tally)
         return SearchPage(
             search_id=search_id,
             results=tuple(results),
@@ -290,8 +405,53 @@ class CpSatSearchService:
             ),
         )
 
+    def _schedule_prefetch(
+        self, session_id: str, search_id: str, epoch: int
+    ) -> None:
+        thread = threading.Thread(
+            target=self._prefetch_one,
+            args=(session_id, search_id, epoch),
+            daemon=True,
+        )
+        thread.start()
+
+    def _prefetch_one(self, session_id: str, search_id: str, epoch: int) -> None:
+        with self._lock:
+            if self._session_epoch.get(session_id) != epoch:
+                return
+            state = self._user_data.get_search_state(search_id)
+            if state is None or state["session_id"] != session_id:
+                return
+            if _shown_capped(state["query_json"]) or _lookahead_payload(
+                state["query_json"]
+            ):
+                return
+            query = _query_from_json(state["query_json"])
+            exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
+            shown_so_far = _delivered(state["query_json"], len(exclusions))
+            if shown_so_far >= self._shown_cap:
+                return
+            results, new_exclusions, partial, exhausted = self._solve_page(
+                query, exclusions, shown_so_far=shown_so_far
+            )
+            if new_exclusions:
+                self._user_data.append_exclusions(search_id, new_exclusions)
+            tally = _patch_query_json(
+                state["query_json"],
+                lookahead={
+                    "results": [_result_to_json(r) for r in results],
+                    "partial": partial,
+                    "exhausted": exhausted,
+                },
+            )
+            self._user_data.update_search_query_json(search_id, tally)
+
     def _solve_page(
-        self, query: Query, exclusions: list[tuple[int, ...]]
+        self,
+        query: Query,
+        exclusions: list[tuple[int, ...]],
+        *,
+        shown_so_far: int,
     ) -> tuple[list[ArmorSetResult], list[list[int]], bool, bool]:
         mode = resolved_charm_mode(query)
         if (
@@ -305,7 +465,7 @@ class CpSatSearchService:
                 use_generated_charms=False,
             )
             inv_results, inv_excl, inv_partial, _inv_exh = self._solve_page(
-                inv, exclusions
+                inv, exclusions, shown_so_far=shown_so_far
             )
             if inv_results:
                 return inv_results, inv_excl, inv_partial, False
@@ -318,8 +478,10 @@ class CpSatSearchService:
         partial = False
         exhausted = False
         working = list(exclusions)
-
         for _ in range(self._page_size):
+            if shown_so_far + _page_units(query, results) >= self._shown_cap:
+                exhausted = True
+                break
             outcome = solve_one(
                 pack=pack,
                 pruned=pruned,
@@ -328,16 +490,46 @@ class CpSatSearchService:
                 time_limit_ms=self._time_limit_ms,
                 num_workers=self._num_workers,
             )
+            if (
+                outcome.result is None
+                and outcome.status == "unknown"
+                and query.use_generated_charms
+                and not results
+            ):
+                outcome = solve_one(
+                    pack=pack,
+                    pruned=pruned,
+                    query=query,
+                    exclusions=working,
+                    time_limit_ms=self._time_limit_ms,
+                    num_workers=self._num_workers,
+                    rank=False,
+                )
             if outcome.status == "infeasible":
                 exhausted = True
                 break
             if outcome.result is None:  # budget hit before any solution
                 partial = True
                 break
+            next_units = _page_units(query, [outcome.result])
+            if (
+                shown_so_far + _page_units(query, results) + next_units
+                > self._shown_cap
+                and results
+            ):
+                exhausted = True
+                break
             results.append(outcome.result)
             exclusion = _exclusion_tuple(outcome.result)
             new_exclusions.append(exclusion)
             working.append(tuple(exclusion))
+            if shown_so_far + _page_units(query, results) >= self._shown_cap:
+                exhausted = True
+                break
+            if outcome.status == "unranked":
+                # Feasibility-first: ranking incomplete; keep filling the page.
+                partial = True
+                continue
             if outcome.status == "feasible":
                 # Budget hit mid-solve: the set is valid but ranking is not
                 # proven; stop the page here and flag it.

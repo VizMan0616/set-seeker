@@ -13,6 +13,12 @@ features:
   charm_up: false
   skill_plus_two: false
   compound_skills: false
+desired_skills_max: 6            # Athena Form1.h NumSkills (Form1.h:95); not 9
+charm_points:                    # documented union; ETL overwrites from CSVs
+  skill1_min: 1                  # skill 1 never negative; stepper skips 0
+  skill1_max: 10                 # union of *_skill1.csv maxima (mystery +10)
+  skill2_min: -10                # union of *_skill2.csv floors
+  skill2_max: 13                 # union of *_skill2.csv ceilings (res / gathering)
 progression:
   guild_rank: 6                  # Athena nudHR max (Form1.h:655)
   village_stars: 6               # Athena nudElder max (Form1.h:708)

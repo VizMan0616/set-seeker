@@ -20,7 +20,8 @@ Worker: `Form1.h` `backgroundWorker1_DoWork` (~1334–1431). Matching:
 `Solution.cpp` `EquivalenceSolution::MatchesQuery` (~121–150). Prep:
 `Query::CreateEquivalences` (~89–119), `LoadedData::GetRelevantData` (~199–244).
 
-1. **Query** (`FormulateQuery` ~992–1027): up to 5 skills, HR/village★, gender,
+1. **Query** (`FormulateQuery` ~992–1027): up to **5** skills (`NumSkills` at
+   `MH Armor/Form1.h:85` — five static combo boxes, no add/subtract), HR/village★, gender,
    blade/gunner, weapon slots, flags (piercings, dummy, torso Inc, bad skills).
 2. **Relevance + dominance prune** (`GetRelevantData`/`AddToList`): keep armors/decorations
    helping query skills or with max slots; drop strictly dominated pieces (`Armor::IsBetterThan`).

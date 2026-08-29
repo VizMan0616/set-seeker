@@ -558,6 +558,30 @@ def load_charm_generation(pack_dir: Path) -> tuple[CharmTypeData, ...]:
     return tuple(types)
 
 
+def charm_point_union(types: tuple[CharmTypeData, ...]) -> dict[str, int] | None:
+    """Inventory stepper bounds: union of all type/tree envelopes per skill slot.
+
+    Same numbers for every tree (no per-skill gift branch). Skill 1 stays
+    non-negative; stepper skips 0 so min is at least 1.
+    """
+    slot1: list[CharmSkillRange] = []
+    slot2: list[CharmSkillRange] = []
+    for kind in types:
+        for rng in kind.ranges:
+            if rng.skill_slot == 1:
+                slot1.append(rng)
+            elif rng.skill_slot == 2:
+                slot2.append(rng)
+    if not slot1:
+        return None
+    return {
+        "skill1_min": 1,
+        "skill1_max": max(rng.max_points for rng in slot1),
+        "skill2_min": min(rng.min_points for rng in slot2) if slot2 else 0,
+        "skill2_max": max(rng.max_points for rng in slot2) if slot2 else 0,
+    }
+
+
 def load_pack(manifest: PackManifest) -> PackData:
     """Load every source file for the pack, bound to its own column map."""
     cmap = importlib.import_module(f"app.etl.column_maps.{manifest.id}")

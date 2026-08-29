@@ -23,7 +23,7 @@ from app.engine.pruning import apply_rel_checks, prune
 from app.repository.game_data import GameDataRepository
 from app.web.present import advanced_columns, page_context
 from app.web.render import templates
-from app.web.resolvers import progression_caps
+from app.web.resolvers import desired_skills_max, progression_caps
 
 router = APIRouter()
 
@@ -54,7 +54,12 @@ def _charm_mode(fields: FormFields) -> str:
 
 def _optional_int(fields: FormFields, key: str) -> int | None:
     value = _first(fields, key).strip()
-    return int(value) if value else None
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid {key}.") from exc
 
 
 def _int_ids(fields: FormFields, key: str) -> tuple[int, ...]:
@@ -109,8 +114,12 @@ def _parse_query(
         # Threshold comes from the skills table — never from the client.
         skills.append(SkillRequest(tree_id=skill["tree_id"], min_points=skill["points"]))
 
-    if not 1 <= len(skills) <= 5:
-        raise HTTPException(status_code=422, detail="Choose between 1 and 5 skills.")
+    skill_cap = desired_skills_max(game_row["features"])
+    if not 1 <= len(skills) <= skill_cap:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Choose between 1 and {skill_cap} skills.",
+        )
 
     try:
         weapon_slots = int(_first(fields, "weapon_slots", "0"))
@@ -127,10 +136,18 @@ def _parse_query(
     caps = progression_caps(game_row["features"])
     hr = _optional_int(fields, "hr")
     village = _optional_int(fields, "village_stars")
-    if hr is not None and not 1 <= hr <= caps["guild_rank"]:
-        raise HTTPException(status_code=422, detail="Guild rank is outside this game's cap.")
-    if village is not None and not 1 <= village <= caps["village_stars"]:
-        raise HTTPException(status_code=422, detail="Village rank is outside this game's cap.")
+    # Clamp leftover ranks from a previous game (MHFU 9 vs MHP3 6). Do not 422
+    # — htmx only swaps 2xx, so a 422 looks like “no results at all”.
+    if hr is not None:
+        if hr < 1:
+            hr = None
+        elif hr > caps["guild_rank"]:
+            hr = caps["guild_rank"]
+    if village is not None:
+        if village < 1:
+            village = None
+        elif village > caps["village_stars"]:
+            village = caps["village_stars"]
 
     mode = _charm_mode(fields)
     query = Query(
@@ -182,14 +199,40 @@ def _search_page_context(request: Request, game: str, query: Query, page) -> dic
     )
 
 
+@router.post("/search", response_class=HTMLResponse)
+async def start_search_from_picker(request: Request) -> HTMLResponse:
+    fields = await _read_form(request)
+    game = _first(fields, "game")
+    if not game:
+        return templates.TemplateResponse(
+            request, "search/error.html", {"message": "Unknown game."},
+        )
+    return _start_search(request, game, fields)
+
+
 @router.post("/games/{game}/search", response_class=HTMLResponse)
 async def start_search(request: Request, game: str) -> HTMLResponse:
-    query = _parse_query(
-        game,
-        await _read_form(request),
-        request.app.state.game_data,
-        request.app.state.pack_loader,
-    )
+    fields = await _read_form(request)
+    picked = _first(fields, "game")
+    if picked:
+        game = picked
+    return _start_search(request, game, fields)
+
+
+def _start_search(request: Request, game: str, fields: FormFields) -> HTMLResponse:
+    try:
+        query = _parse_query(
+            game,
+            fields,
+            request.app.state.game_data,
+            request.app.state.pack_loader,
+        )
+    except HTTPException as exc:
+        return templates.TemplateResponse(
+            request,
+            "search/error.html",
+            {"message": exc.detail},
+        )
     page = request.app.state.search_service.start_search(request.state.session_id, query)
     return templates.TemplateResponse(
         request, "search/results.html", _search_page_context(request, game, query, page)

@@ -34,10 +34,16 @@ ETL is merged. Do not invent a new pack or column map in this session.
 5. Extend the pack's known-query suite with a case that exercises the new mechanic; all
    suites must pass.
 
+When changing the charm *domain* (how generated `CharmSpec`s are built or how
+`charm_x` indexes them), read
+`docs/known-issues/generated-charm-domain-timeout.md` first. Raising
+`SOLVER_TIME_LIMIT_MS` is not the intended fix.
+
 ## Objective order (settled)
 
-1. Minimize required charm strength → 2. Maximize spare slots → 3. Maximize defense →
-4. Query sort tie-breakers. Changing this order requires a new ADR superseding ADR 0005.
+1. Minimize required charm strength → 2. Minimize active penalty skills →
+3. Maximize spare slots → 4. Maximize defense → 5. Query sort tie-breakers.
+Changing this order requires a new ADR superseding ADR 0005 / 0011.
 
 ## References
 

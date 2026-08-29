@@ -20,7 +20,8 @@ Analysis of the six vendored Athena's ASS repositories (`sources/`). Per-repo de
 
 Every repo implements the same five steps:
 
-1. **Formulate query** — up to 5–6 desired skills, HR/village★, gender, hunter type, weapon
+1. **Formulate query** — up to `NumSkills` desired skills (5 in MHFU, 6 in MHP3/MH3U/MH4,
+   7 in MH4U/MHGen/MHGU; static combo boxes), HR/village★, gender, hunter type, weapon
    slots, options (event gear, bad skills, piercings/arena, charm mode).
 2. **Relevance + dominance pruning** (`LoadedData::GetRelevantData`) — keep only armor and
    decorations that grant requested skills or top-tier slots; drop pieces strictly dominated

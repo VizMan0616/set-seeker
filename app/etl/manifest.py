@@ -37,6 +37,8 @@ class PackManifest:
     data_dir: str
     features: dict[str, bool]
     progression: dict[str, int]      # guild_rank, village_stars — per-pack caps
+    desired_skills_max: int          # Athena Form1.h NumSkills
+    charm_points: dict[str, int] | None  # inventory steppers; None if no talismans
     formats: dict[str, Any]
     locales: list[str]
     pack_dir: Path
@@ -58,7 +60,7 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         raise ManifestError(f"{path}: manifest must be a mapping")
 
     for key in ("id", "name", "generation", "source_repo", "data_dir", "features",
-                "progression", "formats", "locales"):
+                "progression", "desired_skills_max", "formats", "locales"):
         if key not in raw:
             raise ManifestError(f"{path}: missing required key {key!r}")
 
@@ -80,6 +82,20 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         if not isinstance(value, int) or value < 1:
             raise ManifestError(f"{path}: progression.{key} must be an integer ≥ 1")
 
+    desired_skills_max = raw["desired_skills_max"]
+    if not isinstance(desired_skills_max, int) or desired_skills_max < 1:
+        raise ManifestError(f"{path}: desired_skills_max must be an integer ≥ 1")
+
+    charm_points = None
+    if features.get("talismans"):
+        charm_points = raw.get("charm_points")
+        if not isinstance(charm_points, dict):
+            raise ManifestError(f"{path}: charm_points is required when talismans is true")
+        for key in ("skill1_min", "skill1_max", "skill2_min", "skill2_max"):
+            value = charm_points.get(key)
+            if not isinstance(value, int):
+                raise ManifestError(f"{path}: charm_points.{key} must be an integer")
+
     manifest = PackManifest(
         id=str(raw["id"]),
         name=str(raw["name"]),
@@ -89,6 +105,8 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         features={k: bool(v) for k, v in features.items()},
         progression={"guild_rank": int(progression["guild_rank"]),
                      "village_stars": int(progression["village_stars"])},
+        desired_skills_max=int(desired_skills_max),
+        charm_points=dict(charm_points) if charm_points else None,
         formats=dict(formats),
         locales=[str(loc) for loc in raw["locales"]],
         pack_dir=pack_dir,

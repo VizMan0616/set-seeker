@@ -111,3 +111,96 @@ def test_start_search_persists_inf_rel_snapshot(search_service, user_data_repo):
     assert 11 in waist["inf_ids"]
     assert 11 not in waist["rel_ids"]
     assert 10 in waist["rel_ids"]
+
+
+def test_feasibility_first_recovers_from_ranked_unknown(search_service, monkeypatch):
+    from app.engine import service as svc
+    from app.engine.solver import SolveOutcome
+
+    real = svc.solve_one
+    ranked_calls = {"n": 0}
+
+    def wrapper(**kwargs):
+        rank = kwargs.get("rank", True)
+        if rank:
+            ranked_calls["n"] += 1
+            if ranked_calls["n"] == 1:
+                return SolveOutcome("unknown", None)
+        return real(**kwargs)
+
+    monkeypatch.setattr(svc, "solve_one", wrapper)
+    page = search_service.start_search("feas", make_query(min_points=10))
+    assert page.results
+    assert page.partial
+
+
+def test_shown_cap_grouped_cards_exhausts(user_data_repo, tiny_pack_data):
+    from app.engine.service import CpSatSearchService
+
+    service = CpSatSearchService(
+        user_data_repo,
+        lambda game: tiny_pack_data,
+        time_limit_ms=2000,
+        shown_cap=1,
+    )
+    page = service.start_search("cap-g", make_query(min_points=10))
+    assert page.shown_count == 1
+    assert page.exhausted
+    more = service.load_more("cap-g", page.search_id)
+    assert more.results == ()
+    assert more.exhausted
+    assert more.shown_count == 1
+
+
+def test_shown_cap_counts_expanded_units(user_data_repo, tiny_pack_data):
+    from app.engine.service import CpSatSearchService
+
+    service = CpSatSearchService(
+        user_data_repo,
+        lambda game: tiny_pack_data,
+        time_limit_ms=2000,
+        shown_cap=3,
+        page_size=10,
+    )
+    grouped = service.start_search(
+        "cap-grp", make_query(min_points=10, expand_equivalents=False)
+    )
+    expanded = service.start_search(
+        "cap-exp", make_query(min_points=10, expand_equivalents=True)
+    )
+    assert grouped.shown_count == 3
+    assert grouped.exhausted
+    assert expanded.shown_count >= 3
+    assert expanded.exhausted
+    # Listing every set spends the cap on member combinations, not just reps.
+    assert expanded.shown_count == sum(r.equivalent_count() for r in expanded.results)
+
+
+def test_prefetch_one_page_lookahead(user_data_repo, tiny_pack_data):
+    import json
+    import time
+
+    from app.engine.service import CpSatSearchService
+
+    service = CpSatSearchService(
+        user_data_repo,
+        lambda game: tiny_pack_data,
+        time_limit_ms=2000,
+        page_size=1,
+    )
+    page = service.start_search("pref", make_query(min_points=10))
+    assert page.results
+    assert not page.exhausted
+    ahead = None
+    deadline = time.time() + 4
+    while time.time() < deadline:
+        state = user_data_repo.get_search_state(page.search_id)
+        ahead = json.loads(state["query_json"]).get("lookahead")
+        if ahead is not None:
+            break
+        time.sleep(0.02)
+    assert ahead is not None
+    assert ahead["results"]
+    more = service.load_more("pref", page.search_id)
+    assert more.results
+    assert more.shown_count == page.shown_count + 1

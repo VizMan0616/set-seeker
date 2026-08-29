@@ -11,7 +11,7 @@ foreign keys from `user_charms` keep pointing at live rows across rebuilds.
 import json
 from typing import Any
 
-from app.etl.loaders import PackData
+from app.etl.loaders import PackData, charm_point_union
 from app.etl.manifest import PackManifest
 from app.repository import tables as t
 from app.repository.game_data import GameDataRepository
@@ -24,7 +24,7 @@ class PackWriter:
         self._repo = repo
 
     def rebuild_pack(self, manifest: PackManifest, data: PackData) -> dict[str, int]:
-        game_id = self._clear_pack_data(manifest)
+        game_id = self._clear_pack_data(manifest, data)
         base = game_id * ID_STRIDE
         counts: dict[str, int] = {"games": 1}
 
@@ -148,7 +148,7 @@ class PackWriter:
 
         return counts
 
-    def _clear_pack_data(self, manifest: PackManifest) -> int:
+    def _clear_pack_data(self, manifest: PackManifest, data: PackData) -> int:
         """Delete the pack's game-data children (FK-safe bulk delete) and return
         the game id, reusing the existing `games` row when present so user-table
         references survive a rebuild."""
@@ -156,15 +156,19 @@ class PackWriter:
         extra = {}
         if manifest.translation:
             extra["translation"] = manifest.translation
-        features = json.dumps(
-            {
-                **manifest.features,
-                **extra,
-                "guild_rank_max": manifest.progression["guild_rank"],
-                "village_stars_max": manifest.progression["village_stars"],
-            },
-            sort_keys=True,
-        )
+        feature_blob = {
+            **manifest.features,
+            **extra,
+            "guild_rank_max": manifest.progression["guild_rank"],
+            "village_stars_max": manifest.progression["village_stars"],
+            "desired_skills_max": manifest.desired_skills_max,
+        }
+        union = charm_point_union(data.charm_types)
+        if union:
+            feature_blob["charm_points"] = union
+        elif manifest.charm_points:
+            feature_blob["charm_points"] = manifest.charm_points
+        features = json.dumps(feature_blob, sort_keys=True)
         game = repo.get_game_by_code(manifest.id)
         if game is None:
             return repo.create_game(code=manifest.id, name=manifest.name,

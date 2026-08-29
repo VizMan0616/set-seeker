@@ -2,11 +2,19 @@
   {% if exhausted %}
   <p class="ss-exhausted">All sets found — nothing more to load.</p>
   {% else %}
+  <div class="ss-scroll-sentinel"
+       hx-post="/search/{{ search_id }}/more"
+       hx-trigger="revealed"
+       hx-target="#results-list"
+       hx-swap="beforeend"
+       hx-sync="#load-more:drop"
+       hx-indicator="#load-more-working"></div>
   <button type="button"
           class="btn ss-btn-brass"
           hx-post="/search/{{ search_id }}/more"
           hx-target="#results-list"
           hx-swap="beforeend"
+          hx-sync="#load-more:drop"
           hx-indicator="#load-more-working">Load more sets</button>
   <span id="load-more-working" class="htmx-indicator ss-working">
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

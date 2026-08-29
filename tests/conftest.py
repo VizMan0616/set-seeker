@@ -38,6 +38,7 @@ def load_tiny_pack(repo: GameDataRepository) -> None:
         id=GAME_ID, code="mhfu", name="Monster Hunter Freedom Unite",
         generation=2, features=json.dumps({
             "talismans": False, "guild_rank_max": 9, "village_stars_max": 9,
+            "desired_skills_max": 5,
         }),
     )
     repo.create_skill_tree(

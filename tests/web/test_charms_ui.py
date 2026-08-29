@@ -48,6 +48,13 @@ def test_talismans_flag_inventory_and_advanced_tab(packed_db):
 
     client = TestClient(create_app())
 
+    home = client.get("/")
+    assert home.status_code == 200
+    assert 'name="charm_mode"' in home.text
+    assert 'value="one_skill"' in home.text
+    assert "Use legal generated charms" not in home.text
+    assert "Use my charms" not in home.text
+
     assert client.get("/games/mhfu/charms").status_code == 404
 
     inventory = client.get("/games/mhp3/charms")

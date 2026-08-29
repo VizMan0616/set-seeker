@@ -7,7 +7,13 @@ stores per-table maxima (MH3U-style ``mh3u_charm_tables``).
 
 from itertools import combinations
 
-from app.domain.models import NONE_CHARM_ID, CharmSpec, Query
+from app.domain.models import (
+    NONE_CHARM_ID,
+    CharmSpec,
+    Query,
+    charm_mode_uses_generated,
+    resolved_charm_mode,
+)
 from app.engine.data import PackData
 
 
@@ -22,9 +28,13 @@ def charm_strength(slots: int, skills: tuple[tuple[int, int], ...]) -> int:
 
 
 def charm_candidates(pack: PackData, query: Query) -> tuple[CharmSpec, ...]:
-    """none ∪ inventory ∪ query-relevant generated envelopes, then Advanced filters."""
+    """none ∪ mode domain (inventory or generated envelopes), then Advanced filters."""
     none = CharmSpec(id=NONE_CHARM_ID, slots=0, skills=())
     if not pack.talismans:
+        return (none,)
+
+    mode = resolved_charm_mode(query)
+    if mode == "none":
         return (none,)
 
     unique: dict[tuple[int, tuple[tuple[int, int], ...]], CharmSpec] = {}
@@ -37,13 +47,13 @@ def charm_candidates(pack: PackData, query: Query) -> tuple[CharmSpec, ...]:
         elif spec.id > 0 and prev.id > 0 and spec.id < prev.id:
             unique[key] = spec
 
-    for charm in query.user_charms:
-        consider(CharmSpec(id=charm.id, slots=charm.slots, skills=charm.skills))
-
-    if query.use_generated_charms:
+    if mode == "inventory":
+        for charm in query.user_charms:
+            consider(CharmSpec(id=charm.id, slots=charm.slots, skills=charm.skills))
+    elif charm_mode_uses_generated(mode):
         requested = tuple(dict.fromkeys(sr.tree_id for sr in query.skills))
         for kind in pack.charm_types:
-            _generate_type(kind, requested, consider)
+            _generate_type(kind, requested, consider, mode)
 
     ordered = sorted(unique.values(), key=lambda c: (c.slots, c.skills, -c.id))
     generated_id = -1
@@ -103,21 +113,24 @@ def _emit_slots(consider, skills: tuple[tuple[int, int], ...], cap: int) -> None
         consider(CharmSpec(id=-1, slots=slots, skills=skills))
 
 
-def _generate_type(kind, requested: tuple[int, ...], consider) -> None:
+def _generate_type(kind, requested: tuple[int, ...], consider, mode: str) -> None:
     skill1 = {tree: (lo, hi) for tree, lo, hi in kind.skill1}
     skill2 = {tree: (lo, hi) for tree, lo, hi in kind.skill2}
-    one_skill = {**skill2, **skill1}
 
     _emit_slots(consider, (), _slot_cap(kind, ()))
+    if mode == "slotted":
+        return
 
-    for tree in requested:
-        rng = one_skill.get(tree)
-        if rng is None:
-            continue
-        lo, hi = rng
-        for pts in range(max(lo, 1), hi + 1):
-            skills = ((tree, pts),)
-            _emit_slots(consider, skills, _slot_cap(kind, ((pts, hi),)))
+    if mode == "one_skill":
+        for tree in requested:
+            rng = skill1.get(tree)
+            if rng is None:
+                continue
+            lo, hi = rng
+            for pts in range(max(lo, 1), hi + 1):
+                skills = ((tree, pts),)
+                _emit_slots(consider, skills, _slot_cap(kind, ((pts, hi),)))
+        return
 
     if not skill2 or len(requested) < 2:
         return

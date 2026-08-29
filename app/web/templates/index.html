@@ -206,13 +206,34 @@
           <input class="form-check-input" type="checkbox" id="allow-dummy" name="allow_dummy">
           <label class="form-check-label" for="allow-dummy">Allow (dummy) pieces</label>
         </div>
-        <div class="form-check" x-show="currentCatalog.talismans">
-          <input type="hidden" name="use_generated_charms"
-                 :value="useGeneratedCharms ? 'on' : 'off'">
-          <input class="form-check-input" type="checkbox" id="use-generated-charms"
-                 x-model="useGeneratedCharms">
-          <label class="form-check-label" for="use-generated-charms">Use legal generated charms</label>
-        </div>
+        <fieldset class="mb-0" x-show="currentCatalog.talismans" x-cloak>
+          <legend class="ss-label fs-6">Charms</legend>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="charm_mode" id="charm-mode-none"
+                   value="none" x-model="charmMode">
+            <label class="form-check-label" for="charm-mode-none">No charm</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="charm_mode" id="charm-mode-inventory"
+                   value="inventory" x-model="charmMode">
+            <label class="form-check-label" for="charm-mode-inventory">My charms</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="charm_mode" id="charm-mode-slotted"
+                   value="slotted" x-model="charmMode">
+            <label class="form-check-label" for="charm-mode-slotted">Blank slotted charms</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="charm_mode" id="charm-mode-one-skill"
+                   value="one_skill" x-model="charmMode">
+            <label class="form-check-label" for="charm-mode-one-skill">One-skill charms</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="charm_mode" id="charm-mode-two-skill"
+                   value="two_skill" x-model="charmMode">
+            <label class="form-check-label" for="charm-mode-two-skill">Two-skill charms</label>
+          </div>
+        </fieldset>
       </div>
     </div>
   </fieldset>
@@ -267,6 +288,7 @@ function searchForm() {
   const domainFields = new Set([
     "skill_id", "weapon_slots", "gender", "hunter_type", "hr", "village_stars",
     "sort", "allow_event", "allow_bad_skills", "allow_torso_inc", "allow_dummy",
+    "charm_mode",
   ]);
   return {
     game: {{ (games[0].code if games else "mhfu") | tojson }},
@@ -278,7 +300,7 @@ function searchForm() {
     hr: null,
     villageStars: null,
     expandEquivalents: false,
-    useGeneratedCharms: true,
+    charmMode: "one_skill",
     get currentCatalog() {
       return this.catalogs[this.game] || {
         categories: [], skills: [],

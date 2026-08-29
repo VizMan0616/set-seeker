@@ -2,6 +2,21 @@ from dataclasses import dataclass
 
 NONE_CHARM_ID = 0
 
+CHARM_MODES = ("none", "inventory", "slotted", "one_skill", "two_skill")
+GENERATED_CHARM_MODES = frozenset({"slotted", "one_skill", "two_skill"})
+DEFAULT_CHARM_MODE = "one_skill"
+
+
+def resolved_charm_mode(query: "Query") -> str:
+    """Athena-style search mode. Empty ``charm_mode`` follows ``use_generated_charms``."""
+    if query.charm_mode in CHARM_MODES:
+        return query.charm_mode
+    return DEFAULT_CHARM_MODE if query.use_generated_charms else "inventory"
+
+
+def charm_mode_uses_generated(mode: str) -> bool:
+    return mode in GENERATED_CHARM_MODES
+
 
 @dataclass(frozen=True)
 class SkillRequest:
@@ -45,6 +60,8 @@ class Query:
     expand_equivalents: bool = False
     user_charms: tuple[CharmSpec, ...] = ()
     use_generated_charms: bool = True
+    # Athena Form1 charm search modes; default one_skill for talisman packs.
+    charm_mode: str = ""
 
 
 @dataclass(frozen=True)

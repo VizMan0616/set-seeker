@@ -5,6 +5,7 @@ with urllib.parse — python-multipart is deliberately not a dependency
 (phase0-contracts §2), and Starlette's request.form() would require it.
 """
 
+import asyncio
 from collections.abc import Callable
 from urllib.parse import parse_qsl
 
@@ -20,6 +21,7 @@ from app.domain.models import (
 )
 from app.engine.data import PackData
 from app.engine.pruning import apply_rel_checks, prune
+from app.engine.service import SearchBusyError
 from app.repository.game_data import GameDataRepository
 from app.web.present import advanced_columns, page_context
 from app.web.render import templates
@@ -207,7 +209,7 @@ async def start_search_from_picker(request: Request) -> HTMLResponse:
         return templates.TemplateResponse(
             request, "search/error.html", {"message": "Unknown game."},
         )
-    return _start_search(request, game, fields)
+    return await asyncio.to_thread(_start_search, request, game, fields)
 
 
 @router.post("/games/{game}/search", response_class=HTMLResponse)
@@ -216,7 +218,7 @@ async def start_search(request: Request, game: str) -> HTMLResponse:
     picked = _first(fields, "game")
     if picked:
         game = picked
-    return _start_search(request, game, fields)
+    return await asyncio.to_thread(_start_search, request, game, fields)
 
 
 def _start_search(request: Request, game: str, fields: FormFields) -> HTMLResponse:
@@ -233,15 +235,34 @@ def _start_search(request: Request, game: str, fields: FormFields) -> HTMLRespon
             "search/error.html",
             {"message": exc.detail},
         )
-    page = request.app.state.search_service.start_search(request.state.session_id, query)
+    try:
+        page = request.app.state.search_service.start_search(
+            request.state.session_id, query
+        )
+    except SearchBusyError as exc:
+        return templates.TemplateResponse(
+            request,
+            "search/error.html",
+            {"message": exc.message},
+            status_code=503,
+        )
     return templates.TemplateResponse(
         request, "search/results.html", _search_page_context(request, game, query, page)
     )
 
 
-@router.post("/search/{search_id}/more", response_class=HTMLResponse)
-async def load_more(request: Request, search_id: str) -> HTMLResponse:
-    page = request.app.state.search_service.load_more(request.state.session_id, search_id)
+def _load_more_sync(request: Request, search_id: str) -> HTMLResponse:
+    try:
+        page = request.app.state.search_service.load_more(
+            request.state.session_id, search_id
+        )
+    except SearchBusyError as exc:
+        return templates.TemplateResponse(
+            request,
+            "search/error.html",
+            {"message": exc.message},
+            status_code=503,
+        )
     query = request.app.state.search_service.get_search_query(
         request.state.session_id, search_id
     )
@@ -251,6 +272,11 @@ async def load_more(request: Request, search_id: str) -> HTMLResponse:
         expand_equivalents=bool(query and query.expand_equivalents),
     )
     return templates.TemplateResponse(request, "search/more.html", context)
+
+
+@router.post("/search/{search_id}/more", response_class=HTMLResponse)
+async def load_more(request: Request, search_id: str) -> HTMLResponse:
+    return await asyncio.to_thread(_load_more_sync, request, search_id)
 
 
 @router.get("/search/{search_id}/advanced", response_class=HTMLResponse)

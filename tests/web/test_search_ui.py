@@ -316,3 +316,76 @@ def test_torso_inc_checkbox_uses_skill_tree_name(packed_db):
     )
     assert catalogs["mhfu"]["torso_inc_name"] == "Torso Inc"
     assert "Allow Torso Inc" in html
+
+
+def test_health_ok(client: TestClient):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.text == "ok"
+
+
+def test_health_during_inflight_search(packed_db, monkeypatch):
+    """GET /health must complete while a solve is blocked (event loop free)."""
+    import socket
+    import threading
+    import time
+    from threading import Event
+
+    import httpx
+    import uvicorn
+
+    from app.engine import service as svc_mod
+
+    entered = Event()
+    release = Event()
+    real = svc_mod.solve_one
+
+    def gated(*args, **kwargs):
+        entered.set()
+        assert release.wait(timeout=5)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(svc_mod, "solve_one", gated)
+    app = create_app()
+
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    host, port = sock.getsockname()
+    sock.close()
+    server = uvicorn.Server(
+        uvicorn.Config(app, host=host, port=port, log_level="error")
+    )
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+    try:
+        deadline = time.time() + 5
+        while time.time() < deadline:
+            if server.started:
+                break
+            time.sleep(0.02)
+        assert server.started
+        base = f"http://{host}:{port}"
+        search_exc: list[BaseException] = []
+
+        def do_search() -> None:
+            try:
+                with httpx.Client(timeout=15) as ac:
+                    r = ac.post(f"{base}/games/mhfu/search", data=SEARCH_FORM)
+                    assert r.status_code == 200
+            except BaseException as exc:  # noqa: BLE001 — surface in main thread
+                search_exc.append(exc)
+
+        searcher = threading.Thread(target=do_search)
+        searcher.start()
+        assert entered.wait(timeout=5)
+        with httpx.Client(timeout=5) as ac:
+            health = ac.get(f"{base}/health")
+        assert health.status_code == 200
+        assert health.text == "ok"
+        release.set()
+        searcher.join(timeout=15)
+        assert not searcher.is_alive()
+        assert not search_exc
+    finally:
+        server.should_exit = True
+        thread.join(timeout=5)

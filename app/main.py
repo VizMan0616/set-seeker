@@ -58,6 +58,8 @@ def create_app() -> FastAPI:
         pack_loader,
         time_limit_ms=settings.SOLVER_TIME_LIMIT_MS,
         num_workers=settings.SOLVER_NUM_WORKERS,
+        max_inflight=settings.SOLVER_MAX_INFLIGHT,
+        queue_wait_s=settings.SOLVER_QUEUE_WAIT_S,
     )
     app.state.game_data = game_data
     app.state.catalog = RepositoryCatalog(game_data)

@@ -34,6 +34,16 @@ from app.engine.solver import solve_one
 from app.repository.user_data import UserDataRepository
 
 
+class SearchBusyError(Exception):
+    """No global solve slot within the queue wait (other users still served)."""
+
+    def __init__(
+        self, message: str = "The search engine is busy. Try again in a moment."
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+
+
 def _query_to_json(query: Query) -> str:
     return json.dumps(
         {
@@ -227,47 +237,60 @@ class CpSatSearchService:
         page_size: int = PAGE_SIZE,
         num_workers: int = 8,
         shown_cap: int = SHOWN_CAP,
+        max_inflight: int = 1,
+        queue_wait_s: float = 30.0,
     ) -> None:
         # time_limit_ms / num_workers are passed in by the web layer from
         # app.config; the engine does not import config. Single-threaded
         # CP-SAT spends whole budgets *proving* optimality/infeasibility on
         # real packs; a parallel portfolio turns pages into sub-second solves.
+        # max_inflight is a *process-wide* solve-job cap (not OR-Tools workers).
         self._user_data = user_data
         self._pack_loader = pack_loader
         self._time_limit_ms = time_limit_ms
         self._page_size = page_size
         self._num_workers = num_workers
         self._shown_cap = shown_cap
+        self._queue_wait_s = queue_wait_s
+        self._slots = threading.BoundedSemaphore(max(1, max_inflight))
         self._lock = threading.Lock()
         self._session_epoch: dict[str, int] = {}
+        self._prefetching: set[str] = set()
+
+    def _acquire_interactive(self) -> None:
+        if not self._slots.acquire(timeout=self._queue_wait_s):
+            raise SearchBusyError()
+
+    def _release_slot(self) -> None:
+        self._slots.release()
 
     def start_search(self, session_id: str, query: Query) -> SearchPage:
-        with self._lock:
-            epoch = self._session_epoch.get(session_id, 0) + 1
-            self._session_epoch[session_id] = epoch
-            self._user_data.get_or_create_session(session_id)
-            # A new search from the same session invalidates its prior states.
-            self._user_data.delete_search_states_for_session(session_id)
-            pack = self._pack_loader(query.game)
-            query = self._with_inventory(session_id, pack, query)
-            snap_query = (
-                replace(query, use_generated_charms=False)
-                if query.user_charms and query.use_generated_charms
-                else query
-            )
-            pruned = prune(pack, snap_query)
-            state = self._user_data.create_search_state(
-                session_id=session_id,
-                game_id=pack.game_id,
-                query_json=_with_domain_snapshot(
-                    _query_to_json(query), domain_snapshot(pack, pruned)
-                ),
-            )
+        self._acquire_interactive()
+        try:
+            with self._lock:
+                epoch = self._session_epoch.get(session_id, 0) + 1
+                self._session_epoch[session_id] = epoch
+                self._user_data.get_or_create_session(session_id)
+                # A new search from the same session invalidates its prior states.
+                self._user_data.delete_search_states_for_session(session_id)
+                pack = self._pack_loader(query.game)
+                query = self._with_inventory(session_id, pack, query)
+                snap_query = (
+                    replace(query, use_generated_charms=False)
+                    if query.user_charms and query.use_generated_charms
+                    else query
+                )
+                pruned = prune(pack, snap_query)
+                state = self._user_data.create_search_state(
+                    session_id=session_id,
+                    game_id=pack.game_id,
+                    query_json=_with_domain_snapshot(
+                        _query_to_json(query), domain_snapshot(pack, pruned)
+                    ),
+                )
             results, new_exclusions, partial, exhausted = self._solve_page(
                 query, [], shown_so_far=0
             )
-            if new_exclusions:
-                self._user_data.append_exclusions(state["id"], new_exclusions)
             shown = _page_units(query, results)
             remaining: int | None
             tally = state["query_json"]
@@ -292,8 +315,12 @@ class CpSatSearchService:
                 else:
                     remaining = None
                     tally = _with_tally(tally, delivered=shown)
-            if tally != state["query_json"]:
-                self._user_data.update_search_query_json(state["id"], tally)
+            with self._lock:
+                if self._session_epoch.get(session_id) == epoch:
+                    if new_exclusions:
+                        self._user_data.append_exclusions(state["id"], new_exclusions)
+                    if tally != state["query_json"]:
+                        self._user_data.update_search_query_json(state["id"], tally)
             page = SearchPage(
                 search_id=state["id"],
                 results=tuple(results),
@@ -302,6 +329,8 @@ class CpSatSearchService:
                 shown_count=shown,
                 remaining_count=remaining,
             )
+        finally:
+            self._release_slot()
         if not page.exhausted:
             self._schedule_prefetch(session_id, page.search_id, epoch)
         return page
@@ -313,44 +342,79 @@ class CpSatSearchService:
         return _query_from_json(state["query_json"])
 
     def load_more(self, session_id: str, search_id: str) -> SearchPage:
-        with self._lock:
-            page = self._load_more_locked(session_id, search_id)
-            epoch = self._session_epoch.get(session_id, 0)
+        page = self._load_more_body(session_id, search_id)
         if not page.exhausted:
-            self._schedule_prefetch(session_id, search_id, epoch)
+            self._schedule_prefetch(
+                session_id, search_id, self._session_epoch.get(session_id, 0)
+            )
         return page
 
-    def _load_more_locked(self, session_id: str, search_id: str) -> SearchPage:
-        state = self._user_data.get_search_state(search_id)
-        if state is None or state["session_id"] != session_id:
-            return SearchPage(
-                search_id=search_id, results=(), partial=False, exhausted=True,
-                shown_count=0, remaining_count=0,
-            )
-        if _shown_capped(state["query_json"]):
-            shown = _delivered(state["query_json"], 0)
-            return SearchPage(
-                search_id=search_id,
-                results=(),
-                partial=False,
-                exhausted=True,
-                shown_count=shown,
-                remaining_count=0,
-            )
-        query = _query_from_json(state["query_json"])
-        ahead = _lookahead_payload(state["query_json"])
-        if ahead is not None:
-            results = [_result_from_json(r) for r in ahead["results"]]
-            partial = bool(ahead.get("partial"))
-            exhausted = bool(ahead.get("exhausted"))
-        else:
+    def _load_more_body(self, session_id: str, search_id: str) -> SearchPage:
+        with self._lock:
+            state = self._user_data.get_search_state(search_id)
+            if state is None or state["session_id"] != session_id:
+                return SearchPage(
+                    search_id=search_id, results=(), partial=False, exhausted=True,
+                    shown_count=0, remaining_count=0,
+                )
+            if _shown_capped(state["query_json"]):
+                shown = _delivered(state["query_json"], 0)
+                return SearchPage(
+                    search_id=search_id,
+                    results=(),
+                    partial=False,
+                    exhausted=True,
+                    shown_count=shown,
+                    remaining_count=0,
+                )
+            query = _query_from_json(state["query_json"])
+            ahead = _lookahead_payload(state["query_json"])
+            if ahead is not None:
+                results = [_result_from_json(r) for r in ahead["results"]]
+                partial = bool(ahead.get("partial"))
+                exhausted = bool(ahead.get("exhausted"))
+                return self._commit_load_more(
+                    search_id, state, query, results, partial, exhausted
+                )
             exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
             shown_so_far = _delivered(state["query_json"], len(exclusions))
+            excl_snap = state["exclusions"]
+
+        self._acquire_interactive()
+        try:
             results, new_exclusions, partial, exhausted = self._solve_page(
                 query, exclusions, shown_so_far=shown_so_far
             )
-            if new_exclusions:
-                self._user_data.append_exclusions(search_id, new_exclusions)
+        finally:
+            self._release_slot()
+
+        with self._lock:
+            state = self._user_data.get_search_state(search_id)
+            if state is None or state["session_id"] != session_id:
+                return SearchPage(
+                    search_id=search_id, results=(), partial=False, exhausted=True,
+                    shown_count=0, remaining_count=0,
+                )
+            if (
+                state["exclusions"] == excl_snap
+                and not _lookahead_payload(state["query_json"])
+            ):
+                if new_exclusions:
+                    self._user_data.append_exclusions(search_id, new_exclusions)
+                return self._commit_load_more(
+                    search_id, state, query, results, partial, exhausted
+                )
+        return self._load_more_body(session_id, search_id)
+
+    def _commit_load_more(
+        self,
+        search_id: str,
+        state: dict,
+        query: Query,
+        results: list[ArmorSetResult],
+        partial: bool,
+        exhausted: bool,
+    ) -> SearchPage:
         shown = _delivered(state["query_json"], 0) + _page_units(query, results)
         total = _found_total(state["query_json"])
         capped = shown >= self._shown_cap
@@ -408,14 +472,32 @@ class CpSatSearchService:
     def _schedule_prefetch(
         self, session_id: str, search_id: str, epoch: int
     ) -> None:
+        with self._lock:
+            if search_id in self._prefetching:
+                return
+            self._prefetching.add(search_id)
         thread = threading.Thread(
             target=self._prefetch_one,
             args=(session_id, search_id, epoch),
             daemon=True,
+            name=f"prefetch-{search_id[:8]}",
         )
         thread.start()
 
     def _prefetch_one(self, session_id: str, search_id: str, epoch: int) -> None:
+        try:
+            # Skip rather than queue: prefetch must not stack behind inflight solves.
+            if not self._slots.acquire(blocking=False):
+                return
+            try:
+                self._prefetch_solve(session_id, search_id, epoch)
+            finally:
+                self._slots.release()
+        finally:
+            with self._lock:
+                self._prefetching.discard(search_id)
+
+    def _prefetch_solve(self, session_id: str, search_id: str, epoch: int) -> None:
         with self._lock:
             if self._session_epoch.get(session_id) != epoch:
                 return
@@ -431,9 +513,22 @@ class CpSatSearchService:
             shown_so_far = _delivered(state["query_json"], len(exclusions))
             if shown_so_far >= self._shown_cap:
                 return
-            results, new_exclusions, partial, exhausted = self._solve_page(
-                query, exclusions, shown_so_far=shown_so_far
-            )
+            excl_snap = state["exclusions"]
+        results, new_exclusions, partial, exhausted = self._solve_page(
+            query, exclusions, shown_so_far=shown_so_far
+        )
+        with self._lock:
+            if self._session_epoch.get(session_id) != epoch:
+                return
+            state = self._user_data.get_search_state(search_id)
+            if state is None or state["session_id"] != session_id:
+                return
+            if state["exclusions"] != excl_snap:
+                return
+            if _shown_capped(state["query_json"]) or _lookahead_payload(
+                state["query_json"]
+            ):
+                return
             if new_exclusions:
                 self._user_data.append_exclusions(search_id, new_exclusions)
             tally = _patch_query_json(

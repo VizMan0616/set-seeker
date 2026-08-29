@@ -1,12 +1,18 @@
 """GET pages (phase0-contracts §5)."""
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.web.render import templates
 from app.web.resolvers import DEFAULT_DESIRED_SKILLS_MAX
 
 router = APIRouter()
+
+
+@router.get("/health", response_class=PlainTextResponse)
+def health() -> str:
+    """Cheap liveness probe — must stay off the solver slot."""
+    return "ok"
 
 
 @router.get("/", response_class=HTMLResponse)

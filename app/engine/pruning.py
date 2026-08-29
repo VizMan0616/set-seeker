@@ -34,8 +34,9 @@ class PrunedPack:
     classes: tuple[tuple[EquivalenceClass, ...], ...]   # per armor slot, len 5
     decorations: tuple[Decoration, ...]
     requested_trees: tuple[int, ...]
-    # (tree_id, threshold) for negative skills the search must avoid; empty when
-    # the query allows bad skills. Per tree, the threshold closest to zero.
+    # (tree_id, threshold) for every negative skill tree. Per tree, the
+    # threshold closest to zero (first penalty that activates). Used as a hard
+    # floor when allow_bad_skills is off, and as an objective count when on.
     bad_tree_thresholds: tuple[tuple[int, int], ...]
     skills: tuple[SkillThreshold, ...]   # all pack thresholds, for result reporting
     # Advanced Search: inf = hard + relevance; skyline = dominance rel (Default).
@@ -102,9 +103,13 @@ def relevance_filter_pieces(
 
 
 def relevance_filter_decorations(
-    decorations: list[Decoration], requested: tuple[int, ...], query: Query
+    decorations: list[Decoration],
+    requested: tuple[int, ...],
+    query: Query,
+    extra_trees: tuple[int, ...] = (),
 ) -> list[Decoration]:
-    trees = set(requested)
+    """Keep jewels that grant requested trees or fixer trees (penalty neutralization)."""
+    trees = set(requested) | set(extra_trees)
     return [
         d
         for d in decorations
@@ -112,6 +117,30 @@ def relevance_filter_decorations(
         and _within_progression_caps(d.hr_required, d.village_stars, query)
         and (query.allow_event or not d.is_event)
     ]
+
+
+def _nonzero_skill_trees(
+    pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]
+) -> set[int]:
+    trees: set[int] = set()
+    for piece in pieces:
+        for tree_id, pts in piece.skills:
+            if pts != 0:
+                trees.add(tree_id)
+    for charm in charms:
+        for tree_id, pts in charm.skills:
+            if pts != 0:
+                trees.add(tree_id)
+    return trees
+
+
+def _fixer_trees(
+    pack: PackData, pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]
+) -> tuple[int, ...]:
+    """Negative-threshold trees that already have nonzero points on the domain."""
+    negative = {sk.tree_id for sk in pack.skills if sk.is_negative}
+    present = _nonzero_skill_trees(pieces, charms)
+    return tuple(sorted(negative & present))
 
 
 def _solver_subset(
@@ -194,9 +223,11 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
     classes_per_slot: list[tuple[EquivalenceClass, ...]] = []
     inf_piece_ids: list[tuple[int, ...]] = []
     skyline_piece_ids: list[tuple[int, ...]] = []
+    inf_pieces: list[ArmorPiece] = []
     for slot in range(SLOT_COUNT):
         pieces = [p for p in pack.pieces if p.slot == slot]
         inf = relevance_filter_pieces(hard_filter(pieces, query), requested)
+        inf_pieces.extend(inf)
         skyline = dominance_prune(inf, requested)
         inf_piece_ids.append(tuple(sorted(p.id for p in inf)))
         skyline_piece_ids.append(tuple(sorted(p.id for p in skyline)))
@@ -205,19 +236,6 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
         )
         classes_per_slot.append(equivalence_collapse(rel, requested))
 
-    inf_decos = relevance_filter_decorations(list(pack.decorations), requested, query)
-    # Jewels have no dominance pass in MHFU; skyline == inf until a pack adds one.
-    skyline_decos = inf_decos
-    rel_decos = _solver_subset(
-        inf_decos, skyline=skyline_decos, excluded=excluded_d, forced=forced_d
-    )
-
-    bad: dict[int, int] = {}
-    if not query.allow_bad_skills:
-        for sk in pack.skills:
-            if sk.is_negative:
-                bad[sk.tree_id] = max(sk.points, bad.get(sk.tree_id, sk.points))
-
     base_charms = charm_candidates(
         pack,
         replace(query, excluded_charm_ids=(), forced_charm_ids=()),
@@ -225,6 +243,21 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
     inf_charm_ids = tuple(c.id for c in base_charms if c.id != 0)
     skyline_charm_ids = inf_charm_ids
     charms = charm_candidates(pack, query)
+
+    fixer = _fixer_trees(pack, inf_pieces, base_charms)
+    inf_decos = relevance_filter_decorations(
+        list(pack.decorations), requested, query, extra_trees=fixer
+    )
+    # Jewels have no dominance pass in MHFU; skyline == inf until a pack adds one.
+    skyline_decos = inf_decos
+    rel_decos = _solver_subset(
+        inf_decos, skyline=skyline_decos, excluded=excluded_d, forced=forced_d
+    )
+
+    bad: dict[int, int] = {}
+    for sk in pack.skills:
+        if sk.is_negative:
+            bad[sk.tree_id] = max(sk.points, bad.get(sk.tree_id, sk.points))
 
     return PrunedPack(
         classes=tuple(classes_per_slot),

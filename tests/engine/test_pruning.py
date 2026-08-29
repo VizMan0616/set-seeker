@@ -196,7 +196,7 @@ def test_village_only_decoration_survives_hr_cap(tiny_pack_data):
     assert 199 not in {d.id for d in pruned_low.decorations}
 
 
-def test_prune_bad_skill_thresholds_follow_allow_bad_skills(tiny_pack_data):
+def test_prune_bad_skill_thresholds_are_always_recorded(tiny_pack_data):
     from app.engine.data import SkillThreshold
 
     pack = tiny_pack_data.__class__(
@@ -208,9 +208,11 @@ def test_prune_bad_skill_thresholds_follow_allow_bad_skills(tiny_pack_data):
         + (SkillThreshold(id=99, tree_id=ATTACK_TREE, points=-10, is_negative=True),),
         talismans=tiny_pack_data.talismans,
     )
-    assert prune(pack, make_query(min_points=10)).bad_tree_thresholds == ((ATTACK_TREE, -10),)
+    expected = ((ATTACK_TREE, -10),)
+    assert prune(pack, make_query(min_points=10)).bad_tree_thresholds == expected
     assert (
-        prune(pack, make_query(min_points=10, allow_bad_skills=True)).bad_tree_thresholds == ()
+        prune(pack, make_query(min_points=10, allow_bad_skills=True)).bad_tree_thresholds
+        == expected
     )
 
 

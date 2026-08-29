@@ -38,6 +38,7 @@ class RepositoryNameResolver:
                 "name": row["name_en"],
                 "rarity": row["rarity"],
                 "defense": row["defense"],
+                "slots": row["slots"],
             }
         return self._pieces[piece_id]
 

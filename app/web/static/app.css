@@ -299,22 +299,34 @@ h1, h2, h3, .ss-card-title {
   margin-right: 0.6rem;
 }
 
-/* The signature element: decoration sockets as Monster Hunter "O--" pips.
-   Pip diameter scales with the decoration size the slot accepts. */
+/* One equal O mark per socket — filled vs leftover empty, not jewel size. */
+.ss-sockets {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
 .ss-pip {
   display: inline-block;
+  width: 12px;
+  height: 12px;
   border: 2px solid var(--ss-brass);
   border-radius: 50%;
-  margin-right: 5px;
+  margin-right: 3px;
   vertical-align: middle;
 }
 
-.ss-pip-1 { width: 10px; height: 10px; }
-.ss-pip-2 { width: 14px; height: 14px; }
-.ss-pip-3 { width: 18px; height: 18px; }
+.ss-pip-filled {
+  background: var(--ss-brass);
+}
 
-.ss-no-spare {
-  color: rgba(35, 42, 36, 0.45);
+.ss-pip-empty {
+  background: transparent;
+}
+
+.ss-spare {
+  font-size: 0.9rem;
+  color: rgba(35, 42, 36, 0.7);
 }
 
 /* --- states --- */

@@ -11,7 +11,19 @@
           <span class="ss-slot-label">{{ piece.slot }}</span>
           <span class="ss-piece-name">{{ piece.name }}</span>
         </div>
-        <span class="ss-piece-meta">R{{ piece.rarity }} · {{ piece.defense }} def</span>
+        <span class="ss-piece-meta">
+          {% if piece.slots %}
+          <span class="ss-sockets" aria-label="{{ piece.filled }} filled, {{ piece.spare }} empty">
+            {% for _ in range(piece.filled) %}
+            <span class="ss-pip ss-pip-filled" title="filled socket"></span>
+            {% endfor %}
+            {% for _ in range(piece.spare) %}
+            <span class="ss-pip ss-pip-empty" title="empty socket"></span>
+            {% endfor %}
+          </span>
+          {% endif %}
+          R{{ piece.rarity }} · {{ piece.defense }} def
+        </span>
       </div>
       {% if piece.alternates | length > 1 %}
       <details class="ss-alts">
@@ -25,6 +37,42 @@
       {% endif %}
     </li>
     {% endfor %}
+    {% if result.weapon %}
+    <li class="list-group-item ss-piece">
+      <div class="d-flex justify-content-between align-items-baseline gap-2">
+        <div>
+          <span class="ss-slot-label">weapon</span>
+          <span class="ss-piece-name">Weapon</span>
+        </div>
+        <span class="ss-sockets" aria-label="{{ result.weapon.filled }} filled, {{ result.weapon.spare }} empty">
+          {% for _ in range(result.weapon.filled) %}
+          <span class="ss-pip ss-pip-filled" title="filled socket"></span>
+          {% endfor %}
+          {% for _ in range(result.weapon.spare) %}
+          <span class="ss-pip ss-pip-empty" title="empty socket"></span>
+          {% endfor %}
+        </span>
+      </div>
+    </li>
+    {% endif %}
+    {% if result.charm_sockets %}
+    <li class="list-group-item ss-piece">
+      <div class="d-flex justify-content-between align-items-baseline gap-2">
+        <div>
+          <span class="ss-slot-label">charm</span>
+          <span class="ss-piece-name">Talisman</span>
+        </div>
+        <span class="ss-sockets" aria-label="{{ result.charm_sockets.filled }} filled, {{ result.charm_sockets.spare }} empty">
+          {% for _ in range(result.charm_sockets.filled) %}
+          <span class="ss-pip ss-pip-filled" title="filled socket"></span>
+          {% endfor %}
+          {% for _ in range(result.charm_sockets.spare) %}
+          <span class="ss-pip ss-pip-empty" title="empty socket"></span>
+          {% endfor %}
+        </span>
+      </div>
+    </li>
+    {% endif %}
   </ul>
   <div class="card-body">
     <div class="ss-skills mb-2">
@@ -44,15 +92,7 @@
     </div>
     {% endif %}
     <div class="ss-spare">
-      <span class="ss-stat-label">Spare slots</span>
-      {% set ns = namespace(total=0) %}
-      {% for size in [1, 2, 3] %}
-      {% set ns.total = ns.total + result.spare_slots[size - 1] %}
-      {% for _ in range(result.spare_slots[size - 1]) %}
-      <span class="ss-pip ss-pip-{{ size }}" title="size-{{ size }} slot"></span>
-      {% endfor %}
-      {% endfor %}
-      {% if ns.total == 0 %}<span class="ss-no-spare">—</span>{% endif %}
+      {{ result.free_sockets }} free socket{{ "" if result.free_sockets == 1 else "s" }}.
     </div>
   </div>
 </div>

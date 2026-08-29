@@ -99,6 +99,11 @@ def test_start_search_returns_result_cards(client: TestClient):
     assert "Chain Faulds" in html
     assert 'data-skyline="0"' in html
     assert 'name="advanced_domain"' in html
+    assert "ss-pip-1" not in html
+    assert "ss-pip-2" not in html
+    assert "ss-pip-3" not in html
+    assert "ss-pip-empty" in html or "ss-pip-filled" in html
+    assert "free socket" in html
 
 
 def test_load_more_updates_remaining_count(client: TestClient):

@@ -87,6 +87,7 @@ def test_one_real_mhp3_query(dual_pack_db):
         hr=1,
         village_stars=1,
         use_generated_charms=True,
+        charm_mode="two_skill",
     )
     outcome = solve_one(
         pack=pack, pruned=prune(pack, query), query=query,

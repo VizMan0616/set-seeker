@@ -113,6 +113,7 @@ queries:
     village_stars: 1
     weapon_slots: 0
     use_generated_charms: true
+    charm_mode: two_skill
     trees: { "Attack": 20, "Sharpness": 10 }
     expect:
       charm: generated

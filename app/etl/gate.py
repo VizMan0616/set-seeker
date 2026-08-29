@@ -184,6 +184,7 @@ class Gate:
             hr=query.get("hr"),
             village_stars=query.get("village_stars"),
             use_generated_charms=bool(query.get("use_generated_charms", True)),
+            charm_mode=str(query.get("charm_mode") or ""),
         )
         outcome = solve_one(
             pack=pack, pruned=prune(pack, q), query=q, exclusions=[], time_limit_ms=5000

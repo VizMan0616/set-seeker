@@ -75,6 +75,9 @@ def test_picker_lists_mhp3(dual_pack_db, monkeypatch):
     catalogs = json.loads(raw.group(1))
     assert catalogs["mhfu"]["has_dummy"] is True
     assert catalogs["mhp3"]["has_dummy"] is False
+    assert catalogs["mhfu"]["torso_inc_name"] == "Torso Inc"
+    assert catalogs["mhp3"]["torso_inc_name"] == "Torso Up"
+    assert "Allow Torso Inc" in html
 
 
 def test_stale_mhfu_search_url_follows_game_picker(dual_pack_db, monkeypatch):

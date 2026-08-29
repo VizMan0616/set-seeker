@@ -24,7 +24,7 @@ responsive, and is simple to deploy with Docker.
 | **Decoration / jewel** | Craftable gems socketed into slots; grant skill points. Sizes 1–3. |
 | **Talisman / charm** | An equipment slot (gen 3 onward) with 0–3 slots and up to 2 skill trees. Gen 2 (MHFU) has **no talismans**. |
 | **Charm table** | In MH3U/MHP3, the in-game RNG that determines which charms a save file can ever obtain. 17 known tables in MH3U. Gen 4+ models charm legality via per-rarity generation tables (Mystery/Shining/Ancient/etc.). |
-| **Torso Inc** | A property of some body armor that doubles the body's skill points (including body-socketed decorations). |
+| **Torso Inc / Torso Up** | A flag on some armor pieces (often legs or helm, not the chest) that doubles the body's skill points, including body-socketed decorations. The pack's skill-tree name is the UI label (Torso Inc or Torso Up). |
 | **Excavated gear** | MH4/MH4U randomized equipment ("relics") the user can register manually. |
 | **Charm Up / Skill +2** | MHGU mechanics that double charm skills or add +2 points to all skills. |
 | **HR / village★** | Athena **quest-star** gates (not in-game HR 1–999) that filter equipment. Caps are per pack — see below. |

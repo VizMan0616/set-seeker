@@ -582,6 +582,21 @@ def charm_point_union(types: tuple[CharmTypeData, ...]) -> dict[str, int] | None
     }
 
 
+def torso_inc_skill_name(data: PackData) -> str | None:
+    """Display name of the Torso Inc / Torso Up mechanic for this pack.
+
+    Pieces store the effect as ``torso_inc``; the skill-tree row that carries
+    no thresholds is the pack's name after the English overlay (Torso Inc on
+    MHFU, Torso Up on MHP3 TMO). None if the pack has no such pieces.
+    """
+    if not any(row.torso_inc for row in data.armor):
+        return None
+    for block in data.skill_trees:
+        if not block.thresholds:
+            return block.name
+    return None
+
+
 def load_pack(manifest: PackManifest) -> PackData:
     """Load every source file for the pack, bound to its own column map."""
     cmap = importlib.import_module(f"app.etl.column_maps.{manifest.id}")

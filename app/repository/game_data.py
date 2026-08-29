@@ -264,6 +264,15 @@ class GameDataRepository:
                 ))
             ).scalar())
 
+    def has_torso_inc_pieces(self, game_id: int) -> bool:
+        with self._engine.begin() as conn:
+            return bool(conn.execute(
+                select(exists().where(
+                    t.armor_pieces.c.game_id == game_id,
+                    t.armor_pieces.c.torso_inc.is_(True),
+                ))
+            ).scalar())
+
     def list_armor_pieces(
         self,
         game_id: int,

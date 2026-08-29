@@ -295,3 +295,24 @@ def test_index_lists_pack_scoped_categories(client: TestClient):
     html = client.get("/").text
     assert "Offensive" in html
     assert "Treasure Hunting" not in html  # tiny pack, not a hardcoded MHFU list
+
+
+def test_torso_inc_checkbox_uses_skill_tree_name(packed_db):
+    """Label comes from the empty-threshold tree, not a hardcoded game id."""
+    import json
+
+    packed_db.create_skill_tree(
+        id=20, game_id=1, name_en="Torso Inc", name_ja="胴系統倍加",
+    )
+    packed_db.create_armor_piece(
+        id=80, game_id=1, slot=4, name_en="Torso Greaves", rarity=1, slots=0,
+        gender=2, hunter_type=2, defense=1, max_defense=1,
+        res_fire=0, res_water=0, res_ice=0, res_thunder=0, res_dragon=0,
+        torso_inc=True,
+    )
+    html = TestClient(create_app()).get("/").text
+    catalogs = json.loads(
+        html.split('id="ss-catalogs">', 1)[1].split("</script>", 1)[0]
+    )
+    assert catalogs["mhfu"]["torso_inc_name"] == "Torso Inc"
+    assert "Allow Torso Inc" in html

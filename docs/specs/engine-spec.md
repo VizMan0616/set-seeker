@@ -37,7 +37,8 @@ Port of the legacy `GetRelevantData` idea, without its O(n²) implementation:
 
 1. **Relevance filter** — drop armor pieces and decorations that grant no points to any
    requested tree *and* have below-maximum slot counts. (A piece with 3 slots is always
-   relevant: slots are generic currency.)
+   relevant: slots are generic currency. A piece with the Torso Inc / Torso Up flag is
+   always relevant: it doubles the body.)
 2. **Hard filters** — gender, hunter type, HR/village★ ceiling, event-gear flag, per-game
    mechanics. The progression ceiling is **OR-availability**: a piece or jewel is excluded only
    when it exceeds *both* caps (legacy `Armor.cpp:102`); the stored per-path value is the
@@ -73,7 +74,7 @@ Decision variables per candidate set:
 | `charm` | user inventory ∪ generated legal charms ∪ {none} | absent when pack flag `talismans: false` |
 | `deco_count[d]` | 0..K per relevant decoration d | how many of each jewel are socketed |
 | `weapon_slots` | 0..3 | from the query, a constant |
-| `torso_inc` | bool | true iff the chosen body piece has Torso Inc |
+| `torso_inc` | bool | true iff any chosen piece has the pack's Torso Inc / Torso Up flag |
 
 Derived expressions:
 

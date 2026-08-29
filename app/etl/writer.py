@@ -11,7 +11,7 @@ foreign keys from `user_charms` keep pointing at live rows across rebuilds.
 import json
 from typing import Any
 
-from app.etl.loaders import PackData, charm_point_union
+from app.etl.loaders import PackData, charm_point_union, torso_inc_skill_name
 from app.etl.manifest import PackManifest
 from app.repository import tables as t
 from app.repository.game_data import GameDataRepository
@@ -168,6 +168,9 @@ class PackWriter:
             feature_blob["charm_points"] = union
         elif manifest.charm_points:
             feature_blob["charm_points"] = manifest.charm_points
+        torso_name = torso_inc_skill_name(data)
+        if torso_name:
+            feature_blob["torso_inc_name"] = torso_name
         features = json.dumps(feature_blob, sort_keys=True)
         game = repo.get_game_by_code(manifest.id)
         if game is None:

@@ -44,6 +44,26 @@ def desired_skills_max(features_json: str | None) -> int:
     return n if n >= 1 else DEFAULT_DESIRED_SKILLS_MAX
 
 
+def torso_inc_display_name(
+    repo: GameDataRepository, game_id: int, features_json: str | None,
+) -> str | None:
+    """Pack's Torso Inc / Torso Up label, or None if the mechanic is absent.
+
+    Prefers ``games.features.torso_inc_name`` (ETL, from the empty-threshold
+    tree). Falls back to pieces-with-flag + a threshold-less skill tree so
+    fixture packs and a stale DB still agree with game data.
+    """
+    stored = _features(features_json).get("torso_inc_name")
+    if isinstance(stored, str) and stored.strip():
+        return stored.strip()
+    if not repo.has_torso_inc_pieces(game_id):
+        return None
+    for tree in repo.list_skill_trees(game_id):
+        if not repo.list_skills_for_tree(tree["id"]):
+            return tree["name_en"]
+    return None
+
+
 def charm_point_bounds(features_json: str | None) -> dict[str, int]:
     """Per-slot inventory stepper ranges (skill 1 ≠ skill 2)."""
     data = _features(features_json).get("charm_points") or {}
@@ -137,6 +157,7 @@ class RepositoryCatalog:
                 "skills": [],
                 "talismans": False,
                 "has_dummy": False,
+                "torso_inc_name": None,
                 "progression": {"guild_rank": 9, "village_stars": 9},
                 "desired_skills_max": DEFAULT_DESIRED_SKILLS_MAX,
             }
@@ -145,6 +166,9 @@ class RepositoryCatalog:
             "categories": [c["tag"] for c in self._repo.list_skill_categories(game_id)],
             "talismans": bool(json.loads(row["features"] or "{}").get("talismans", False)),
             "has_dummy": self._repo.has_dummy_pieces(game_id),
+            "torso_inc_name": torso_inc_display_name(
+                self._repo, game_id, row["features"],
+            ),
             "progression": progression_caps(row["features"]),
             "desired_skills_max": desired_skills_max(row["features"]),
             "skills": [

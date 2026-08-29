@@ -200,9 +200,10 @@
           <input class="form-check-input" type="checkbox" id="allow-bad-skills" name="allow_bad_skills">
           <label class="form-check-label" for="allow-bad-skills">Allow sets with negative skills</label>
         </div>
-        <div class="form-check">
+        <div class="form-check" x-show="currentCatalog.torso_inc_name" x-cloak>
           <input class="form-check-input" type="checkbox" id="allow-torso-inc" name="allow_torso_inc" checked>
-          <label class="form-check-label" for="allow-torso-inc">Allow Torso Inc</label>
+          <label class="form-check-label" for="allow-torso-inc"
+                 x-text="currentCatalog.torso_inc_name ? ('Allow ' + currentCatalog.torso_inc_name) : ''">Allow {{ torso_inc_name or "" }}</label>
         </div>
         <div class="form-check" x-show="currentCatalog.has_dummy" x-cloak>
           <input class="form-check-input" type="checkbox" id="allow-dummy"
@@ -325,6 +326,7 @@ function searchForm() {
         progression: { guild_rank: 9, village_stars: 9 },
         talismans: false,
         has_dummy: false,
+        torso_inc_name: null,
         desired_skills_max: 5,
       };
     },

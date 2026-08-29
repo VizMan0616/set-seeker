@@ -20,6 +20,7 @@ def index(request: Request) -> HTMLResponse:
         "progression": {"guild_rank": 9, "village_stars": 9},
         "talismans": False,
         "has_dummy": False,
+        "torso_inc_name": None,
         "desired_skills_max": DEFAULT_DESIRED_SKILLS_MAX,
     })
     max_skill_picks = max(
@@ -39,5 +40,6 @@ def index(request: Request) -> HTMLResponse:
             "progression": default_catalog.get(
                 "progression", {"guild_rank": 9, "village_stars": 9}
             ),
+            "torso_inc_name": default_catalog.get("torso_inc_name"),
         },
     )

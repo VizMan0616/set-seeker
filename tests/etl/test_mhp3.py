@@ -121,6 +121,8 @@ def test_load_pack_charms_and_fan_names(pack_data, manifest):
     assert "Artisan" not in trees
     assert "Torso Up" in trees
     assert "Torso Inc" not in trees
+    from app.etl.loaders import torso_inc_skill_name
+    assert torso_inc_skill_name(pack_data) == "Torso Up"
     helm = next(r for r in pack_data.armor if r.name_en == "Chainmail Headgear")
     assert helm.name_ja == "チェーンヘッド"
     assert helm.skills == (("Health", 2), ("Combo Rate", 4), ("Combo Plus", 1))
@@ -165,6 +167,7 @@ def test_writer_counts_and_progression(etl_db):
     assert features["talismans"] is True
     assert features["charm_tables"] is True
     assert features["translation"] == "fan"
+    assert features["torso_inc_name"] == "Torso Up"
     helm = next(p for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
                 if p["name_en"] == "Chainmail Headgear")
     assert helm["name_ja"] == "チェーンヘッド"

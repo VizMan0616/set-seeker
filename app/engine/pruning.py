@@ -88,7 +88,9 @@ def relevance_filter_pieces(
     """Drop pieces that grant no requested-tree points and have below-max slots.
 
     A piece with the maximum slot count for its slot is always relevant:
-    slots are generic currency (engine-spec.md §1.1).
+    slots are generic currency (engine-spec.md §1.1). Torso Inc / Torso Up
+    pieces stay too — they double the body (Athena ``Armor.cpp``: if
+    ``torso_inc`` return true).
     """
     trees = set(requested)
     max_slots = [0] * SLOT_COUNT
@@ -98,6 +100,7 @@ def relevance_filter_pieces(
         p
         for p in pieces
         if p.slots >= max_slots[p.slot]
+        or p.torso_inc
         or any(pts != 0 and t in trees for t, pts in p.skills)
     ]
 
@@ -172,12 +175,7 @@ def _piece_vector(piece: ArmorPiece, requested: tuple[int, ...]) -> tuple[int, .
     return (piece.slots, *(skills.get(t, 0) for t in requested))
 
 
-def dominance_prune(pieces: list[ArmorPiece], requested: tuple[int, ...]) -> list[ArmorPiece]:
-    """Skyline pass: drop pieces dominated on (slots, requested-tree points).
-
-    Sorted descending so a piece's dominators are always earlier in the scan;
-    the kept list is the running skyline.
-    """
+def _skyline(pieces: list[ArmorPiece], requested: tuple[int, ...]) -> list[ArmorPiece]:
     keyed = sorted(
         ((p, _piece_vector(p, requested)) for p in pieces),
         key=lambda pv: pv[1],
@@ -190,6 +188,19 @@ def dominance_prune(pieces: list[ArmorPiece], requested: tuple[int, ...]) -> lis
             kept.append(piece)
             skyline.append(vec)
     return kept
+
+
+def dominance_prune(pieces: list[ArmorPiece], requested: tuple[int, ...]) -> list[ArmorPiece]:
+    """Skyline pass: drop pieces dominated on (slots, requested-tree points).
+
+    Torso Inc / Torso Up pieces are incomparable with plain pieces (Athena
+    ``IsBetterThan``: if either has the flag, both stay). Skyline each group
+    separately. Sorted descending so a piece's dominators are earlier in the
+    scan.
+    """
+    plain = [p for p in pieces if not p.torso_inc]
+    torso = [p for p in pieces if p.torso_inc]
+    return _skyline(plain, requested) + _skyline(torso, requested)
 
 
 def equivalence_collapse(

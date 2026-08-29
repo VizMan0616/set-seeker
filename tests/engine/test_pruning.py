@@ -158,6 +158,23 @@ def test_excluded_ids_leave_the_solver_rel_but_stay_on_inf(tiny_pack_data):
     assert 101 in pruned.inf_decoration_ids
 
 
+def test_zero_slot_torso_inc_stays_relevant_and_incomparable(tiny_pack_data):
+    """Athena keeps Torso Inc pieces even with no requested points (Armor.cpp)."""
+    pack = _pack_with_extra_pieces(tiny_pack_data, [
+        _piece(82, LEGS, slots=0, attack=0, torso_inc=True),
+    ])
+    pruned = prune(pack, make_query(min_points=10))
+    legs = {m.id for c in pruned.classes[LEGS] for m in c.members}
+    assert 82 in legs
+    inf_legs = set(pruned.inf_piece_ids[LEGS])
+    assert 82 in inf_legs
+
+    high_slot = _piece(1, HEAD, slots=3, attack=5)
+    torso_only = _piece(2, HEAD, slots=0, attack=0, torso_inc=True)
+    kept = dominance_prune([high_slot, torso_only], (ATTACK_TREE,))
+    assert {p.id for p in kept} == {1, 2}  # Athena: flag vs plain is incomparable
+
+
 def test_torso_inc_and_dummy_hard_filters(tiny_pack_data):
     pack = _pack_with_extra_pieces(tiny_pack_data, [
         _piece(80, HEAD, slots=3, attack=5, torso_inc=True),

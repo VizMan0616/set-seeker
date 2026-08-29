@@ -28,6 +28,7 @@ def test_pack_stores_progression_caps(etl_db):
     assert features["guild_rank_max"] == 9
     assert features["village_stars_max"] == 9
     assert features["desired_skills_max"] == 5
+    assert features["torso_inc_name"] == "Torso Inc"
 
 
 def test_loaded_row_counts(etl_db):

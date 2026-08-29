@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.web.render import templates
-from app.web.resolvers import charm_point_bounds
+from app.web.resolvers import charm_point_bounds, torso_inc_display_name
 
 router = APIRouter()
 
@@ -26,10 +26,15 @@ def _require_talisman_game(request: Request, game: str) -> dict:
 
 
 def _tree_options(request: Request, game: str) -> list[dict]:
+    row = request.app.state.game_data.get_game_by_code(game)
+    skip = (
+        torso_inc_display_name(request.app.state.game_data, row["id"], row.get("features"))
+        if row is not None else None
+    )
     return [
         tree
         for tree in request.app.state.catalog.list_skill_trees(game)
-        if tree["name"] not in {"Torso Inc", "Torso Up"}
+        if tree["name"] != skip
     ]
 
 

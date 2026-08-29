@@ -111,9 +111,14 @@ def solve_one(
         for s in range(SLOT_COUNT)
         for t in trees
     }
-    torso_inc = element(
-        BODY, [1 if r.torso_inc else 0 for r in reps[BODY]], "torso_inc"
-    )
+    # Athena adds ``torso_inc`` from every piece (head/arms/waist/legs first),
+    # then applies the multiplier to the body. One flag still means ×2.
+    torso_flags = [
+        element(s, [1 if r.torso_inc else 0 for r in reps[s]], f"ti_flag_{s}")
+        for s in range(SLOT_COUNT)
+    ]
+    torso_inc = model.new_int_var(0, 1, "torso_inc")
+    model.add_max_equality(torso_inc, torso_flags)
 
     charms = pruned.charms or ()
     if not charms:

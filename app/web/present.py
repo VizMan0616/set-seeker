@@ -10,7 +10,7 @@ from itertools import product
 from typing import Any, Protocol
 
 from app.domain.models import ArmorSetResult, Query, SearchPage
-from app.engine.data import ARMOR_SLOT_KINDS, PackData
+from app.engine.data import ARMOR_SLOT_KINDS, SLOT_COUNT, PackData
 from app.engine.pruning import PrunedPack, domain_snapshot
 
 SLOT_ORDER = ("head", "body", "arms", "waist", "legs")
@@ -29,7 +29,7 @@ KIND_LABELS = {
 
 class NameResolver(Protocol):
     def armor_piece(self, piece_id: int) -> dict[str, Any]:
-        """Return {"name": str, "rarity": int, "defense": int}."""
+        """Return {"name": str, "rarity": int, "defense": int, "slots": int}."""
         ...
 
     def decoration_name(self, decoration_id: int) -> str: ...
@@ -63,26 +63,46 @@ def _charm_label(result: ArmorSetResult, resolver: NameResolver) -> str | None:
     return _format_charm(result.charm_slots, result.charm_skills, resolver)
 
 
+def _socket_marks(slots: int, spare: int) -> dict[str, int]:
+    slots = max(0, int(slots))
+    spare = max(0, min(int(spare), slots))
+    return {"slots": slots, "spare": spare, "filled": slots - spare}
+
+
 def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str, Any]:
+    leftovers = result.spare_by_piece
     pieces = []
-    for slot, piece_id, alternates in zip(
-        SLOT_ORDER, result.piece_ids, result.alternates, strict=True
+    for i, (slot, piece_id, alternates) in enumerate(
+        zip(SLOT_ORDER, result.piece_ids, result.alternates, strict=True)
     ):
         piece = resolver.armor_piece(piece_id)
+        slots = int(piece.get("slots") or 0)
+        spare = leftovers[i] if i < len(leftovers) else 0
         pieces.append(
             {
                 "slot": slot,
                 "name": piece["name"],
                 "rarity": piece["rarity"],
                 "defense": piece["defense"],
+                **_socket_marks(slots, spare),
                 "alternates": [
                     {"id": alt_id, "name": resolver.armor_piece(alt_id)["name"]}
                     for alt_id in alternates
                 ],
             }
         )
+    weapon = None
+    if result.weapon_slots:
+        spare = leftovers[SLOT_COUNT] if len(leftovers) > SLOT_COUNT else 0
+        weapon = _socket_marks(result.weapon_slots, spare)
+    charm_sockets = None
+    if result.charm_slots:
+        spare = leftovers[SLOT_COUNT + 1] if len(leftovers) > SLOT_COUNT + 1 else 0
+        charm_sockets = _socket_marks(result.charm_slots, spare)
     return {
         "pieces": pieces,
+        "weapon": weapon,
+        "charm_sockets": charm_sockets,
         "decorations": [
             {"name": resolver.decoration_name(d.decoration_id), "count": d.count}
             for d in result.decorations
@@ -93,6 +113,7 @@ def _result_context(result: ArmorSetResult, resolver: NameResolver) -> dict[str,
             for skill_id, points in result.active_skills
         ],
         "spare_slots": list(result.spare_slots),
+        "free_sockets": sum(leftovers),
         "defense": result.defense,
     }
 

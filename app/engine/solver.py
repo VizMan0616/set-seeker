@@ -302,6 +302,7 @@ def _extract(
 
     # Spare sockets per bucket, grouped by the largest jewel size they fit.
     spare = [0, 0, 0]
+    leftover = []
     chosen_charm = charms[solver.value(charm_x)]
     for b in range(SLOT_COUNT + 2):
         if b < SLOT_COUNT:
@@ -312,6 +313,7 @@ def _extract(
             cap = chosen_charm.slots
         used = sum(solver.value(place[d.id, b]) * d.size for d in decos)
         remaining = cap - used
+        leftover.append(remaining)
         if 1 <= remaining <= 3:
             spare[remaining - 1] += 1
 
@@ -337,4 +339,6 @@ def _extract(
         defense=sum(c.representative.defense for c in chosen),
         charm_slots=chosen_charm.slots,
         charm_skills=chosen_charm.skills,
+        spare_by_piece=tuple(leftover),
+        weapon_slots=query.weapon_slots,
     )

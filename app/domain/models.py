@@ -66,6 +66,9 @@ class ArmorSetResult:
     defense: int
     charm_slots: int = 0
     charm_skills: tuple[tuple[int, int], ...] = ()
+    # Leftover empty sockets: head, body, arms, waist, legs, weapon, charm
+    spare_by_piece: tuple[int, int, int, int, int, int, int] = (0, 0, 0, 0, 0, 0, 0)
+    weapon_slots: int = 0
 
     def equivalent_count(self) -> int:
         """How many concrete sets this representative expands to."""

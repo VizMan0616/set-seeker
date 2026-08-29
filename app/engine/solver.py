@@ -7,9 +7,10 @@ solves for exactly one ranked set; enumeration lives in service.py as
 iterate-and-exclude (ADR 0005). Charm variable is present when pack flag ``talismans`` is true
 (inventory ∪ generated legal envelopes ∪ none).
 
-Objective order (settled; changing it requires superseding ADR 0005):
+Objective order (ADR 0005 as extended by ADR 0011):
 1. minimize required charm strength — constant 0 when there is only none;
-2. maximize spare slots; 3. maximize defense; 4. query sort tie-breakers.
+2. minimize active penalty skills (trees at or below their negative threshold);
+3. maximize spare slots; 4. maximize defense; 5. query sort tie-breakers.
 Implemented as a single weighted sum with bounds derived from the pruned
 data so the lexicographic order is exact.
 """
@@ -43,7 +44,9 @@ _RES_ATTR = {
 
 @dataclass(frozen=True)
 class SolveOutcome:
-    status: str  # "optimal" | "feasible" (budget hit) | "infeasible" | "unknown" (budget hit)
+    # optimal | feasible (ranked, budget) | unranked (feasibility-first) |
+    # infeasible | unknown (budget, no assignment)
+    status: str
     result: ArmorSetResult | None
 
 
@@ -55,8 +58,14 @@ def solve_one(
     exclusions: list[tuple[int, ...]],
     time_limit_ms: int,
     num_workers: int = 1,
+    rank: bool = True,
 ) -> SolveOutcome:
-    """Solve for the single best set not in ``exclusions``.
+    """Solve for one set not in ``exclusions``.
+
+    With ``rank=True`` (default), maximize weakest-charm → fewer penalties →
+    slots → defense.
+    With ``rank=False``, stop at the first feasible assignment so a large
+    charm table can still return *a* set inside the time budget.
 
     ``num_workers`` defaults to 1 so results are deterministic; on this data
     size each solve is milliseconds (engine-spec.md §4).
@@ -192,8 +201,14 @@ def solve_one(
     # --- hard constraints ---
     for sr in query.skills:
         model.add(points[sr.tree_id] >= sr.min_points)
+    penalty_terms: list = []
     for t, neg_threshold in pruned.bad_tree_thresholds:
-        model.add(points[t] >= neg_threshold + 1)
+        if not query.allow_bad_skills:
+            model.add(points[t] >= neg_threshold + 1)
+        active = model.new_bool_var(f"penalty_{t}")
+        model.add(points[t] <= neg_threshold).only_enforce_if(active)
+        model.add(points[t] >= neg_threshold + 1).only_enforce_if(~active)
+        penalty_terms.append(active)
 
     # --- exclusions (iterate-and-exclude, ADR 0005): representative id tuples ---
     id_to_idx = [
@@ -248,19 +263,26 @@ def solve_one(
         tie_bound = 1
 
     max_spare = 3 * SLOT_COUNT + 6
+    n_bad = len(pruned.bad_tree_thresholds)
     mid_weight = (max_defense + 1) * tie_bound
-    charm_weight = (max_spare + 1) * mid_weight
+    penalty_weight = (max_spare + 1) * mid_weight
+    charm_weight = (n_bad + 1) * penalty_weight
     max_str = max(charm_strength(c.slots, c.skills) for c in charms)
     weak_charm = max_str - charm_strength_var
-    model.maximize(
-        weak_charm * charm_weight
-        + spare * mid_weight
-        + defense * tie_bound
-        + tie
-    )
+    fewer_penalties = n_bad - sum(penalty_terms)
+    if rank:
+        model.maximize(
+            weak_charm * charm_weight
+            + fewer_penalties * penalty_weight
+            + spare * mid_weight
+            + defense * tie_bound
+            + tie
+        )
 
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = time_limit_ms / 1000.0
+    if not rank:
+        solver.parameters.stop_after_first_solution = True
     try:
         solver.parameters.num_workers = num_workers
     except AttributeError:
@@ -277,6 +299,8 @@ def solve_one(
     result = _extract(
         solver, pruned, query, x, deco_count, place, points, decos, charms, charm_x
     )
+    if not rank:
+        return SolveOutcome("unranked", result)
     return SolveOutcome("optimal" if status == cp_model.OPTIMAL else "feasible", result)
 
 
@@ -318,14 +342,22 @@ def _extract(
     achieved = {t: solver.value(v) for t, v in points.items()}
     thresholds_by_tree: dict[int, list] = {}
     for sk in pruned.skills:
-        if not sk.is_negative:
-            thresholds_by_tree.setdefault(sk.tree_id, []).append(sk)
+        thresholds_by_tree.setdefault(sk.tree_id, []).append(sk)
     active = []
     for t in sorted(thresholds_by_tree):
-        crossed = [sk for sk in thresholds_by_tree[t] if achieved.get(t, 0) >= sk.points]
-        if crossed:
-            best = max(crossed, key=lambda sk: sk.points)
-            active.append((best.id, achieved[t]))
+        pts = achieved.get(t, 0)
+        pos = [sk for sk in thresholds_by_tree[t] if not sk.is_negative]
+        neg = [sk for sk in thresholds_by_tree[t] if sk.is_negative]
+        if pos:
+            crossed = [sk for sk in pos if pts >= sk.points]
+            if crossed:
+                best = max(crossed, key=lambda sk: sk.points)
+                active.append((best.id, pts))
+        if neg:
+            crossed = [sk for sk in neg if pts <= sk.points]
+            if crossed:
+                worst = min(crossed, key=lambda sk: sk.points)
+                active.append((worst.id, pts))
 
     return ArmorSetResult(
         piece_ids=tuple(c.representative.id for c in chosen),

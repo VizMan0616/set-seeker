@@ -17,6 +17,8 @@ from app.domain.models import (
     Query,
     SearchPage,
     SkillRequest,
+    charm_mode_uses_generated,
+    resolved_charm_mode,
 )
 
 # Tail census after the first page so the UI can say "N more to load".
@@ -51,6 +53,7 @@ def _query_to_json(query: Query) -> str:
             "sort": query.sort,
             "expand_equivalents": query.expand_equivalents,
             "use_generated_charms": query.use_generated_charms,
+            "charm_mode": resolved_charm_mode(query),
             "user_charms": [
                 {"id": c.id, "slots": c.slots, "skills": [list(p) for p in c.skills]}
                 for c in query.user_charms
@@ -87,6 +90,9 @@ def _page_units(query: Query, results: list[ArmorSetResult]) -> int:
 
 def _query_from_json(payload: str) -> Query:
     d = json.loads(payload)
+    raw_mode = d.get("charm_mode") or ""
+    if raw_mode not in ("none", "inventory", "slotted", "one_skill", "two_skill"):
+        raw_mode = "one_skill" if d.get("use_generated_charms", True) else "inventory"
     return Query(
         game=d["game"],
         skills=tuple(SkillRequest(tree_id=t, min_points=p) for t, p in d["skills"]),
@@ -107,7 +113,8 @@ def _query_from_json(payload: str) -> Query:
         forced_charm_ids=tuple(d.get("forced_charm_ids") or ()),
         sort=d["sort"],
         expand_equivalents=bool(d.get("expand_equivalents", False)),
-        use_generated_charms=bool(d.get("use_generated_charms", True)),
+        use_generated_charms=charm_mode_uses_generated(raw_mode),
+        charm_mode=raw_mode,
         user_charms=tuple(
             CharmSpec(
                 id=c["id"],
@@ -258,11 +265,21 @@ class CpSatSearchService:
         )
 
     def _with_inventory(self, session_id: str, pack: PackData, query: Query) -> Query:
-        if not pack.talismans or query.user_charms:
-            return query
+        mode = resolved_charm_mode(query)
+        synced = replace(
+            query,
+            charm_mode=mode,
+            use_generated_charms=charm_mode_uses_generated(mode),
+        )
+        if not pack.talismans or mode == "none":
+            return replace(synced, user_charms=())
+        if synced.user_charms:
+            return synced
+        if mode != "inventory" and not charm_mode_uses_generated(mode):
+            return synced
         rows = self._user_data.list_charms(session_id, pack.game_id)
         return replace(
-            query,
+            synced,
             user_charms=tuple(
                 CharmSpec(
                     id=row["id"],
@@ -276,6 +293,23 @@ class CpSatSearchService:
     def _solve_page(
         self, query: Query, exclusions: list[tuple[int, ...]]
     ) -> tuple[list[ArmorSetResult], list[list[int]], bool, bool]:
+        mode = resolved_charm_mode(query)
+        if (
+            charm_mode_uses_generated(mode)
+            and query.user_charms
+            and not query.forced_charm_ids
+        ):
+            inv = replace(
+                query,
+                charm_mode="inventory",
+                use_generated_charms=False,
+            )
+            inv_results, inv_excl, inv_partial, _inv_exh = self._solve_page(
+                inv, exclusions
+            )
+            if inv_results:
+                return inv_results, inv_excl, inv_partial, False
+
         pack = self._pack_loader(query.game)
         pruned: PrunedPack = prune(pack, query)  # cached per (pack, query)
 

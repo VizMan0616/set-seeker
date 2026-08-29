@@ -1,6 +1,6 @@
 """Charm variable: inventory, generated envelopes, weakest-charm objective."""
 
-from app.domain.models import CharmSpec
+from app.domain.models import CharmSpec, SkillRequest
 from app.engine.charms import charm_candidates
 from app.engine.data import CharmTypeSpec, PackData
 from app.engine.pruning import domain_snapshot, prune
@@ -140,6 +140,8 @@ def test_domain_snapshot_lists_user_charms(tiny_pack_data):
     query = make_query(
         min_points=10,
         game="mhp3",
+        charm_mode="inventory",
+        use_generated_charms=False,
         user_charms=(CharmSpec(id=9, slots=2, skills=((ATTACK_TREE, 4),)),),
     )
     pruned = prune(pack, query)
@@ -150,3 +152,86 @@ def test_domain_snapshot_lists_user_charms(tiny_pack_data):
 def test_mhfu_pack_still_has_no_charm_kind(tiny_pack_data):
     pruned = prune(tiny_pack_data, make_query(min_points=10))
     assert "charms" not in domain_snapshot(tiny_pack_data, pruned)["kinds"]
+
+
+def _two_tree_pack() -> PackData:
+    other = 99
+    return _talisman_pack(
+        charm_types=(
+            CharmTypeSpec(
+                code="timeworn",
+                max_slots=3,
+                skill1=((ATTACK_TREE, 0, 6), (other, 0, 6)),
+                skill2=((ATTACK_TREE, -10, 10), (other, -10, 10)),
+            ),
+        )
+    )
+
+
+def test_charm_mode_none_is_only_none():
+    pack = _two_tree_pack()
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="none",
+        user_charms=(CharmSpec(id=3, slots=1, skills=((ATTACK_TREE, 4),)),),
+    )
+    ids = [c.id for c in charm_candidates(pack, query)]
+    assert ids == [0]
+
+
+def test_charm_mode_inventory_skips_generated():
+    pack = _two_tree_pack()
+    owned = CharmSpec(id=3, slots=1, skills=((ATTACK_TREE, 4),))
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="inventory",
+        use_generated_charms=False,
+        user_charms=(owned,),
+    )
+    ids = [c.id for c in charm_candidates(pack, query)]
+    assert ids == [0, 3]
+
+
+def test_charm_mode_slotted_has_no_skill_rows():
+    pack = _two_tree_pack()
+    query = make_query(min_points=10, game="mhp3", charm_mode="slotted", user_charms=())
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0]
+    assert generated
+    assert all(not c.skills for c in generated)
+    assert max(c.slots for c in generated) == 3
+
+
+def test_charm_mode_one_skill_skips_two_tree_pairs():
+    pack = _two_tree_pack()
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="one_skill",
+        user_charms=(),
+        skills=(
+            SkillRequest(tree_id=ATTACK_TREE, min_points=10),
+            SkillRequest(tree_id=99, min_points=1),
+        ),
+    )
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0]
+    assert any(len(c.skills) == 1 for c in generated)
+    assert all(len(c.skills) <= 1 for c in generated)
+
+
+def test_charm_mode_two_skill_skips_one_skill_point_grid():
+    pack = _two_tree_pack()
+    query = make_query(
+        min_points=10,
+        game="mhp3",
+        charm_mode="two_skill",
+        user_charms=(),
+        skills=(
+            SkillRequest(tree_id=ATTACK_TREE, min_points=10),
+            SkillRequest(tree_id=99, min_points=1),
+        ),
+    )
+    generated = [c for c in charm_candidates(pack, query) if c.id < 0]
+    assert any(len(c.skills) == 2 for c in generated)
+    assert all(len(c.skills) != 1 for c in generated)

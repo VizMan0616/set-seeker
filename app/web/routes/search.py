@@ -11,7 +11,13 @@ from urllib.parse import parse_qsl
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from app.domain.models import Query, SkillRequest
+from app.domain.models import (
+    CHARM_MODES,
+    DEFAULT_CHARM_MODE,
+    Query,
+    SkillRequest,
+    charm_mode_uses_generated,
+)
 from app.engine.data import PackData
 from app.engine.pruning import apply_rel_checks, prune
 from app.repository.game_data import GameDataRepository
@@ -35,6 +41,15 @@ async def _read_form(request: Request) -> FormFields:
 def _first(fields: FormFields, key: str, default: str = "") -> str:
     values = fields.get(key)
     return values[0] if values else default
+
+
+def _charm_mode(fields: FormFields) -> str:
+    raw = _first(fields, "charm_mode", DEFAULT_CHARM_MODE)
+    if raw in CHARM_MODES:
+        return raw
+    if _first(fields, "use_generated_charms", "on") != "on":
+        return "inventory"
+    return DEFAULT_CHARM_MODE
 
 
 def _optional_int(fields: FormFields, key: str) -> int | None:
@@ -117,6 +132,7 @@ def _parse_query(
     if village is not None and not 1 <= village <= caps["village_stars"]:
         raise HTTPException(status_code=422, detail="Village rank is outside this game's cap.")
 
+    mode = _charm_mode(fields)
     query = Query(
         game=game,
         skills=tuple(skills),
@@ -137,7 +153,8 @@ def _parse_query(
         forced_charm_ids=_int_ids(fields, "forced_charm_id"),
         sort=_first(fields, "sort", "defense"),
         expand_equivalents=_first(fields, "expand_equivalents") == "on",
-        use_generated_charms=_first(fields, "use_generated_charms", "on") == "on",
+        charm_mode=mode,
+        use_generated_charms=charm_mode_uses_generated(mode),
     )
     if pack_loader is not None and _first(fields, "advanced_domain") == "1":
         query = apply_rel_checks(

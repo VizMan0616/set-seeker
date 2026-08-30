@@ -75,15 +75,24 @@ def solve_one(
 
     model = cp_model.CpModel()
 
-    # Track every tree the model must reason about: requested trees, bad-skill
-    # trees, and any tree with a defined threshold (for active_skills reporting).
-    trees = tuple(
-        dict.fromkeys(
-            [*pruned.requested_trees]
-            + [t for t, _ in pruned.bad_tree_thresholds]
-            + [sk.tree_id for sk in pruned.skills]
-        )
+    # Requested trees plus penalty trees that can move on this domain.
+    # Other activated skills are computed in `_extract` from the assignment.
+    live: set[int] = set()
+    for classes in pruned.classes:
+        for cls in classes:
+            for tree_id, pts in cls.representative.skills:
+                if pts < 0:
+                    live.add(tree_id)
+    for spec in pruned.charms or ():
+        for tree_id, pts in spec.skills:
+            if pts < 0:
+                live.add(tree_id)
+    modeled_bad = tuple(
+        (tree_id, threshold)
+        for tree_id, threshold in pruned.bad_tree_thresholds
+        if tree_id in live
     )
+    trees = tuple(dict.fromkeys([*pruned.requested_trees, *[t for t, _ in modeled_bad]]))
 
     # --- one index variable per slot over equivalence-class representatives ---
     x = [
@@ -207,13 +216,14 @@ def solve_one(
     for sr in query.skills:
         model.add(points[sr.tree_id] >= sr.min_points)
     penalty_terms: list = []
-    for t, neg_threshold in pruned.bad_tree_thresholds:
+    for t, neg_threshold in modeled_bad:
         if not query.allow_bad_skills:
             model.add(points[t] >= neg_threshold + 1)
-        active = model.new_bool_var(f"penalty_{t}")
-        model.add(points[t] <= neg_threshold).only_enforce_if(active)
-        model.add(points[t] >= neg_threshold + 1).only_enforce_if(~active)
-        penalty_terms.append(active)
+        if query.allow_bad_skills:
+            active = model.new_bool_var(f"penalty_{t}")
+            model.add(points[t] <= neg_threshold).only_enforce_if(active)
+            model.add(points[t] >= neg_threshold + 1).only_enforce_if(~active)
+            penalty_terms.append(active)
 
     # --- exclusions (iterate-and-exclude, ADR 0005): representative id tuples ---
     id_to_idx = [
@@ -268,13 +278,13 @@ def solve_one(
         tie_bound = 1
 
     max_spare = 3 * SLOT_COUNT + 6
-    n_bad = len(pruned.bad_tree_thresholds)
+    n_bad = len(modeled_bad)
     mid_weight = (max_defense + 1) * tie_bound
     penalty_weight = (max_spare + 1) * mid_weight
     charm_weight = (n_bad + 1) * penalty_weight
     max_str = max(charm_strength(c.slots, c.skills) for c in charms)
     weak_charm = max_str - charm_strength_var
-    fewer_penalties = n_bad - sum(penalty_terms)
+    fewer_penalties = n_bad - (sum(penalty_terms) if penalty_terms else 0)
     if rank:
         model.maximize(
             weak_charm * charm_weight
@@ -307,6 +317,31 @@ def solve_one(
     if not rank:
         return SolveOutcome("unranked", result)
     return SolveOutcome("optimal" if status == cp_model.OPTIMAL else "feasible", result)
+
+
+def _assignment_points(chosen, chosen_charm, query, decos, place, solver) -> dict[int, int]:
+    """Skill totals from the chosen pieces/jewels — covers trees not in the model."""
+    torso = any(cls.representative.torso_inc for cls in chosen)
+    totals: dict[int, int] = {}
+
+    def add(tree_id: int, pts: int, *, body: bool = False) -> None:
+        if pts == 0:
+            return
+        totals[tree_id] = totals.get(tree_id, 0) + (pts * (2 if body and torso else 1))
+
+    for slot, cls in enumerate(chosen):
+        for tree_id, pts in cls.representative.skills:
+            add(tree_id, pts, body=slot == BODY)
+    for tree_id, pts in chosen_charm.skills:
+        add(tree_id, pts)
+    for deco in decos:
+        for bucket in range(SLOT_COUNT + 2):
+            count = solver.value(place[deco.id, bucket])
+            if count <= 0:
+                continue
+            for tree_id, pts in deco.skills:
+                add(tree_id, pts * count, body=bucket == BODY)
+    return totals
 
 
 def _extract(
@@ -346,7 +381,10 @@ def _extract(
         if 1 <= remaining <= 3:
             spare[remaining - 1] += 1
 
-    achieved = {t: solver.value(v) for t, v in points.items()}
+    achieved = _assignment_points(
+        chosen, chosen_charm, query, decos, place, solver
+    )
+    achieved.update({t: solver.value(v) for t, v in points.items()})
     thresholds_by_tree: dict[int, list] = {}
     for sk in pruned.skills:
         thresholds_by_tree.setdefault(sk.tree_id, []).append(sk)

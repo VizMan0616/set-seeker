@@ -15,6 +15,7 @@ ORPHAN_TREE = 8
 GLOOM_DOWN_ID = 50
 FIXER_DECO_ID = 201
 ORPHAN_DECO_ID = 202
+HARMFUL_FIXER_DECO_ID = 203
 
 
 def _gloom_pack(tiny: PackData, *, with_fixer: bool = True) -> PackData:
@@ -25,6 +26,9 @@ def _gloom_pack(tiny: PackData, *, with_fixer: bool = True) -> PackData:
     extra_decos = []
     if with_fixer:
         extra_decos.append(Decoration(id=FIXER_DECO_ID, size=1, skills=((GLOOM_TREE, 1),)))
+        extra_decos.append(
+            Decoration(id=HARMFUL_FIXER_DECO_ID, size=1, skills=((GLOOM_TREE, -1),))
+        )
     extra_decos.append(Decoration(id=ORPHAN_DECO_ID, size=1, skills=((ORPHAN_TREE, 1),)))
     return PackData(
         game=tiny.game,
@@ -47,6 +51,14 @@ def test_fixer_jewel_enters_domain_only_for_present_penalty_trees(tiny_pack_data
     assert FIXER_DECO_ID in deco_ids
     assert ORPHAN_DECO_ID not in deco_ids
     assert pruned.bad_tree_thresholds == ((GLOOM_TREE, -10), (ORPHAN_TREE, -10))
+
+
+def test_harmful_fixer_jewel_is_pruned_from_domain(tiny_pack_data):
+    pack = _gloom_pack(tiny_pack_data)
+    pruned = prune(pack, make_query(min_points=10))
+    deco_ids = {d.id for d in pruned.decorations}
+    assert FIXER_DECO_ID in deco_ids
+    assert HARMFUL_FIXER_DECO_ID not in deco_ids
 
 
 def test_allow_bad_off_is_infeasible_without_fixer(tiny_pack_data):

@@ -112,27 +112,32 @@ def relevance_filter_decorations(
     extra_trees: tuple[int, ...] = (),
 ) -> list[Decoration]:
     """Keep jewels that grant requested trees or fixer trees (penalty neutralization)."""
-    trees = set(requested) | set(extra_trees)
+    requested_set = set(requested)
+    fixer_set = set(extra_trees)
     return [
         d
         for d in decorations
-        if any(pts != 0 and t in trees for t, pts in d.skills)
+        if (
+            any(t in requested_set and pts != 0 for t, pts in d.skills)
+            or any(t in fixer_set and pts > 0 for t, pts in d.skills)
+        )
         and _within_progression_caps(d.hr_required, d.village_stars, query)
         and (query.allow_event or not d.is_event)
     ]
 
 
-def _nonzero_skill_trees(
+def _negative_skill_trees(
     pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]
 ) -> set[int]:
+    """Trees that can actually go below zero on the solver domain."""
     trees: set[int] = set()
     for piece in pieces:
         for tree_id, pts in piece.skills:
-            if pts != 0:
+            if pts < 0:
                 trees.add(tree_id)
     for charm in charms:
         for tree_id, pts in charm.skills:
-            if pts != 0:
+            if pts < 0:
                 trees.add(tree_id)
     return trees
 
@@ -140,9 +145,9 @@ def _nonzero_skill_trees(
 def _fixer_trees(
     pack: PackData, pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]
 ) -> tuple[int, ...]:
-    """Negative-threshold trees that already have nonzero points on the domain."""
+    """Penalty trees that can activate on the chosen domain (need fixer jewels)."""
     negative = {sk.tree_id for sk in pack.skills if sk.is_negative}
-    present = _nonzero_skill_trees(pieces, charms)
+    present = _negative_skill_trees(pieces, charms)
     return tuple(sorted(negative & present))
 
 
@@ -255,7 +260,8 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
     skyline_charm_ids = inf_charm_ids
     charms = charm_candidates(pack, query)
 
-    fixer = _fixer_trees(pack, inf_pieces, base_charms)
+    rel_reps = [c.representative for classes in classes_per_slot for c in classes]
+    fixer = _fixer_trees(pack, rel_reps, charms)
     inf_decos = relevance_filter_decorations(
         list(pack.decorations), requested, query, extra_trees=fixer
     )

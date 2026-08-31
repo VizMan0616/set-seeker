@@ -162,6 +162,7 @@ class PackWriter:
             "guild_rank_max": manifest.progression["guild_rank"],
             "village_stars_max": manifest.progression["village_stars"],
             "desired_skills_max": manifest.desired_skills_max,
+            "data_version": manifest.data_version,
         }
         union = charm_point_union(data.charm_types)
         if union:

@@ -1,8 +1,15 @@
 id: mhfu
 name: "Monster Hunter Freedom Unite"
 generation: 2
-source_repo: sources/MHFU-ASS
-data_dir: "Run/Data"               # pinned repo keeps data here (not "MH Armor/Run/Data")
+data_version: 1
+data:
+  armor_dir: vendor/data
+  locale_overlays:
+    en: vendor/locales/en
+provenance:
+  upstream: AthenaADP/MHFU-ASS
+  commit: 134acee87dd0105f3b03dcebe78c5ea9227dafb5
+  license: MIT
 features:
   talismans: false                  # gen 2 has no charm slot
   charm_tables: false               # MH3U-style table selection

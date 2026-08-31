@@ -1,39 +1,43 @@
 # Data pack spec — legacy data formats and ETL mapping
 
-A **game pack** is one generation's data + feature flags. Packs are built at Docker image
-build time by an ETL step that reads the legacy CSV-like files from `sources/<REPO>/` and
-writes the normalized SQLite schema (`docs/specs/database-schema.md`). Game data is
-**read-only at runtime**.
+A **game pack** is one generation's data + feature flags. ETL reads vendored raw files under
+`packs/<id>/vendor/` (ADR 0012) and writes the normalized SQLite schema
+(`docs/specs/database-schema.md`). Game data is **read-only at runtime**; bootstrap loads it
+on first boot or when `data_version` increases (ADR 0013).
 
 ## Pack manifest
 
-Each pack has a manifest (YAML/JSON) declaring its flags and source paths:
+Each pack has a manifest (YAML) declaring flags, vendored paths, and provenance:
 
 ```yaml
 id: mhfu
 name: "Monster Hunter Freedom Unite"
 generation: 2
-source_repo: sources/MHFU-ASS
-data_dir: "MH Armor/Run/Data"        # per-repo location of the data files
+data_version: 1                    # bump when vendor/ files change
+data:
+  armor_dir: vendor/data           # relative to pack_dir
+  locale_overlays:
+    en: vendor/locales/en
+provenance:
+  upstream: AthenaADP/MHFU-ASS
+  commit: 134acee87dd0105f3b03dcebe78c5ea9227dafb5
+  license: MIT
 features:
-  talismans: false                    # gen 2 has no charm slot
-  charm_tables: false                 # MH3U-style table selection
-  charm_generation: false             # gen4+ CSV-driven legal-charm generation
-  excavated_gear: false               # MH4/4U relic equipment
-  weapon_search: false                # weapons as a 6th search dimension
-  charm_up: false                     # MHGU: double charm skills
-  skill_plus_two: false               # MHGU: +2 to all trees
-  compound_skills: false              # gen4+: one tree grants several others
+  talismans: false
+  # … see existing flag matrix below
 progression:
-  guild_rank: 9                       # HR / guild quest cap (not the ETL sentinel 10)
-  village_stars: 9                    # village / Elder★ cap
+  guild_rank: 9
+  village_stars: 9
 formats:
-  armor_file_ext: csv                 # MHFU uses .csv; all others .txt
-  armor_header_lines: 2               # MHFU: 2 header lines; others: comment headers
-  skills_leading_index_columns: 0     # MH3U skills.txt has 2 leading index columns
+  armor_file_ext: csv
+  armor_header_lines: 2
+  skills_leading_index_columns: 0
 locales: [en, ja]
-desired_skills_max: 5                 # Athena Form1.h NumSkills (fixed combo boxes)
+desired_skills_max: 5
 ```
+
+ETL stores `data_version` in `games.features` alongside feature flags. Bootstrap compares
+manifest vs installed version to decide whether to re-run ETL for that pack.
 
 ETL copies `desired_skills_max` onto `games.features`. The search UI and query
 parser read that field — **do not hardcode 5** and do not `if game == …`.
@@ -150,13 +154,14 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 
 - `components.txt` — material names (crafting info display).
 - `tags.txt` — skill filter categories.
-- `Languages/*/` — localized name overlays applied at ETL. For MHFU, **`name_en` is the
-  official Freedom Unite English pack** (`Languages/English MHFU/`), not the CSV strings
-  (those match TeamHGG's P2G fan translation: "Speed Fire", "All Shots Up", "SpeedFire Jewel").
-  For MHP3, **`name_en` is Team Maverick One** (`Languages/English (TMO)/`); CSV English
-  stays Athena/TeamHGG and is used only as parse keys and overlay fallback. Japanese
-  `name_ja` is always the Athena CSV Japanese column. Dummy pieces are flagged from overlay
-  names that contain `(dummy)`; the marker is not stored in `name_en`.
+- `Languages/*/` — localized name overlays applied at ETL from `vendor/locales/en/`.
+  For MHFU, **`name_en` is the official Freedom Unite English pack** (formerly
+  `Languages/English MHFU/`), not the CSV strings (those match TeamHGG's P2G fan
+  translation). For MHP3, **`name_en` is Team Maverick One** (formerly
+  `Languages/English (TMO)/`); CSV English stays Athena/TeamHGG and is used only as
+  parse keys and overlay fallback. Japanese `name_ja` is always the Athena CSV Japanese
+  column. Dummy pieces are flagged from overlay names that contain `(dummy)`; the marker
+  is not stored in `name_en`.
 - `mycharms.txt` — **not** ETL'd; it is user data. Our equivalent lives in the `user_charms`
   table (same logical shape: `slots, skill1, points1, skill2, points2`).
 
@@ -165,10 +170,9 @@ Maps a compound tree to its component trees. ETL expands these so the solver see
 1. **Per-pack column maps.** Never share positional parsing across packs; each manifest
    declares its format quirks (header lines, index columns, slot notation).
 2. **Names are bilingual from day one** (`name_en`, `name_ja`). For MHFU, `name_en` comes
-   from `Languages/English MHFU` (official localization). For MHP3, `name_en` comes from
-   `Languages/English (TMO)` (Team Maverick One fan pack). A blank overlay row falls
-   back to the CSV English string and is counted. MHP3 stays `translation: fan`
-   (see `docs/adr/0009`) — TMO is not an official localization.
+   from `vendor/locales/en` (official localization). For MHP3, `name_en` comes from the
+   same path (Team Maverick One fan pack). A blank overlay row falls back to the CSV
+   English string and is counted. MHP3 stays `translation: fan` (see `docs/adr/0009`).
 3. **Skill trees are normalized** into `skill_trees` + `skills` (threshold rows) +
    `armor_skills` / `decoration_skills` junction rows. Never store skill points as packed
    columns in relational tables.

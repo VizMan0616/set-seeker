@@ -1,55 +1,43 @@
 # syntax=docker/dockerfile:1
 
-# set-seeker — single-container build (CONTEXT.md hard constraint).
-# Stage 1 installs dependencies and runs every shipped pack's ETL (MHFU +
-# MHP3) into one SQLite DB. Stage 2 is the runtime: app source (templates/
-# static), the built DB, uvicorn.
+# set-seeker — dependency-only runtime image (ADR 0013).
+#
+# The image installs Python packages and the entrypoint only. Mutable project
+# trees (app, packs, alembic, config) are bind-mounted by docker-compose.yml
+# so code and data changes need `docker compose restart`, not `docker build`.
+#
+# Rebuild the image when pyproject.toml dependencies change.
 
-FROM python:3.12-slim AS build
-
-WORKDIR /build
-
-# Install dependencies (and the project metadata) from pyproject.toml.
-COPY pyproject.toml ./
-COPY app ./app
-RUN pip install --no-cache-dir .
-
-# ETL inputs: pack manifest/known queries, Alembic migrations, legacy data.
-COPY packs ./packs
-COPY alembic ./alembic
-COPY alembic.ini ./
-COPY sources/MHFU-ASS ./sources/MHFU-ASS
-COPY sources/MHP3-ASS ./sources/MHP3-ASS
-
-# Build the SQLite game database (migrations + each pack + validation gate;
-# the build fails if a gate fails). Packs share one DB so list_games() is
-# the picker source of truth (phase0-contracts.md §8–§9, ADR 0001).
-RUN mkdir -p /data \
-    && python -m app.etl --pack mhfu --database-url sqlite:////data/setseeker.db \
-    && python -m app.etl --pack mhp3 --database-url sqlite:////data/setseeker.db
-
-
-FROM python:3.12-slim AS runtime
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    DATABASE_URL=sqlite:////data/setseeker.db
+    DATABASE_URL=sqlite:////data/setseeker.db \
+    PYTHONPATH=/srv/setseeker
 
-RUN useradd --create-home --uid 1000 setseeker
+WORKDIR /srv/setseeker
 
-COPY --from=build /usr/local /usr/local
-COPY --from=build /build/app /srv/setseeker/app
-COPY --from=build --chown=setseeker:setseeker /data/setseeker.db /data/setseeker.db
+RUN useradd --create-home --uid 1000 setseeker \
+    && mkdir -p /data /srv/setseeker \
+    && chown setseeker:setseeker /data /srv/setseeker
 
-# The app runs from its source tree so Jinja2 templates and the vendored
-# static assets (app/web/...) resolve; PYTHONPATH puts it ahead of the
-# site-packages copy installed by pip.
-ENV PYTHONPATH=/srv/setseeker
+# Install runtime dependencies from pyproject.toml (no application source copy).
+COPY pyproject.toml ./
+RUN python - <<'PY'
+import subprocess
+import tomllib
+from pathlib import Path
 
-# The runtime DB is writable: sessions and search_states are runtime data.
-RUN chown -R setseeker:setseeker /data
+project = tomllib.loads(Path("pyproject.toml").read_text())["project"]
+subprocess.check_call(
+    ["pip", "install", "--no-cache-dir", *project["dependencies"]],
+)
+PY
+
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 USER setseeker
 
 EXPOSE 8000
-# --proxy-headers: trust X-Forwarded-Proto/For from a local reverse proxy
-# (e.g. cloudflared) so request.url_for and redirects keep the https scheme.
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

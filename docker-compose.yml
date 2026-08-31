@@ -1,0 +1,32 @@
+# Default deploy: slim deps-only image + bind-mounted project trees + persistent DB.
+#
+# Rebuild the image only when pyproject.toml dependencies change:
+#   docker compose build
+#
+# After app / pack / migration / config edits:
+#   docker compose restart set-seeker
+#
+# For auto-reload on file save, add docker-compose.dev.yml.
+
+services:
+  set-seeker:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Runtime state (SQLite DB: game + user data)
+      - setseeker-data:/data
+      # Mutable project trees — not baked into the image
+      - ./app:/srv/setseeker/app:ro
+      - ./packs:/srv/setseeker/packs:ro
+      - ./alembic:/srv/setseeker/alembic:ro
+      - ./alembic.ini:/srv/setseeker/alembic.ini:ro
+      - ./config:/srv/setseeker/config:ro
+    env_file:
+      - path: config/.env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////data/setseeker.db
+
+volumes:
+  setseeker-data:

@@ -29,12 +29,20 @@ class ManifestError(ValueError):
 
 
 @dataclass(frozen=True)
+class PackProvenance:
+    upstream: str
+    commit: str
+    license: str
+
+
+@dataclass(frozen=True)
 class PackManifest:
     id: str
     name: str
     generation: int
-    source_repo: str
-    data_dir: str
+    data_version: int
+    data: dict[str, Any]           # armor_dir, locale_overlays
+    provenance: PackProvenance
     features: dict[str, bool]
     progression: dict[str, int]      # guild_rank, village_stars — per-pack caps
     desired_skills_max: int          # Athena Form1.h NumSkills
@@ -46,8 +54,31 @@ class PackManifest:
 
     @property
     def source_data_path(self) -> Path:
-        """Absolute path to the legacy data files (read-only, see AGENTS.md rule 1)."""
-        return self.pack_dir.parent.parent / self.source_repo / self.data_dir
+        """Absolute path to vendored armor/skills/decoration files."""
+        return self.pack_dir / self.data["armor_dir"]
+
+    @property
+    def english_locale_path(self) -> Path | None:
+        """Absolute path to the English name overlay directory, if declared."""
+        overlays = self.data.get("locale_overlays") or {}
+        rel = overlays.get("en")
+        if not rel:
+            return None
+        return self.pack_dir / rel
+
+
+def _parse_provenance(raw: dict[str, Any], path: Path) -> PackProvenance:
+    prov = raw.get("provenance")
+    if not isinstance(prov, dict):
+        raise ManifestError(f"{path}: missing required key 'provenance'")
+    for key in ("upstream", "commit", "license"):
+        if key not in prov:
+            raise ManifestError(f"{path}: provenance.{key} is required")
+    return PackProvenance(
+        upstream=str(prov["upstream"]),
+        commit=str(prov["commit"]),
+        license=str(prov["license"]),
+    )
 
 
 def load_manifest(pack_dir: Path) -> PackManifest:
@@ -59,10 +90,18 @@ def load_manifest(pack_dir: Path) -> PackManifest:
     if not isinstance(raw, dict):
         raise ManifestError(f"{path}: manifest must be a mapping")
 
-    for key in ("id", "name", "generation", "source_repo", "data_dir", "features",
-                "progression", "desired_skills_max", "formats", "locales"):
+    for key in ("id", "name", "generation", "data_version", "data", "provenance",
+                "features", "progression", "desired_skills_max", "formats", "locales"):
         if key not in raw:
             raise ManifestError(f"{path}: missing required key {key!r}")
+
+    data = raw["data"]
+    if not isinstance(data, dict) or "armor_dir" not in data:
+        raise ManifestError(f"{path}: data.armor_dir is required")
+
+    data_version = raw["data_version"]
+    if not isinstance(data_version, int) or data_version < 1:
+        raise ManifestError(f"{path}: data_version must be an integer ≥ 1")
 
     features = raw["features"]
     for flag in REQUIRED_FEATURES:
@@ -100,8 +139,9 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         id=str(raw["id"]),
         name=str(raw["name"]),
         generation=int(raw["generation"]),
-        source_repo=str(raw["source_repo"]),
-        data_dir=str(raw["data_dir"]),
+        data_version=int(data_version),
+        data=dict(data),
+        provenance=_parse_provenance(raw, path),
         features={k: bool(v) for k, v in features.items()},
         progression={"guild_rank": int(progression["guild_rank"]),
                      "village_stars": int(progression["village_stars"])},
@@ -114,7 +154,19 @@ def load_manifest(pack_dir: Path) -> PackManifest:
     )
     if not manifest.source_data_path.is_dir():
         raise ManifestError(
-            f"{path}: source data not found at {manifest.source_data_path} "
-            "(restore per SOURCES.md)"
+            f"{path}: vendored data not found at {manifest.source_data_path} "
+            "(run scripts/vendor_pack_data.py or restore pack vendor/ tree)"
+        )
+    locale = manifest.english_locale_path
+    if locale is not None and not locale.is_dir():
+        raise ManifestError(
+            f"{path}: English locale overlay not found at {locale}"
         )
     return manifest
+
+
+def list_pack_dirs(packs_root: Path | None = None) -> list[Path]:
+    """Return pack directories that contain a manifest.yaml, sorted by id."""
+    root = (packs_root or Path(__file__).resolve().parents[2] / "packs").resolve()
+    dirs = [p for p in root.iterdir() if p.is_dir() and (p / "manifest.yaml").is_file()]
+    return sorted(dirs, key=lambda p: p.name)

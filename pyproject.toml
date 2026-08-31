@@ -25,6 +25,9 @@ dev = [
     "httpx",
     "ruff",
 ]
+mariadb = [
+    "pymysql",
+]
 
 [tool.setuptools.packages.find]
 include = ["app*"]

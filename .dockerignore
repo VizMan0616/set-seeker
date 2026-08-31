@@ -1,25 +1,31 @@
-# VCS / local environments
+# Minimal build context: Dockerfile copies only pyproject.toml and docker/entrypoint.sh.
+# Runtime trees are bind-mounted (docker-compose.yml).
+
 .git
 .venv
 .cursor
+.worktrees
 
-# Python noise
 __pycache__
 **/__pycache__
 *.pyc
 .pytest_cache
 .ruff_cache
 
-# Local runtime database (built fresh inside the image)
+# Bind-mounted at runtime — never COPY into the image
+app
+packs
+alembic
+alembic.ini
+config
 data
-
-# Tests and docs are not needed to build or run the app
 tests
 docs
+scripts
+sources
 
-# Legacy source clones: only shipped packs' data enter the build context.
-# Their .git dirs never enter the context.
-sources/*/.git
-sources/*
-!sources/MHFU-ASS
-!sources/MHP3-ASS
+# Compose / local artifacts
+docker-compose*.yml
+*.md
+LICENSE
+NOTICE

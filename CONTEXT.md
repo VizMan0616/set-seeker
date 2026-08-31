@@ -54,8 +54,11 @@ Athena’s static combo-box count, not a later add/subtract UI. Full citations:
 
 - **Frontend CSS framework is Bootstrap. Tailwind is banned** — do not introduce it by any means.
 - **No JavaScript build step.** Server-rendered HTML (Jinja2) + htmx/Alpine for interactivity.
-- **Deployment must stay simple: one Docker container.** No database-as-a-service, no required
-  external services. SQLite today; the repository layer must keep a future MariaDB swap cheap.
+- **Deployment must stay simple: one Docker container.** No required external services;
+  SQLite on a persistent volume today; MariaDB optional via compose overlay (ADR 0014).
+  The Docker image installs Python dependencies only; `app/`, `packs/`, Alembic, and
+  `config/` bind-mount from the repo (ADR 0013). The repository layer must keep a
+  future MariaDB swap cheap.
 - **Open source: AGPLv3** (see `LICENSE`), with upstream MIT attribution in `NOTICE`.
 - **English UI**; game-data names are stored bilingually (English/Japanese) from day one.
 - Mobile browsers are first-class: the UI must be fully usable on a phone.
@@ -66,8 +69,8 @@ One Python/FastAPI monolith serves server-rendered pages. Armor set search is mo
 constraint-satisfaction problem solved with Google OR-Tools CP-SAT — not a port of the legacy
 brute-force loops. Results are produced one solve at a time using iterate-and-exclude (each
 "load more" re-solves with prior solutions excluded), ranked by objectives (weakest required
-charm first, then defense/spare slots). Game data ships in SQLite, built by an ETL step from the
-legacy CSV data packs. Users are anonymous (long-lived session cookie) and can register their
+charm first, then defense/spare slots). Game data ships as vendored files under `packs/*/vendor/`, loaded into SQLite at bootstrap
+(ADR 0012/0013). Users are anonymous (long-lived session cookie) and can register their
 charm inventories per game.
 
 ## Where things live
@@ -85,5 +88,5 @@ charm inventories per game.
 
 Phase 0/1 (MHFU) and Phase 2 (MHP3) ship in one image: FastAPI + Jinja2/Bootstrap/htmx,
 SQLite via SQLAlchemy Core, CP-SAT search, Advanced Search, charm inventory (MHP3),
-multi-stage Dockerfile that ETLs `packs/mhfu/` and `packs/mhp3/`. Next: MHGU
+slim Dockerfile + compose volume + runtime bootstrap (ADR 0013). Next: MHGU
 per `docs/roadmap.md`.

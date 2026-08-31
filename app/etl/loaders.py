@@ -395,6 +395,7 @@ def apply_official_english_overlay(
     armor: tuple[ArmorRow, ...],
     decorations: tuple[DecorationRow, ...],
     data_dir: Path,
+    locale_dir: Path | None,
     cmap,
     header_lines: int = 0,
     armor_ext: str = "csv",
@@ -405,16 +406,14 @@ def apply_official_english_overlay(
     dict[str, str],
     int,
 ]:
-    """Replace CSV English ``name_en`` with the pack's ``Languages/`` overlay.
+    """Replace CSV English ``name_en`` with the pack's English locale overlay.
 
     Athena ``LoadLanguage`` overlays names positionally. MHFU uses official
-    Freedom Unite English (``English MHFU``). MHP3 uses Team Maverick One
-    (``English (TMO)``). Japanese ``name_ja`` is left as parsed from the CSV.
+    Freedom Unite English. MHP3 uses Team Maverick One (TMO). Japanese
+    ``name_ja`` is left as parsed from the CSV.
     """
-    locale_rel = getattr(cmap, "ENGLISH_LOCALE_DIR", None)
-    if not locale_rel:
+    if locale_dir is None:
         return skill_trees, armor, decorations, {}, 0
-    locale_dir = data_dir / locale_rel
     if not locale_dir.is_dir():
         raise RuntimeError(f"English overlay missing: {locale_dir}")
 
@@ -623,6 +622,7 @@ def load_pack(manifest: PackManifest) -> PackData:
             tuple(armor),
             tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
             data_dir,
+            manifest.english_locale_path,
             cmap,
             header_lines=header_lines,
             armor_ext=ext,

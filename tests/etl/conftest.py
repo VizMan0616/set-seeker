@@ -11,7 +11,6 @@ from app.repository.game_data import GameDataRepository
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PACK_DIR = REPO_ROOT / "packs" / "mhfu"
-DATA_DIR = REPO_ROOT / "sources" / "MHFU-ASS" / "Run" / "Data"
 
 
 @pytest.fixture(scope="session")

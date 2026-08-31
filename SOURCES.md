@@ -3,8 +3,12 @@
 The directories under `sources/` are **local-only reference clones** of the six Athena's Armor
 Set Search repositories published by AthenaADP on GitHub. They are **not part of this
 repository**: `sources/` is gitignored, nothing under it is committed, and a fresh clone of
-set-seeker will not contain them. They exist only so agents and developers can read the legacy
-code and data during analysis and ETL implementation.
+set-seeker will not contain them. They exist so maintainers can read legacy code during
+analysis, cite file:line behavior, and refresh vendored pack data via
+`scripts/vendor_pack_data.py` (ADR 0012).
+
+**Runtime and Docker no longer require `sources/`.** Committed game data lives under
+`packs/<id>/vendor/`.
 
 All six are licensed **MIT, Copyright (c) 2017 AthenaADP** (see each repo's `LICENSE` once
 cloned, and this project's `NOTICE`).
@@ -25,8 +29,9 @@ git clone https://github.com/AthenaADP/MHGU-ASS.git  && git -C MHGU-ASS  checkou
 ```
 
 You only need the subset for the generation you are working on (see `docs/roadmap.md`) —
-e.g. MHFU-ASS alone is enough for Phase 1. The ETL will read from these paths at Docker build
-time, so restore them before building images.
+e.g. MHFU-ASS alone when adding or refreshing the MHFU pack. After restoring a clone,
+run `python scripts/vendor_pack_data.py <pack_id>` to copy data into `packs/<id>/vendor/`,
+then bump `data_version` in the pack manifest and re-run ETL (or `python -m app.bootstrap`).
 
 | Directory | Upstream | Pinned commit | Game / generation | Notes |
 |---|---|---|---|---|

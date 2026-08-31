@@ -1,0 +1,17 @@
+# Dev overlay: uvicorn --reload watches bind-mounted app/ (from docker-compose.yml).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  set-seeker:
+    command:
+      - uvicorn
+      - app.main:create_app
+      - --factory
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --proxy-headers
+      - --reload
+      - --reload-dir
+      - /srv/setseeker/app

@@ -8,6 +8,7 @@ At most one prefetched page sits in query_json (lookahead), never a 1000-set buf
 
 import json
 import threading
+import time
 from collections.abc import Callable
 from dataclasses import replace
 
@@ -28,6 +29,9 @@ from app.domain.models import (
 # Tail census after the first page so the UI can say "N more to load".
 # Only representative ids are walked; cards stay page-sized (ADR 0005).
 _CENSUS_CAP = 500
+# Tail-count budget inside start_search so census cannot monopolize the global
+# solve slot long enough to starve concurrent requests (503 SearchBusyError).
+_CENSUS_BUDGET_S = 8.0
 from app.engine.data import PackData
 from app.engine.pruning import PrunedPack, domain_snapshot, prune
 from app.engine.solver import solve_one
@@ -305,7 +309,9 @@ class CpSatSearchService:
                 tally = _with_tally(tally, delivered=shown)
             else:
                 extra, exact = self._count_further(
-                    snap_query, [tuple(e) for e in new_exclusions]
+                    snap_query,
+                    [tuple(e) for e in new_exclusions],
+                    deadline=time.monotonic() + _CENSUS_BUDGET_S,
                 )
                 if exact:
                     remaining = extra
@@ -634,7 +640,11 @@ class CpSatSearchService:
         return results, new_exclusions, partial, exhausted
 
     def _count_further(
-        self, query: Query, exclusions: list[tuple[int, ...]]
+        self,
+        query: Query,
+        exclusions: list[tuple[int, ...]],
+        *,
+        deadline: float | None = None,
     ) -> tuple[int, bool]:
         """How many more result units exist after ``exclusions``.
 
@@ -648,6 +658,8 @@ class CpSatSearchService:
         working = list(exclusions)
         extra = 0
         for _ in range(_CENSUS_CAP):
+            if deadline is not None and time.monotonic() >= deadline:
+                return extra, False
             outcome = solve_one(
                 pack=pack,
                 pruned=pruned,

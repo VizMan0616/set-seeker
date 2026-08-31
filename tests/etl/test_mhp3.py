@@ -20,7 +20,6 @@ from app.repository.game_data import GameDataRepository
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PACK_DIR = REPO_ROOT / "packs" / "mhp3"
-DATA_DIR = REPO_ROOT / "sources" / "MHP3-ASS" / "Run" / "Data"
 
 EXPECTED_ARMOR = {"head": 226, "body": 226, "arms": 208, "waist": 207, "legs": 213}
 
@@ -50,7 +49,10 @@ def test_column_map_is_pack_scoped():
     assert cmap.ARMOR["slots"] == 5
     assert cmap.DECORATION["skill1_tree"] == 6
     assert cmap.ARMOR_DEDUP == "name"
-    assert cmap.ENGLISH_LOCALE_DIR == "Languages/English (TMO)"
+
+
+def test_manifest_locale_path(manifest):
+    assert manifest.english_locale_path == PACK_DIR / "vendor" / "locales" / "en"
 
 
 def test_athena_012_gender_and_type():
@@ -63,8 +65,9 @@ def test_athena_012_gender_and_type():
     assert cmap.parse_slots("3") == 3
 
 
-def test_skill_table_counts():
-    blocks = load_skill_table(DATA_DIR / "skills.txt", cmap)
+def test_skill_table_counts(manifest):
+    data_dir = manifest.source_data_path
+    blocks = load_skill_table(data_dir / "skills.txt", cmap)
     assert len(blocks) == 100
     assert sum(len(b.thresholds) for b in blocks) == 209
     torso = next(b for b in blocks if b.name == "Torso Inc")
@@ -75,19 +78,22 @@ def test_skill_table_counts():
 
 
 @pytest.mark.parametrize("slot,stem", list(enumerate(EXPECTED_ARMOR)))
-def test_armor_row_counts(slot, stem):
-    rows, _ = load_armor_file(DATA_DIR / f"{stem}.txt", slot, cmap, header_lines=0)
+def test_armor_row_counts(slot, stem, manifest):
+    data_dir = manifest.source_data_path
+    rows, _ = load_armor_file(data_dir / f"{stem}.txt", slot, cmap, header_lines=0)
     assert len(rows) == EXPECTED_ARMOR[stem]
 
 
-def test_name_only_duplicates_dropped():
-    rows, skipped = load_armor_file(DATA_DIR / "head.txt", 0, cmap, header_lines=0)
+def test_name_only_duplicates_dropped(manifest):
+    data_dir = manifest.source_data_path
+    rows, skipped = load_armor_file(data_dir / "head.txt", 0, cmap, header_lines=0)
     assert "Nightmare Furore" in skipped
     assert sum(1 for r in rows if r.name_en == "Nightmare Furore") == 1
 
 
-def test_chain_helm_and_torso_inc():
-    rows, _ = load_armor_file(DATA_DIR / "head.txt", 0, cmap, header_lines=0)
+def test_chain_helm_and_torso_inc(manifest):
+    data_dir = manifest.source_data_path
+    rows, _ = load_armor_file(data_dir / "head.txt", 0, cmap, header_lines=0)
     helm = next(r for r in rows if r.name_en == "Chain Helm")
     assert helm.name_ja == "チェーンヘッド"
     assert helm.slots == 1
@@ -100,8 +106,9 @@ def test_chain_helm_and_torso_inc():
     assert skull.skills == ()
 
 
-def test_decorations():
-    rows = load_decorations(DATA_DIR / "decorations.txt", cmap)
+def test_decorations(manifest):
+    data_dir = manifest.source_data_path
+    rows = load_decorations(data_dir / "decorations.txt", cmap)
     assert len(rows) == 164
     jewel = next(r for r in rows if r.name_en == "Attack Jewel[1]")
     assert jewel.size == 1
@@ -168,6 +175,7 @@ def test_writer_counts_and_progression(etl_db):
     assert features["charm_tables"] is True
     assert features["translation"] == "fan"
     assert features["torso_inc_name"] == "Torso Up"
+    assert features["data_version"] == 1
     helm = next(p for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
                 if p["name_en"] == "Chainmail Headgear")
     assert helm["name_ja"] == "チェーンヘッド"

@@ -4,6 +4,8 @@ Runs Alembic migrations (schema is migration-owned, never ad-hoc DDL —
 database-schema.md rule 4), rebuilds the pack's game-data tables via the
 repository, then runs the pack's known-query validation gate. A failed gate
 exits non-zero: do not ship data that fails it.
+
+Use `--all` to load every pack under packs/ into the same database.
 """
 
 import argparse
@@ -14,23 +16,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="python -m app.etl")
-    parser.add_argument("--pack", required=True, help="pack id, e.g. mhfu")
-    parser.add_argument("--database-url", default=None,
-                        help="override DATABASE_URL (default: app config)")
-    parser.add_argument("--skip-gate", action="store_true",
-                        help="load data without running the validation gate")
-    args = parser.parse_args(argv)
-
-    if args.database_url:
-        # Must be set before app.config.get_settings() is first called
-        # (it is lru_cached, and alembic/env.py reads it).
-        os.environ["DATABASE_URL"] = args.database_url
-
+def _run_one_pack(pack_id: str, *, skip_gate: bool) -> int:
+    from alembic import command
     from alembic.config import Config
 
-    from alembic import command
     from app.config import get_settings
     from app.db import create_engine_from_settings
     from app.etl.gate import run_gate
@@ -39,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     from app.etl.writer import PackWriter
     from app.repository.game_data import GameDataRepository
 
-    pack_dir = REPO_ROOT / "packs" / args.pack
+    pack_dir = REPO_ROOT / "packs" / pack_id
     manifest = load_manifest(pack_dir)
 
     alembic_cfg = Config(str(REPO_ROOT / "alembic.ini"))
@@ -61,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     for table, count in counts.items():
         print(f"[etl]   {table}: {count}")
 
-    if args.skip_gate:
+    if skip_gate:
         print("[etl] validation gate skipped")
         return 0
 
@@ -78,6 +67,36 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print("[gate] all checks passed")
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="python -m app.etl")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--pack", help="pack id, e.g. mhfu")
+    group.add_argument("--all", action="store_true",
+                       help="load every pack under packs/")
+    parser.add_argument("--database-url", default=None,
+                        help="override DATABASE_URL (default: app config)")
+    parser.add_argument("--skip-gate", action="store_true",
+                        help="load data without running the validation gate")
+    args = parser.parse_args(argv)
+
+    if args.database_url:
+        # Must be set before app.config.get_settings() is first called
+        # (it is lru_cached, and alembic/env.py reads it).
+        os.environ["DATABASE_URL"] = args.database_url
+
+    if args.all:
+        from app.etl.manifest import list_pack_dirs
+
+        exit_code = 0
+        for pack_dir in list_pack_dirs():
+            code = _run_one_pack(pack_dir.name, skip_gate=args.skip_gate)
+            if code != 0:
+                exit_code = code
+        return exit_code
+
+    return _run_one_pack(args.pack, skip_gate=args.skip_gate)
 
 
 if __name__ == "__main__":

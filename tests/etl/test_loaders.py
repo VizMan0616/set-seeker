@@ -1,11 +1,10 @@
-"""Parsing tests against the real sources/MHFU-ASS files (read-only)."""
+"""Parsing tests against vendored pack data (packs/mhfu/vendor/)."""
 
 import pytest
 
 from app.etl import column_maps
 from app.etl.column_maps import mhfu as cmap
 from app.etl.loaders import load_armor_file, load_decorations, load_skill_blocks
-from tests.etl.conftest import DATA_DIR
 
 EXPECTED_ARMOR_COUNTS = {"head": 425, "body": 419, "arms": 410, "waist": 408,
                          "legs": 418}
@@ -47,16 +46,18 @@ def test_column_map_is_pack_scoped():
 
 # --- skills.txt block format ---
 
-def test_skill_blocks_counts():
-    blocks = load_skill_blocks(DATA_DIR / "skills.txt")
+def test_skill_blocks_counts(manifest):
+    data_dir = manifest.source_data_path
+    blocks = load_skill_blocks(data_dir / "skills.txt")
     assert len(blocks) == 99
     thresholds = [t for b in blocks for t in b.thresholds]
     assert len(thresholds) == 216
     assert sum(1 for points, _ in thresholds if points < 0) == 68
 
 
-def test_skill_block_attack_exact():
-    blocks = {b.name: b for b in load_skill_blocks(DATA_DIR / "skills.txt")}
+def test_skill_block_attack_exact(manifest):
+    data_dir = manifest.source_data_path
+    blocks = {b.name: b for b in load_skill_blocks(data_dir / "skills.txt")}
     attack = blocks["Attack"]
     assert attack.tag == "Offensive"
     assert attack.tags == ("Offensive",)
@@ -70,15 +71,17 @@ def test_skill_block_attack_exact():
     )
 
 
-def test_skill_block_keeps_every_athena_tag():
-    blocks = {b.name: b for b in load_skill_blocks(DATA_DIR / "skills.txt")}
+def test_skill_block_keeps_every_athena_tag(manifest):
+    data_dir = manifest.source_data_path
+    blocks = {b.name: b for b in load_skill_blocks(data_dir / "skills.txt")}
     artisan = blocks["Artisan"]
     assert artisan.tags == ("Offensive", "Blademaster")
     assert artisan.tag == "Offensive"
 
 
-def test_torso_inc_block_has_no_thresholds():
-    blocks = {b.name: b for b in load_skill_blocks(DATA_DIR / "skills.txt")}
+def test_torso_inc_block_has_no_thresholds(manifest):
+    data_dir = manifest.source_data_path
+    blocks = {b.name: b for b in load_skill_blocks(data_dir / "skills.txt")}
     # The trailing `99` sentinel line carries no skill name and is dropped,
     # matching the legacy loader (`Skill.cpp:126-133`).
     assert blocks["Torso Inc"].thresholds == ()
@@ -87,20 +90,23 @@ def test_torso_inc_block_has_no_thresholds():
 # --- armor CSVs ---
 
 @pytest.mark.parametrize("slot,stem", list(enumerate(EXPECTED_ARMOR_COUNTS)))
-def test_armor_row_counts(slot, stem):
-    rows, _ = load_armor_file(DATA_DIR / f"{stem}.csv", slot, cmap, header_lines=2)
+def test_armor_row_counts(slot, stem, manifest):
+    data_dir = manifest.source_data_path
+    rows, _ = load_armor_file(data_dir / f"{stem}.csv", slot, cmap, header_lines=2)
     assert len(rows) == EXPECTED_ARMOR_COUNTS[stem]
     assert all(r.slot == slot for r in rows)
 
 
-def test_armor_duplicate_dropped_like_legacy():
-    rows, skipped = load_armor_file(DATA_DIR / "head.csv", 0, cmap, header_lines=2)
+def test_armor_duplicate_dropped_like_legacy(manifest):
+    data_dir = manifest.source_data_path
+    rows, skipped = load_armor_file(data_dir / "head.csv", 0, cmap, header_lines=2)
     assert skipped == ["Felyne Piercing"]  # legacy keeps the first occurrence
     assert sum(1 for r in rows if r.name_en == "Felyne Piercing") == 1
 
 
-def test_chain_helm_exact():
-    rows, _ = load_armor_file(DATA_DIR / "head.csv", 0, cmap, header_lines=2)
+def test_chain_helm_exact(manifest):
+    data_dir = manifest.source_data_path
+    rows, _ = load_armor_file(data_dir / "head.csv", 0, cmap, header_lines=2)
     helm = next(r for r in rows if r.name_en == "Chain Helm")
     assert helm.slots == 1            # "O--"
     assert helm.rarity == 1
@@ -118,8 +124,9 @@ def test_chain_helm_exact():
     )
 
 
-def test_torso_inc_piece_has_flag_and_no_marker_skill():
-    rows, _ = load_armor_file(DATA_DIR / "head.csv", 0, cmap, header_lines=2)
+def test_torso_inc_piece_has_flag_and_no_marker_skill(manifest):
+    data_dir = manifest.source_data_path
+    rows, _ = load_armor_file(data_dir / "head.csv", 0, cmap, header_lines=2)
     helm = next(r for r in rows if r.name_en == "Black Belt Helm")
     assert helm.torso_inc is True
     assert helm.skills == ()          # the Torso Inc marker row is not a skill
@@ -128,16 +135,18 @@ def test_torso_inc_piece_has_flag_and_no_marker_skill():
     assert helm.village_stars == 4
 
 
-def test_collapsed_level_requirement_max_wins():
+def test_collapsed_level_requirement_max_wins(manifest):
+    data_dir = manifest.source_data_path
     # body.csv has an Elder* value of "5!8": requires 5, available at 8.
-    rows, _ = load_armor_file(DATA_DIR / "body.csv", 1, cmap, header_lines=2)
+    rows, _ = load_armor_file(data_dir / "body.csv", 1, cmap, header_lines=2)
     assert any(r.village_stars == 8 for r in rows)
 
 
 # --- decorations.csv (no header) ---
 
-def test_decoration_count_and_attack_jewel():
-    rows = load_decorations(DATA_DIR / "decorations.csv", cmap)
+def test_decoration_count_and_attack_jewel(manifest):
+    data_dir = manifest.source_data_path
+    rows = load_decorations(data_dir / "decorations.csv", cmap)
     assert len(rows) == 168
     jewel = next(r for r in rows if r.name_en == "Attack Jewel")
     assert jewel.size == 1            # "O--"
@@ -145,8 +154,9 @@ def test_decoration_count_and_attack_jewel():
     assert jewel.skills == (("Attack", 1),)
 
 
-def test_dual_skill_decoration_keeps_negative_points():
-    rows = load_decorations(DATA_DIR / "decorations.csv", cmap)
+def test_dual_skill_decoration_keeps_negative_points(manifest):
+    data_dir = manifest.source_data_path
+    rows = load_decorations(data_dir / "decorations.csv", cmap)
     fierce = next(r for r in rows if r.name_en == "Fierce Jewel")
     assert fierce.size == 2           # "OO-"
     assert fierce.skills == (("Attack", 3), ("Defence", -1))

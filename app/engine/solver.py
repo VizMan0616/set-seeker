@@ -92,7 +92,21 @@ def solve_one(
         for tree_id, threshold in pruned.bad_tree_thresholds
         if tree_id in live
     )
-    trees = tuple(dict.fromkeys([*pruned.requested_trees, *[t for t, _ in modeled_bad]]))
+    # allow_bad off: hard floors + fixer jewels only for penalties reachable on
+    # armor/charms (modeled_bad). allow_bad on: reified penalty tier for every
+    # negative threshold (ADR 0011), still far fewer trees than the full table.
+    if query.allow_bad_skills:
+        penalty_thresholds = pruned.bad_tree_thresholds
+        trees = tuple(
+            dict.fromkeys(
+                [*pruned.requested_trees, *[t for t, _ in pruned.bad_tree_thresholds]]
+            )
+        )
+    else:
+        penalty_thresholds = modeled_bad
+        trees = tuple(
+            dict.fromkeys([*pruned.requested_trees, *[t for t, _ in modeled_bad]])
+        )
 
     # --- one index variable per slot over equivalence-class representatives ---
     x = [
@@ -216,10 +230,10 @@ def solve_one(
     for sr in query.skills:
         model.add(points[sr.tree_id] >= sr.min_points)
     penalty_terms: list = []
-    for t, neg_threshold in modeled_bad:
+    for t, neg_threshold in penalty_thresholds:
         if not query.allow_bad_skills:
             model.add(points[t] >= neg_threshold + 1)
-        if query.allow_bad_skills:
+        else:
             active = model.new_bool_var(f"penalty_{t}")
             model.add(points[t] <= neg_threshold).only_enforce_if(active)
             model.add(points[t] >= neg_threshold + 1).only_enforce_if(~active)
@@ -278,7 +292,7 @@ def solve_one(
         tie_bound = 1
 
     max_spare = 3 * SLOT_COUNT + 6
-    n_bad = len(modeled_bad)
+    n_bad = len(penalty_thresholds)
     mid_weight = (max_defense + 1) * tie_bound
     penalty_weight = (max_spare + 1) * mid_weight
     charm_weight = (n_bad + 1) * penalty_weight

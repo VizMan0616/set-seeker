@@ -36,14 +36,12 @@ def create_app() -> FastAPI:
     except Exception as exc:
         raise RuntimeError(
             f"cannot read game data from {settings.DATABASE_URL!r} — "
-            "run `python -m app.etl --pack mhfu` then "
-            "`python -m app.etl --pack mhp3` to build the database first"
+            "run `python -m app.bootstrap` to migrate and load pack data first"
         ) from exc
     if not games:
         raise RuntimeError(
             f"no game packs loaded in {settings.DATABASE_URL!r} — "
-            "run `python -m app.etl --pack mhfu` then "
-            "`python -m app.etl --pack mhp3` first"
+            "run `python -m app.bootstrap` first"
         )
 
     # Pack data is loaded once at startup and cached for the process lifetime.

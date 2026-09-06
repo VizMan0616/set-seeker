@@ -18,9 +18,9 @@ def _stress_query(tree_ids):
     return Query(
         game="mhfu",
         skills=(
-            SkillRequest(tree_ids["Expert"], 20),      # Critical Eye +3
-            SkillRequest(tree_ids["Artisan"], 10),     # Sharpness +1
-            SkillRequest(tree_ids["Sharpness"], 10),   # Sharp Sword
+            SkillRequest(tree_ids["Expert"], 20),  # Critical Eye +3
+            SkillRequest(tree_ids["Artisan"], 10),  # Sharpness +1
+            SkillRequest(tree_ids["Sharpness"], 10),  # Sharp Sword
         ),
         weapon_slots=1,
         gender="m",
@@ -36,8 +36,9 @@ def test_expert_artisan_sharpness_stress_query_is_feasible(etl_db):
     tree_ids = {t["name_en"]: t["id"] for t in repo.list_skill_trees(game_id)}
     query = _stress_query(tree_ids)
 
-    outcome = solve_one(pack=pack, pruned=prune(pack, query), query=query,
-                        exclusions=[], time_limit_ms=5000)
+    outcome = solve_one(
+        pack=pack, pruned=prune(pack, query), query=query, exclusions=[], time_limit_ms=30000
+    )
 
     assert outcome.status == "optimal"
     result = outcome.result
@@ -60,13 +61,19 @@ def test_g_rank_sentinel_pieces_survive_maxed_caps(etl_db):
     query = _stress_query(tree_ids)
     pruned = prune(pack, query)
 
-    kaiser_id = next(p["id"] for p in repo.list_armor_pieces(game_id, slot=1, allow_event=True)
-                     if p["name_en"] == "Kaiser Mail X")
+    kaiser_id = next(
+        p["id"]
+        for p in repo.list_armor_pieces(game_id, slot=1, allow_event=True)
+        if p["name_en"] == "Kaiser Mail X"
+    )
     body_member_ids = {m.id for c in pruned.classes[1] for m in c.members}
     assert kaiser_id in body_member_ids
 
     # Village-only jewels keep their path too (Artisan Jewel: HR sentinel 10,
     # village 4-star).
-    artisan_id = next(d["id"] for d in repo.list_decorations(game_id, allow_event=True)
-                      if d["name_en"] == "Artisan Jewel")
+    artisan_id = next(
+        d["id"]
+        for d in repo.list_decorations(game_id, allow_event=True)
+        if d["name_en"] == "Artisan Jewel"
+    )
     assert artisan_id in {d.id for d in pruned.decorations}

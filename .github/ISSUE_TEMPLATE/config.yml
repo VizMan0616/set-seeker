@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contributing guide
+    url: https://github.com/VizMan0616/set-seeker/blob/main/CONTRIBUTING.md
+    about: Setup, PR flow, Conventional Commits, and release cadence
+  - name: Code of Conduct
+    url: https://github.com/VizMan0616/set-seeker/blob/main/CODE_OF_CONDUCT.md
+    about: Community standards and enforcement

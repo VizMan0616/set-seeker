@@ -1,0 +1,70 @@
+name: Feature request
+description: Suggest a new capability or improvement
+title: "[feat]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem first, then your proposed solution.
+        See [CONTRIBUTING.md](https://github.com/VizMan0616/set-seeker/blob/main/CONTRIBUTING.md#requesting-features)
+        and [docs/roadmap.md](https://github.com/VizMan0616/set-seeker/blob/main/docs/roadmap.md).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user need or pain point does this address?
+      placeholder: As a player building a MHFU set, I need …
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: games
+    attributes:
+      label: Game scope
+      description: Which generations should this apply to?
+      options:
+        - label: mhfu (Freedom Unite)
+        - label: mhp3 (Portable 3rd)
+        - label: mh3u
+        - label: mh4 / mh4u
+        - label: mhgen / mhgu
+        - label: all games / engine-wide
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should set-seeker behave?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable conditions for "done"
+      placeholder: |
+        - [ ] User can …
+        - [ ] Search returns …
+        - [ ] Tests cover …
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Agreement
+      options:
+        - label: I understand features outside the current roadmap may be labeled `future`
+          required: true

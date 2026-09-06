@@ -15,10 +15,10 @@ sources/MHP3-ASS @ a22f3ac2:
 ARMOR = {
     "name": 0,
     "name_ja": 1,
-    "gender": 2,         # 0=both, 1=male, 2=female (Athena); remapped below
-    "hunter_type": 3,    # 0=both, 1=blade, 2=gunner
+    "gender": 2,  # 0=both, 1=male, 2=female (Athena); remapped below
+    "hunter_type": 3,  # 0=both, 1=blade, 2=gunner
     "rarity": 4,
-    "slots": 5,          # integer 0–3
+    "slots": 5,  # integer 0–3
     "hr": 6,
     "village": 7,
     "defense": 8,
@@ -28,7 +28,7 @@ ARMOR = {
     "res_ice": 12,
     "res_thunder": 13,
     "res_dragon": 14,
-    "skill_start": 15,   # 5 x (tree name, points)
+    "skill_start": 15,  # 5 x (tree name, points)
     "skill_pairs": 5,
 }
 
@@ -55,7 +55,7 @@ DECORATION = {
 SKILLS = {
     "name_en": 0,
     "name_ja": 1,
-    "tree_en": 2,        # empty → Torso Inc marker
+    "tree_en": 2,  # empty → Torso Inc marker
     "tree_ja": 3,
     "points": 4,
     "tag": 6,
@@ -69,7 +69,7 @@ ENGLISH_LOCALE_DIR = "Languages/English (TMO)"
 DUMMY_MARK = "(dummy)"
 
 # Athena 0/1/2 → schema 0=male/blade, 1=female/gunner, 2=both
-_ATHENA_GENDER = {"1": 0, "2": 1}       # else both
+_ATHENA_GENDER = {"1": 0, "2": 1}  # else both
 _ATHENA_TYPE = {"1": 0, "2": 1}
 
 

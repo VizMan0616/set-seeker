@@ -8,7 +8,7 @@ from dataclasses import replace
 from app.engine.data import HEAD, Decoration, PackData, SkillThreshold
 from app.engine.pruning import prune
 from app.engine.solver import solve_one
-from tests.engine.conftest import ATTACK_TREE, make_query
+from tests.engine.conftest import make_query
 
 GLOOM_TREE = 7
 ORPHAN_TREE = 8
@@ -26,9 +26,7 @@ def _gloom_pack(tiny: PackData, *, with_fixer: bool = True) -> PackData:
     extra_decos = []
     if with_fixer:
         extra_decos.append(Decoration(id=FIXER_DECO_ID, size=1, skills=((GLOOM_TREE, 1),)))
-        extra_decos.append(
-            Decoration(id=HARMFUL_FIXER_DECO_ID, size=1, skills=((GLOOM_TREE, -1),))
-        )
+        extra_decos.append(Decoration(id=HARMFUL_FIXER_DECO_ID, size=1, skills=((GLOOM_TREE, -1),)))
     extra_decos.append(Decoration(id=ORPHAN_DECO_ID, size=1, skills=((ORPHAN_TREE, 1),)))
     return PackData(
         game=tiny.game,

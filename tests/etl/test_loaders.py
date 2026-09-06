@@ -6,22 +6,34 @@ from app.etl import column_maps
 from app.etl.column_maps import mhfu as cmap
 from app.etl.loaders import load_armor_file, load_decorations, load_skill_blocks
 
-EXPECTED_ARMOR_COUNTS = {"head": 425, "body": 419, "arms": 410, "waist": 408,
-                         "legs": 418}
+EXPECTED_ARMOR_COUNTS = {"head": 425, "body": 419, "arms": 410, "waist": 408, "legs": 418}
 
 
 # --- column map unit tests ---
 
-@pytest.mark.parametrize("notation,expected", [
-    ("---", 0), ("O--", 1), ("OO-", 2), ("OOO", 3),
-])
+
+@pytest.mark.parametrize(
+    "notation,expected",
+    [
+        ("---", 0),
+        ("O--", 1),
+        ("OO-", 2),
+        ("OOO", 3),
+    ],
+)
 def test_parse_slots(notation, expected):
     assert cmap.parse_slots(notation) == expected
 
 
-@pytest.mark.parametrize("raw,expected", [
-    ('"1"', 1), ('"6!"', 6), ('"5!8"', 8), ('"10"', 10),
-])
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        ('"1"', 1),
+        ('"6!"', 6),
+        ('"5!8"', 8),
+        ('"10"', 10),
+    ],
+)
 def test_parse_level_requirement(raw, expected):
     assert cmap.parse_level_requirement(raw) == expected
 
@@ -45,6 +57,7 @@ def test_column_map_is_pack_scoped():
 
 
 # --- skills.txt block format ---
+
 
 def test_skill_blocks_counts(manifest):
     data_dir = manifest.source_data_path
@@ -89,6 +102,7 @@ def test_torso_inc_block_has_no_thresholds(manifest):
 
 # --- armor CSVs ---
 
+
 @pytest.mark.parametrize("slot,stem", list(enumerate(EXPECTED_ARMOR_COUNTS)))
 def test_armor_row_counts(slot, stem, manifest):
     data_dir = manifest.source_data_path
@@ -108,18 +122,26 @@ def test_chain_helm_exact(manifest):
     data_dir = manifest.source_data_path
     rows, _ = load_armor_file(data_dir / "head.csv", 0, cmap, header_lines=2)
     helm = next(r for r in rows if r.name_en == "Chain Helm")
-    assert helm.slots == 1            # "O--"
+    assert helm.slots == 1  # "O--"
     assert helm.rarity == 1
     assert helm.defense == 4
-    assert helm.gender == 2           # "Male/ Female"
-    assert helm.hunter_type == 2      # "Blade/ Gunner"
+    assert helm.gender == 2  # "Male/ Female"
+    assert helm.hunter_type == 2  # "Blade/ Gunner"
     assert helm.hr_required == 1
     assert helm.village_stars == 1
-    assert (helm.res_fire, helm.res_water, helm.res_ice,
-            helm.res_thunder, helm.res_dragon) == (2, 2, 1, -2, 0)
+    assert (helm.res_fire, helm.res_water, helm.res_ice, helm.res_thunder, helm.res_dragon) == (
+        2,
+        2,
+        1,
+        -2,
+        0,
+    )
     assert helm.torso_inc is False
     assert helm.skills == (
-        ("Paralysis", -1), ("Health", 2), ("Backpackng", 2), ("Map", 2),
+        ("Paralysis", -1),
+        ("Health", 2),
+        ("Backpackng", 2),
+        ("Map", 2),
         ("Whim", 2),
     )
 
@@ -129,8 +151,8 @@ def test_torso_inc_piece_has_flag_and_no_marker_skill(manifest):
     rows, _ = load_armor_file(data_dir / "head.csv", 0, cmap, header_lines=2)
     helm = next(r for r in rows if r.name_en == "Black Belt Helm")
     assert helm.torso_inc is True
-    assert helm.skills == ()          # the Torso Inc marker row is not a skill
-    assert helm.slots == 0            # "---"
+    assert helm.skills == ()  # the Torso Inc marker row is not a skill
+    assert helm.slots == 0  # "---"
     assert helm.hr_required == 8
     assert helm.village_stars == 4
 
@@ -144,12 +166,13 @@ def test_collapsed_level_requirement_max_wins(manifest):
 
 # --- decorations.csv (no header) ---
 
+
 def test_decoration_count_and_attack_jewel(manifest):
     data_dir = manifest.source_data_path
     rows = load_decorations(data_dir / "decorations.csv", cmap)
     assert len(rows) == 168
     jewel = next(r for r in rows if r.name_en == "Attack Jewel")
-    assert jewel.size == 1            # "O--"
+    assert jewel.size == 1  # "O--"
     assert jewel.hr_required == 1
     assert jewel.skills == (("Attack", 1),)
 
@@ -158,11 +181,12 @@ def test_dual_skill_decoration_keeps_negative_points(manifest):
     data_dir = manifest.source_data_path
     rows = load_decorations(data_dir / "decorations.csv", cmap)
     fierce = next(r for r in rows if r.name_en == "Fierce Jewel")
-    assert fierce.size == 2           # "OO-"
+    assert fierce.size == 2  # "OO-"
     assert fierce.skills == (("Attack", 3), ("Defence", -1))
 
 
 # --- whole-pack load ---
+
 
 def test_dummy_flag_comes_from_english_overlay(pack_data):
     helm = next(r for r in pack_data.armor if r.name_en == "Red Lobster Helm")

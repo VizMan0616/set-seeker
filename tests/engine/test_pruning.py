@@ -8,8 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from app.engine.data import ARMS, HEAD, LEGS, WAIST, ArmorPiece
 from app.engine.pruning import (
     apply_rel_checks,
-    dominance_prune,
     domain_snapshot,
+    dominance_prune,
     equivalence_collapse,
     prune,
 )
@@ -108,36 +108,45 @@ def test_progression_caps_use_or_availability(tiny_pack_data):
     10 is the sentinel for "not obtainable via this path" (both caps max at 9),
     so G-rank pieces carry village_stars=10 and village pieces hr_required=10.
     """
-    pack = _pack_with_extra_pieces(tiny_pack_data, [
-        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),   # HR path
-        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),  # village path
-        _piece(94, LEGS, slots=3, attack=5, hr_required=10, village_stars=10), # neither
-    ])
+    pack = _pack_with_extra_pieces(
+        tiny_pack_data,
+        [
+            _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),  # HR path
+            _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),  # village path
+            _piece(94, LEGS, slots=3, attack=5, hr_required=10, village_stars=10),  # neither
+        ],
+    )
     pruned = prune(pack, make_query(min_points=10, hr=9, village_stars=9))
 
     legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
-    assert 92 in legs_member_ids      # reachable via HR
-    assert 93 in legs_member_ids      # reachable via village
+    assert 92 in legs_member_ids  # reachable via HR
+    assert 93 in legs_member_ids  # reachable via village
     assert 94 not in legs_member_ids  # exceeds both caps
 
 
 def test_progression_caps_close_the_other_path(tiny_pack_data):
-    pack = _pack_with_extra_pieces(tiny_pack_data, [
-        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
-        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
-    ])
+    pack = _pack_with_extra_pieces(
+        tiny_pack_data,
+        [
+            _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
+            _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
+        ],
+    )
     pruned = prune(pack, make_query(min_points=10, hr=9, village_stars=3))
 
     legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
-    assert 92 in legs_member_ids       # HR path still open
-    assert 93 not in legs_member_ids   # village 4 > cap 3, HR sentinel 10 > 9
+    assert 92 in legs_member_ids  # HR path still open
+    assert 93 not in legs_member_ids  # village 4 > cap 3, HR sentinel 10 > 9
 
 
 def test_uncapped_progression_paths_admit_everything(tiny_pack_data):
-    pack = _pack_with_extra_pieces(tiny_pack_data, [
-        _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
-        _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
-    ])
+    pack = _pack_with_extra_pieces(
+        tiny_pack_data,
+        [
+            _piece(92, LEGS, slots=3, attack=5, hr_required=9, village_stars=10),
+            _piece(93, LEGS, slots=3, attack=5, hr_required=10, village_stars=4),
+        ],
+    )
     pruned = prune(pack, make_query(min_points=10))  # both caps None = uncapped
 
     legs_member_ids = {m.id for c in pruned.classes[LEGS] for m in c.members}
@@ -160,9 +169,12 @@ def test_excluded_ids_leave_the_solver_rel_but_stay_on_inf(tiny_pack_data):
 
 def test_zero_slot_torso_inc_stays_relevant_and_incomparable(tiny_pack_data):
     """Athena keeps Torso Inc pieces even with no requested points (Armor.cpp)."""
-    pack = _pack_with_extra_pieces(tiny_pack_data, [
-        _piece(82, LEGS, slots=0, attack=0, torso_inc=True),
-    ])
+    pack = _pack_with_extra_pieces(
+        tiny_pack_data,
+        [
+            _piece(82, LEGS, slots=0, attack=0, torso_inc=True),
+        ],
+    )
     pruned = prune(pack, make_query(min_points=10))
     legs = {m.id for c in pruned.classes[LEGS] for m in c.members}
     assert 82 in legs
@@ -176,10 +188,13 @@ def test_zero_slot_torso_inc_stays_relevant_and_incomparable(tiny_pack_data):
 
 
 def test_torso_inc_and_dummy_hard_filters(tiny_pack_data):
-    pack = _pack_with_extra_pieces(tiny_pack_data, [
-        _piece(80, HEAD, slots=3, attack=5, torso_inc=True),
-        _piece(81, HEAD, slots=3, attack=5, is_dummy=True),
-    ])
+    pack = _pack_with_extra_pieces(
+        tiny_pack_data,
+        [
+            _piece(80, HEAD, slots=3, attack=5, torso_inc=True),
+            _piece(81, HEAD, slots=3, attack=5, is_dummy=True),
+        ],
+    )
     default = prune(pack, make_query(min_points=10))
     heads = {m.id for c in default.classes[HEAD] for m in c.members}
     assert 80 in heads  # Athena chkTorsoInc defaults on
@@ -201,8 +216,9 @@ def test_village_only_decoration_survives_hr_cap(tiny_pack_data):
         game_id=tiny_pack_data.game_id,
         pieces=tiny_pack_data.pieces,
         decorations=tiny_pack_data.decorations
-        + (Decoration(id=199, size=1, skills=((ATTACK_TREE, 1),),
-                      hr_required=10, village_stars=4),),
+        + (
+            Decoration(id=199, size=1, skills=((ATTACK_TREE, 1),), hr_required=10, village_stars=4),
+        ),
         skills=tiny_pack_data.skills,
         talismans=tiny_pack_data.talismans,
     )
@@ -244,9 +260,7 @@ def test_dominated_piece_stays_on_inf_not_skyline(tiny_pack_data):
 
 
 def test_forced_piece_returns_dominated_id_to_solver_rel(tiny_pack_data):
-    pruned = prune(
-        tiny_pack_data, make_query(min_points=10, forced_piece_ids=(11,))
-    )
+    pruned = prune(tiny_pack_data, make_query(min_points=10, forced_piece_ids=(11,)))
     waist = {m.id for c in pruned.classes[WAIST] for m in c.members}
     assert 11 in waist
 
@@ -272,7 +286,12 @@ def test_domain_snapshot_adds_kinds_from_pack_flags(tiny_pack_data):
     pruned = prune(tiny_pack_data, make_query(min_points=10))
     mhfu = domain_snapshot(tiny_pack_data, pruned)
     assert set(mhfu["kinds"]) == {
-        "head", "body", "arms", "waist", "legs", "decorations",
+        "head",
+        "body",
+        "arms",
+        "waist",
+        "legs",
+        "decorations",
     }
     later = tiny_pack_data.__class__(
         game=tiny_pack_data.game,

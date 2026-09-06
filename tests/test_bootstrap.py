@@ -24,6 +24,7 @@ def bootstrap_db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", url)
     get_settings.cache_clear()
     from app.db import get_engine
+
     get_engine.cache_clear()
     yield url
     get_settings.cache_clear()
@@ -56,9 +57,12 @@ def test_pack_needs_etl_when_missing(bootstrap_db):
 
 def test_etl_all_cli(bootstrap_db):
     proc = subprocess.run(
-        [sys.executable, "-m", "app.etl", "--all",
-         "--database-url", bootstrap_db],
-        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600, check=False,
+        [sys.executable, "-m", "app.etl", "--all", "--database-url", bootstrap_db],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=600,
+        check=False,
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
     assert "[gate] all checks passed" in proc.stdout

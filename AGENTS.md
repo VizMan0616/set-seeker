@@ -19,6 +19,7 @@ Read `CONTEXT.md` first. It defines the domain language and the hard constraints
 | Why a decision was made | `docs/adr/` (each ADR is self-contained) |
 | What to build next | `docs/roadmap.md` |
 | Provenance/licensing of legacy code and data | `SOURCES.md`, `NOTICE`, `LICENSE` |
+| CI, releases, production deploy | `CONTRIBUTING.md`, `docker/README.md`, `docs/adr/0015-production-blue-green-compose.md` |
 
 Do not bulk-read `docs/` — each document is written to be self-sufficient for its task type.
 

@@ -207,7 +207,9 @@ async def start_search_from_picker(request: Request) -> HTMLResponse:
     game = _first(fields, "game")
     if not game:
         return templates.TemplateResponse(
-            request, "search/error.html", {"message": "Unknown game."},
+            request,
+            "search/error.html",
+            {"message": "Unknown game."},
         )
     return await asyncio.to_thread(_start_search, request, game, fields)
 
@@ -236,9 +238,7 @@ def _start_search(request: Request, game: str, fields: FormFields) -> HTMLRespon
             {"message": exc.detail},
         )
     try:
-        page = request.app.state.search_service.start_search(
-            request.state.session_id, query
-        )
+        page = request.app.state.search_service.start_search(request.state.session_id, query)
     except SearchBusyError as exc:
         return templates.TemplateResponse(
             request,
@@ -253,9 +253,7 @@ def _start_search(request: Request, game: str, fields: FormFields) -> HTMLRespon
 
 def _load_more_sync(request: Request, search_id: str) -> HTMLResponse:
     try:
-        page = request.app.state.search_service.load_more(
-            request.state.session_id, search_id
-        )
+        page = request.app.state.search_service.load_more(request.state.session_id, search_id)
     except SearchBusyError as exc:
         return templates.TemplateResponse(
             request,
@@ -263,9 +261,7 @@ def _load_more_sync(request: Request, search_id: str) -> HTMLResponse:
             {"message": exc.message},
             status_code=503,
         )
-    query = request.app.state.search_service.get_search_query(
-        request.state.session_id, search_id
-    )
+    query = request.app.state.search_service.get_search_query(request.state.session_id, search_id)
     context = page_context(
         page,
         request.app.state.name_resolver,

@@ -1,0 +1,31 @@
+name: release-hotfix
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why is this a hotfix? (app unusable, data loss, etc.)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-hotfix-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Log hotfix reason
+        run: echo "Hotfix reason:${{ github.event.inputs.reason }}"
+
+      - name: Merge release PR immediately
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/merge-release-pr.mjs hotfix

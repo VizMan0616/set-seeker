@@ -20,13 +20,13 @@ ARMOR = {
     "res_dragon": 13,
     "res_water": 14,
     "res_ice": 15,
-    "gender": 16,        # "Male" | "Female" | "Male/ Female" (spacing varies per file)
-    "hunter_type": 17,   # "Blade" | "Gunner" | "Blade/ Gunner" (spacing varies)
+    "gender": 16,  # "Male" | "Female" | "Male/ Female" (spacing varies per file)
+    "hunter_type": 17,  # "Blade" | "Gunner" | "Blade/ Gunner" (spacing varies)
     "rarity": 18,
-    "hr": 19,            # level-req syntax, see parse_level_requirement
-    "village": 20,       # "Elder*" column, same syntax
-    "slots": 21,         # "---" | "O--" | "OO-" | "OOO"
-    "skill_start": 22,   # 5 x (tree name, points)
+    "hr": 19,  # level-req syntax, see parse_level_requirement
+    "village": 20,  # "Elder*" column, same syntax
+    "slots": 21,  # "---" | "O--" | "OO-" | "OOO"
+    "skill_start": 22,  # 5 x (tree name, points)
     "skill_pairs": 5,
 }
 
@@ -35,9 +35,9 @@ ARMOR = {
 DECORATION = {
     "name": 0,
     # 1 = price, not stored
-    "slots": 2,          # same O-- notation; count = decoration size 1..3
+    "slots": 2,  # same O-- notation; count = decoration size 1..3
     "hr": 3,
-    "village": 4,        # elder-star req (decorations.village_stars, migration 0002)
+    "village": 4,  # elder-star req (decorations.village_stars, migration 0002)
     "skill1_points": 5,  # NOTE: points first, then tree name (inverse of armor)
     "skill1_tree": 6,
     "skill2_points": 7,
@@ -49,7 +49,7 @@ DECORATION = {
 # (legacy: `Armor.cpp:80-81`; the tree's own block in skills.txt has no thresholds).
 TORSO_INC_TREE = "Torso Inc"
 
-GENDER = {"male": 0, "female": 1}        # anything else -> 2 (both)
+GENDER = {"male": 0, "female": 1}  # anything else -> 2 (both)
 HUNTER_TYPE = {"blade": 0, "gunner": 1}  # anything else -> 2 (both)
 
 

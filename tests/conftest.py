@@ -35,45 +35,83 @@ DECORATION_NAMES = {101: "Attack Jewel 1", 102: "Attack Jewel 2"}
 def load_tiny_pack(repo: GameDataRepository) -> None:
     """The §6 fixture as database rows; ids match tests/fixtures/tiny_pack.py."""
     repo.create_game(
-        id=GAME_ID, code="mhfu", name="Monster Hunter Freedom Unite",
-        generation=2, features=json.dumps({
-            "talismans": False, "guild_rank_max": 9, "village_stars_max": 9,
-            "desired_skills_max": 5,
-        }),
+        id=GAME_ID,
+        code="mhfu",
+        name="Monster Hunter Freedom Unite",
+        generation=2,
+        features=json.dumps(
+            {
+                "talismans": False,
+                "guild_rank_max": 9,
+                "village_stars_max": 9,
+                "desired_skills_max": 5,
+            }
+        ),
     )
     repo.create_skill_tree(
-        id=ATTACK_TREE_ID, game_id=GAME_ID, name_en="Attack", name_ja="Attack",
+        id=ATTACK_TREE_ID,
+        game_id=GAME_ID,
+        name_en="Attack",
+        name_ja="Attack",
         category_tag="Offensive",
     )
     repo.create_skill(
-        id=ATTACK_UP_S_SKILL_ID, tree_id=ATTACK_TREE_ID,
-        name_en="Attack Up (S)", points=10,
+        id=ATTACK_UP_S_SKILL_ID,
+        tree_id=ATTACK_TREE_ID,
+        name_en="Attack Up (S)",
+        points=10,
     )
     repo.create_skill(
-        id=2, tree_id=ATTACK_TREE_ID,
-        name_en="Attack Up (Absurd)", points=99,
+        id=2,
+        tree_id=ATTACK_TREE_ID,
+        name_en="Attack Up (Absurd)",
+        points=99,
     )
-    for slot, rows in enumerate((
-        tiny_pack.HEAD, tiny_pack.BODY, tiny_pack.ARMS, tiny_pack.WAIST, tiny_pack.LEGS,
-    )):
+    for slot, rows in enumerate(
+        (
+            tiny_pack.HEAD,
+            tiny_pack.BODY,
+            tiny_pack.ARMS,
+            tiny_pack.WAIST,
+            tiny_pack.LEGS,
+        )
+    ):
         for piece_id, attack_pts, slots in rows:
             repo.create_armor_piece(
-                id=piece_id, game_id=GAME_ID, slot=slot,
-                name_en=PIECE_NAMES[piece_id], rarity=1, slots=slots,
-                gender=2, hunter_type=2, defense=slot + 1, max_defense=slot + 1,
-                res_fire=0, res_water=0, res_ice=0, res_thunder=0, res_dragon=0,
+                id=piece_id,
+                game_id=GAME_ID,
+                slot=slot,
+                name_en=PIECE_NAMES[piece_id],
+                rarity=1,
+                slots=slots,
+                gender=2,
+                hunter_type=2,
+                defense=slot + 1,
+                max_defense=slot + 1,
+                res_fire=0,
+                res_water=0,
+                res_ice=0,
+                res_thunder=0,
+                res_dragon=0,
             )
             if attack_pts:
                 repo.set_armor_skill(
-                    armor_id=piece_id, tree_id=ATTACK_TREE_ID, points=attack_pts,
+                    armor_id=piece_id,
+                    tree_id=ATTACK_TREE_ID,
+                    points=attack_pts,
                 )
     for deco_id, size, pts in tiny_pack.DECORATIONS:
         repo.create_decoration(
-            id=deco_id, game_id=GAME_ID, name_en=DECORATION_NAMES[deco_id],
-            rarity=1, size=size,
+            id=deco_id,
+            game_id=GAME_ID,
+            name_en=DECORATION_NAMES[deco_id],
+            rarity=1,
+            size=size,
         )
         repo.set_decoration_skill(
-            decoration_id=deco_id, tree_id=ATTACK_TREE_ID, points=pts,
+            decoration_id=deco_id,
+            tree_id=ATTACK_TREE_ID,
+            points=pts,
         )
 
 

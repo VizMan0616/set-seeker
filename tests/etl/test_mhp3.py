@@ -129,6 +129,7 @@ def test_load_pack_charms_and_fan_names(pack_data, manifest):
     assert "Torso Up" in trees
     assert "Torso Inc" not in trees
     from app.etl.loaders import torso_inc_skill_name
+
     assert torso_inc_skill_name(pack_data) == "Torso Up"
     helm = next(r for r in pack_data.armor if r.name_en == "Chainmail Headgear")
     assert helm.name_ja == "チェーンヘッド"
@@ -148,12 +149,13 @@ def test_load_pack_charms_and_fan_names(pack_data, manifest):
 def test_charm_point_union_is_csv_envelope_not_plus_seven(pack_data):
     bounds = charm_point_union(pack_data.charm_types)
     assert bounds == {
-        "skill1_min": 1, "skill1_max": 10,
-        "skill2_min": -10, "skill2_max": 13,
+        "skill1_min": 1,
+        "skill1_max": 10,
+        "skill2_min": -10,
+        "skill2_max": 13,
     }
     skill1_hi = max(
-        rng.max_points for c in pack_data.charm_types
-        for rng in c.ranges if rng.skill_slot == 1
+        rng.max_points for c in pack_data.charm_types for rng in c.ranges if rng.skill_slot == 1
     )
     assert skill1_hi == 10
 
@@ -176,8 +178,11 @@ def test_writer_counts_and_progression(etl_db):
     assert features["translation"] == "fan"
     assert features["torso_inc_name"] == "Torso Up"
     assert features["data_version"] == 1
-    helm = next(p for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
-                if p["name_en"] == "Chainmail Headgear")
+    helm = next(
+        p
+        for p in repo.list_armor_pieces(game_id, slot=0, allow_event=True)
+        if p["name_en"] == "Chainmail Headgear"
+    )
     assert helm["name_ja"] == "チェーンヘッド"
     assert helm["max_defense"] == 22
     assert table_counts(repo, game_id)["charm_skill_ranges"] == 265
@@ -208,9 +213,7 @@ def test_pack_loader_applies_slot_thresholds_to_generated_charms(etl_db):
     # Attack-only query: one-skill charms use skill1 (mystery/shining +4).
     assert max(attack_pts) <= 4
     # Mystery Attack +4 cannot pair with 3 slots under FURUSLO.
-    assert not any(
-        c.slots == 3 and c.skills == ((attack, 4),) for c in generated
-    )
+    assert not any(c.slots == 3 and c.skills == ((attack, 4),) for c in generated)
 
 
 def test_cli_end_to_end(tmp_path):
@@ -219,9 +222,20 @@ def test_cli_end_to_end(tmp_path):
 
     db_path = tmp_path / "cli.db"
     proc = subprocess.run(
-        [sys.executable, "-m", "app.etl", "--pack", "mhp3",
-         "--database-url", f"sqlite:///{db_path}"],
-        cwd=REPO_ROOT, capture_output=True, text=True, timeout=600, check=False,
+        [
+            sys.executable,
+            "-m",
+            "app.etl",
+            "--pack",
+            "mhp3",
+            "--database-url",
+            f"sqlite:///{db_path}",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=600,
+        check=False,
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
     assert "[etl]   armor_pieces: 1080" in proc.stdout

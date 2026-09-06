@@ -14,6 +14,7 @@ Create Date: 2026-08-27
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "0003_skill_tags_and_dummy"
@@ -29,15 +30,13 @@ def upgrade() -> None:
     if "skill_tree_tags" not in tables:
         op.create_table(
             "skill_tree_tags",
-            sa.Column("tree_id", sa.Integer(), sa.ForeignKey("skill_trees.id"),
-                      primary_key=True),
+            sa.Column("tree_id", sa.Integer(), sa.ForeignKey("skill_trees.id"), primary_key=True),
             sa.Column("tag", sa.String(32), primary_key=True),
         )
     if "skill_categories" not in tables:
         op.create_table(
             "skill_categories",
-            sa.Column("game_id", sa.Integer(), sa.ForeignKey("games.id"),
-                      primary_key=True),
+            sa.Column("game_id", sa.Integer(), sa.ForeignKey("games.id"), primary_key=True),
             sa.Column("tag", sa.String(32), primary_key=True),
             sa.Column("sort_order", sa.Integer(), nullable=False),
         )

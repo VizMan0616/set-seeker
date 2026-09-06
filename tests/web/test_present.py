@@ -42,8 +42,12 @@ def test_expand_equivalent_results_makes_one_card_per_combo():
 
 def test_page_context_grouped_keeps_one_card():
     page = SearchPage(
-        search_id="s", results=(_grouped(),), partial=False, exhausted=True,
-        shown_count=1, remaining_count=0,
+        search_id="s",
+        results=(_grouped(),),
+        partial=False,
+        exhausted=True,
+        shown_count=1,
+        remaining_count=0,
     )
     ctx = page_context(page, _Resolver(), expand_equivalents=False)
     assert len(ctx["results"]) == 1
@@ -52,8 +56,12 @@ def test_page_context_grouped_keeps_one_card():
 
 def test_result_context_marks_filled_and_empty_sockets():
     page = SearchPage(
-        search_id="s", results=(_grouped(),), partial=False, exhausted=True,
-        shown_count=1, remaining_count=0,
+        search_id="s",
+        results=(_grouped(),),
+        partial=False,
+        exhausted=True,
+        shown_count=1,
+        remaining_count=0,
     )
     ctx = page_context(page, _Resolver(), expand_equivalents=False)
     card = ctx["results"][0]
@@ -77,8 +85,12 @@ def test_result_context_shows_weapon_and_charm_sockets():
         charm_skills=((1, 4),),
     )
     page = SearchPage(
-        search_id="s", results=(result,), partial=False, exhausted=True,
-        shown_count=1, remaining_count=0,
+        search_id="s",
+        results=(result,),
+        partial=False,
+        exhausted=True,
+        shown_count=1,
+        remaining_count=0,
     )
     card = page_context(page, _Resolver())["results"][0]
     assert card["weapon"] == {"slots": 3, "spare": 1, "filled": 2}
@@ -88,8 +100,12 @@ def test_result_context_shows_weapon_and_charm_sockets():
 
 def test_page_context_expanded_splits_lookalikes():
     page = SearchPage(
-        search_id="s", results=(_grouped(),), partial=False, exhausted=True,
-        shown_count=1, remaining_count=0,
+        search_id="s",
+        results=(_grouped(),),
+        partial=False,
+        exhausted=True,
+        shown_count=1,
+        remaining_count=0,
     )
     ctx = page_context(page, _Resolver(), expand_equivalents=True)
     assert len(ctx["results"]) == 2

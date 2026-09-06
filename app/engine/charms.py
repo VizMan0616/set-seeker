@@ -67,11 +67,7 @@ def charm_candidates(pack: PackData, query: Query) -> tuple[CharmSpec, ...]:
 
     excluded = set(query.excluded_charm_ids)
     forced = set(query.forced_charm_ids)
-    kept = [
-        c
-        for c in assigned
-        if c.id == NONE_CHARM_ID or c.id in forced or c.id not in excluded
-    ]
+    kept = [c for c in assigned if c.id == NONE_CHARM_ID or c.id in forced or c.id not in excluded]
     if not any(c.id == NONE_CHARM_ID for c in kept):
         kept.insert(0, none)
     return tuple(kept)
@@ -107,7 +103,7 @@ def _slot_cap(kind, weighted: tuple[tuple[int, int], ...]) -> int:
 
 
 def _emit_slots(consider, skills: tuple[tuple[int, int], ...], cap: int) -> None:
-    for slots in range(0, cap + 1):
+    for slots in range(cap + 1):
         if not skills and slots == 0:
             continue
         consider(CharmSpec(id=-1, slots=slots, skills=skills))

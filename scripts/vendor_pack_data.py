@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import shutil
-import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,12 +33,22 @@ PACK_SOURCES: dict[str, tuple[str, str, str]] = {
 }
 
 DATA_FILES = (
-    "head", "body", "arms", "waist", "legs",
-    "skills", "decorations",
+    "head",
+    "body",
+    "arms",
+    "waist",
+    "legs",
+    "skills",
+    "decorations",
 )
 LOCALE_FILES = (
-    "head", "body", "arms", "waist", "legs",
-    "skills", "decorations",
+    "head",
+    "body",
+    "arms",
+    "waist",
+    "legs",
+    "skills",
+    "decorations",
 )
 
 
@@ -50,9 +59,7 @@ def vendor_pack(pack_id: str, *, force: bool = False) -> None:
     source_repo, data_dir, locale_name = PACK_SOURCES[pack_id]
     source_root = REPO_ROOT / source_repo / data_dir
     if not source_root.is_dir():
-        raise SystemExit(
-            f"source data not found at {source_root} — restore clone per SOURCES.md"
-        )
+        raise SystemExit(f"source data not found at {source_root} — restore clone per SOURCES.md")
 
     pack_dir = REPO_ROOT / "packs" / pack_id
     vendor_data = pack_dir / "vendor" / "data"
@@ -62,7 +69,7 @@ def vendor_pack(pack_id: str, *, force: bool = False) -> None:
     if not manifest.is_file():
         raise SystemExit(f"no manifest at {manifest}")
 
-    import yaml  # noqa: PLC0415 — script entry point
+    import yaml
 
     raw = yaml.safe_load(manifest.read_text(encoding="utf-8"))
     ext = raw.get("formats", {}).get("armor_file_ext", "csv")

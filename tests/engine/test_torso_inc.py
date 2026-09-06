@@ -33,15 +33,15 @@ def _pack(*pieces: ArmorPiece) -> PackData:
 
 
 def _query(**overrides) -> Query:
-    kwargs = dict(
-        game="mhfu",
-        skills=(SkillRequest(tree_id=ATTACK_TREE, min_points=10),),
-        weapon_slots=0,
-        gender="m",
-        hunter_type="blademaster",
-        hr=None,
-        village_stars=None,
-    )
+    kwargs = {
+        "game": "mhfu",
+        "skills": (SkillRequest(tree_id=ATTACK_TREE, min_points=10),),
+        "weapon_slots": 0,
+        "gender": "m",
+        "hunter_type": "blademaster",
+        "hr": None,
+        "village_stars": None,
+    }
     kwargs.update(overrides)
     return Query(**kwargs)
 
@@ -57,8 +57,11 @@ def test_torso_inc_on_legs_doubles_body_points():
     )
     query = _query()
     outcome = solve_one(
-        pack=pack, pruned=prune(pack, query), query=query,
-        exclusions=[], time_limit_ms=2000,
+        pack=pack,
+        pruned=prune(pack, query),
+        query=query,
+        exclusions=[],
+        time_limit_ms=2000,
     )
     assert outcome.status == "optimal"
     assert outcome.result is not None
@@ -76,8 +79,11 @@ def test_torso_inc_on_head_doubles_body_points():
     )
     query = _query()
     outcome = solve_one(
-        pack=pack, pruned=prune(pack, query), query=query,
-        exclusions=[], time_limit_ms=2000,
+        pack=pack,
+        pruned=prune(pack, query),
+        query=query,
+        exclusions=[],
+        time_limit_ms=2000,
     )
     assert outcome.status == "optimal"
     assert outcome.result is not None
@@ -94,15 +100,13 @@ def test_allow_torso_inc_off_excludes_the_flagged_piece():
     )
     query = _query(allow_torso_inc=False)
     pruned = prune(pack, query)
-    assert all(
-        not m.torso_inc
-        for slot in pruned.classes
-        for c in slot
-        for m in c.members
-    )
+    assert all(not m.torso_inc for slot in pruned.classes for c in slot for m in c.members)
     outcome = solve_one(
-        pack=pack, pruned=pruned, query=query,
-        exclusions=[], time_limit_ms=2000,
+        pack=pack,
+        pruned=pruned,
+        query=query,
+        exclusions=[],
+        time_limit_ms=2000,
     )
     assert outcome.status == "infeasible"
     assert outcome.result is None

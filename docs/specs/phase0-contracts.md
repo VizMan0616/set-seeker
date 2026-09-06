@@ -83,35 +83,39 @@ Name resolution for rendering happens in the web layer via the repository.
 ```python
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class SkillRequest:
     tree_id: int
-    min_points: int          # activation threshold from the skills table
+    min_points: int  # activation threshold from the skills table
+
 
 @dataclass(frozen=True)
 class Query:
-    game: str                            # pack id, e.g. "mhfu"
-    skills: tuple[SkillRequest, ...]     # 1..5 entries
-    weapon_slots: int                    # 0..3
-    gender: str                          # "m" | "f"
-    hunter_type: str                     # "blademaster" | "gunner"
-    hr: int | None                       # None = uncapped
-    village_stars: int | None            # None = uncapped
+    game: str  # pack id, e.g. "mhfu"
+    skills: tuple[SkillRequest, ...]  # 1..5 entries
+    weapon_slots: int  # 0..3
+    gender: str  # "m" | "f"
+    hunter_type: str  # "blademaster" | "gunner"
+    hr: int | None  # None = uncapped
+    village_stars: int | None  # None = uncapped
     allow_event: bool = False
     allow_bad_skills: bool = False
-    allow_torso_inc: bool = True         # Athena chkTorsoInc defaults checked
+    allow_torso_inc: bool = True  # Athena chkTorsoInc defaults checked
     allow_dummy: bool = False
     excluded_piece_ids: tuple[int, ...] = ()
     excluded_decoration_ids: tuple[int, ...] = ()
     forced_piece_ids: tuple[int, ...] = ()
     forced_decoration_ids: tuple[int, ...] = ()
-    sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
-    expand_equivalents: bool = False     # list every equivalent set, not grouped alts
+    sort: str = "defense"  # "defense" | "slots" | "rarity" | res_*
+    expand_equivalents: bool = False  # list every equivalent set, not grouped alts
+
 
 @dataclass(frozen=True)
 class DecorationAssignment:
     decoration_id: int
     count: int
+
 
 @dataclass(frozen=True)
 class ArmorSetResult:
@@ -120,17 +124,19 @@ class ArmorSetResult:
     # Per-slot equivalence-class member ids (includes the representative)
     alternates: tuple[tuple[int, ...], ...]
     decorations: tuple[DecorationAssignment, ...]
-    charm_id: int | None                 # always None for mhfu (pack flag talismans: false)
-    active_skills: tuple[tuple[int, int], ...]   # (skill_id, points achieved)
-    spare_slots: tuple[int, int, int]            # remaining size-1/2/3 slots
+    charm_id: int | None  # always None for mhfu (pack flag talismans: false)
+    active_skills: tuple[tuple[int, int], ...]  # (skill_id, points achieved)
+    spare_slots: tuple[int, int, int]  # remaining size-1/2/3 slots
     defense: int
+
 
 @dataclass(frozen=True)
 class SearchPage:
     search_id: str
     results: tuple[ArmorSetResult, ...]  # len <= PAGE_SIZE
-    partial: bool                        # solver hit its time budget
-    exhausted: bool                      # no further solutions exist
+    partial: bool  # solver hit its time budget
+    exhausted: bool  # no further solutions exist
+
 
 PAGE_SIZE = 10
 ```
@@ -140,6 +146,7 @@ PAGE_SIZE = 10
 ```python
 from typing import Protocol
 from app.domain.models import Query, SearchPage
+
 
 class SearchService(Protocol):
     def start_search(self, session_id: str, query: Query) -> SearchPage: ...
@@ -178,22 +185,27 @@ ids to names via `repository.game_data` before rendering:
 
 ```python
 {
-  "search_id": str,
-  "results": [
-    {
-      "pieces": [            # always 5, order head/body/arms/waist/legs
-        {"slot": "head", "name": str, "rarity": int, "defense": int,
-         "alternates": [{"id": int, "name": str}]}
-      ],
-      "decorations": [{"name": str, "count": int}],
-      "charm": None,                   # mhfu: always None
-      "active_skills": [{"name": str, "points": int}],
-      "spare_slots": [int, int, int],
-      "defense": int,
-    }
-  ],
-  "partial": bool,
-  "exhausted": bool,
+    "search_id": str,
+    "results": [
+        {
+            "pieces": [  # always 5, order head/body/arms/waist/legs
+                {
+                    "slot": "head",
+                    "name": str,
+                    "rarity": int,
+                    "defense": int,
+                    "alternates": [{"id": int, "name": str}],
+                }
+            ],
+            "decorations": [{"name": str, "count": int}],
+            "charm": None,  # mhfu: always None
+            "active_skills": [{"name": str, "points": int}],
+            "spare_slots": [int, int, int],
+            "defense": int,
+        }
+    ],
+    "partial": bool,
+    "exhausted": bool,
 }
 ```
 
@@ -209,12 +221,12 @@ Solver and UI agents develop against this — **not** against real ETL output. O
 allowed, all rarities 1, defense = slot index + 1 (arbitrary but deterministic).
 
 ```python
-HEAD  = [(1, 4, 0), (2, 2, 1), (3, 0, 2)]   # (piece_id, attack_pts, slots)
-BODY  = [(4, 3, 0), (5, 2, 1), (6, 0, 2)]
-ARMS  = [(7, 3, 1), (8, 1, 2), (9, 0, 0)]
+HEAD = [(1, 4, 0), (2, 2, 1), (3, 0, 2)]  # (piece_id, attack_pts, slots)
+BODY = [(4, 3, 0), (5, 2, 1), (6, 0, 2)]
+ARMS = [(7, 3, 1), (8, 1, 2), (9, 0, 0)]
 WAIST = [(10, 2, 1), (11, 1, 1), (12, 0, 2)]
-LEGS  = [(13, 3, 0), (14, 2, 1), (15, 0, 1)]
-DECORATIONS = [(101, 1, 1), (102, 2, 3)]    # (deco_id, size, attack_pts)
+LEGS = [(13, 3, 0), (14, 2, 1), (15, 0, 1)]
+DECORATIONS = [(101, 1, 1), (102, 2, 3)]  # (deco_id, size, attack_pts)
 ```
 
 Deterministic assertions the solver agent's tests must encode:

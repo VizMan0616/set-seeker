@@ -10,9 +10,9 @@ import json
 import sys
 from pathlib import Path
 
-from alembic import command
 from alembic.config import Config
 
+from alembic import command
 from app.config import get_settings
 from app.db import create_engine_from_settings
 from app.etl.manifest import PackManifest, list_pack_dirs, load_manifest

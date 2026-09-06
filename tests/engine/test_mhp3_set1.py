@@ -50,8 +50,7 @@ def mhp3_pack(tmp_path_factory):
     game_id = repo.get_game_by_code("mhp3")["id"]
     pack = PackLoader(repo)("mhp3")
     pieces = {
-        (p["slot"], p["name_en"]): p
-        for p in repo.list_armor_pieces(game_id, allow_event=True)
+        (p["slot"], p["name_en"]): p for p in repo.list_armor_pieces(game_id, allow_event=True)
     }
     skills = {s["name_en"]: s for s in repo.list_skills_for_game(game_id)}
     return {
@@ -88,6 +87,7 @@ def test_volvidon_greaves_are_torso_up(mhp3_pack):
     assert greaves["torso_inc"] is True or greaves["torso_inc"] == 1
     features = mhp3_pack["repo"].get_game(mhp3_pack["game_id"])["features"]
     import json
+
     assert json.loads(features)["torso_inc_name"] == "Torso Up"
 
 
@@ -101,12 +101,7 @@ def test_set1_query_keeps_torso_up_legs_when_allowed(mhp3_pack):
     off = prune(mhp3_pack["pack"], _set1_query(mhp3_pack, allow_torso_inc=False))
     off_legs = {m.id for c in off.classes[LEGS] for m in c.members}
     assert greaves_id not in off_legs
-    assert not any(
-        m.torso_inc
-        for slot in off.classes
-        for c in slot
-        for m in c.members
-    )
+    assert not any(m.torso_inc for slot in off.classes for c in slot for m in c.members)
 
 
 def test_set1_search_finds_torso_up_sets(mhp3_pack):
@@ -119,8 +114,11 @@ def test_set1_search_finds_torso_up_sets(mhp3_pack):
     exclusions: list[tuple[int, ...]] = []
     for _ in range(24):
         outcome = solve_one(
-            pack=pack, pruned=pruned, query=query,
-            exclusions=exclusions, time_limit_ms=SOLVE_MS,
+            pack=pack,
+            pruned=pruned,
+            query=query,
+            exclusions=exclusions,
+            time_limit_ms=SOLVE_MS,
         )
         if outcome.result is None:
             break
@@ -147,8 +145,11 @@ def test_set1_search_without_torso_up_omits_flagged_pieces(mhp3_pack):
     exclusions: list[tuple[int, ...]] = []
     for _ in range(8):
         outcome = solve_one(
-            pack=pack, pruned=pruned, query=query,
-            exclusions=exclusions, time_limit_ms=SOLVE_MS,
+            pack=pack,
+            pruned=pruned,
+            query=query,
+            exclusions=exclusions,
+            time_limit_ms=SOLVE_MS,
         )
         if outcome.result is None:
             break

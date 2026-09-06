@@ -41,11 +41,11 @@ class PackManifest:
     name: str
     generation: int
     data_version: int
-    data: dict[str, Any]           # armor_dir, locale_overlays
+    data: dict[str, Any]  # armor_dir, locale_overlays
     provenance: PackProvenance
     features: dict[str, bool]
-    progression: dict[str, int]      # guild_rank, village_stars — per-pack caps
-    desired_skills_max: int          # Athena Form1.h NumSkills
+    progression: dict[str, int]  # guild_rank, village_stars — per-pack caps
+    desired_skills_max: int  # Athena Form1.h NumSkills
     charm_points: dict[str, int] | None  # inventory steppers; None if no talismans
     formats: dict[str, Any]
     locales: list[str]
@@ -90,8 +90,19 @@ def load_manifest(pack_dir: Path) -> PackManifest:
     if not isinstance(raw, dict):
         raise ManifestError(f"{path}: manifest must be a mapping")
 
-    for key in ("id", "name", "generation", "data_version", "data", "provenance",
-                "features", "progression", "desired_skills_max", "formats", "locales"):
+    for key in (
+        "id",
+        "name",
+        "generation",
+        "data_version",
+        "data",
+        "provenance",
+        "features",
+        "progression",
+        "desired_skills_max",
+        "formats",
+        "locales",
+    ):
         if key not in raw:
             raise ManifestError(f"{path}: missing required key {key!r}")
 
@@ -143,8 +154,10 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         data=dict(data),
         provenance=_parse_provenance(raw, path),
         features={k: bool(v) for k, v in features.items()},
-        progression={"guild_rank": int(progression["guild_rank"]),
-                     "village_stars": int(progression["village_stars"])},
+        progression={
+            "guild_rank": int(progression["guild_rank"]),
+            "village_stars": int(progression["village_stars"]),
+        },
         desired_skills_max=int(desired_skills_max),
         charm_points=dict(charm_points) if charm_points else None,
         formats=dict(formats),
@@ -159,9 +172,7 @@ def load_manifest(pack_dir: Path) -> PackManifest:
         )
     locale = manifest.english_locale_path
     if locale is not None and not locale.is_dir():
-        raise ManifestError(
-            f"{path}: English locale overlay not found at {locale}"
-        )
+        raise ManifestError(f"{path}: English locale overlay not found at {locale}")
     return manifest
 
 

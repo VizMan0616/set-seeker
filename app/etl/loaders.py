@@ -25,7 +25,7 @@ class SkillTreeBlock:
     name: str
     tag: str | None
     thresholds: tuple[tuple[int, str], ...]  # (points, skill name), signed
-    tags: tuple[str, ...] = ()               # all Athena tags; tag is tags[0]
+    tags: tuple[str, ...] = ()  # all Athena tags; tag is tags[0]
     name_ja: str | None = None
 
 
@@ -106,12 +106,14 @@ def load_skill_blocks(path: Path) -> list[SkillTreeBlock]:
     def close() -> None:
         nonlocal name, tags, thresholds
         if name is not None:
-            blocks.append(SkillTreeBlock(
-                name=name,
-                tag=tags[0] if tags else None,
-                tags=tuple(tags),
-                thresholds=tuple(thresholds),
-            ))
+            blocks.append(
+                SkillTreeBlock(
+                    name=name,
+                    tag=tags[0] if tags else None,
+                    tags=tuple(tags),
+                    thresholds=tuple(thresholds),
+                )
+            )
         name, tags, thresholds = None, [], []
 
     for raw in path.read_text(encoding="utf-8").splitlines():
@@ -162,8 +164,11 @@ def load_skill_table(path: Path, cmap) -> list[SkillTreeBlock]:
             tree_ja = fields[cols["tree_ja"]].strip() if cols["tree_ja"] < len(fields) else ""
             if not tree_en:
                 torso = SkillTreeBlock(
-                    name=name_en, name_ja=name_ja or None, tag=None,
-                    tags=(), thresholds=(),
+                    name=name_en,
+                    name_ja=name_ja or None,
+                    tag=None,
+                    tags=(),
+                    thresholds=(),
                 )
                 continue
             points_raw = fields[cols["points"]].strip() if cols["points"] < len(fields) else ""
@@ -175,19 +180,25 @@ def load_skill_table(path: Path, cmap) -> list[SkillTreeBlock]:
             if tree_en not in by_tree:
                 tags = (tag,) if tag else ()
                 by_tree[tree_en] = SkillTreeBlock(
-                    name=tree_en, name_ja=tree_ja or None,
-                    tag=tags[0] if tags else None, tags=tags, thresholds=(),
+                    name=tree_en,
+                    name_ja=tree_ja or None,
+                    tag=tags[0] if tags else None,
+                    tags=tags,
+                    thresholds=(),
                 )
                 order.append(tree_en)
             elif tag and tag not in by_tree[tree_en].tags:
                 prev = by_tree[tree_en]
                 new_tags = prev.tags + (tag,)
                 by_tree[tree_en] = replace(
-                    prev, tags=new_tags, tag=new_tags[0],
+                    prev,
+                    tags=new_tags,
+                    tag=new_tags[0],
                 )
             prev = by_tree[tree_en]
             by_tree[tree_en] = replace(
-                prev, thresholds=prev.thresholds + ((int(points_raw), name_en),),
+                prev,
+                thresholds=prev.thresholds + ((int(points_raw), name_en),),
             )
     blocks = [by_tree[name] for name in order]
     if torso is not None and all(b.name != torso.name for b in blocks):
@@ -195,8 +206,9 @@ def load_skill_table(path: Path, cmap) -> list[SkillTreeBlock]:
     return blocks
 
 
-def load_armor_file(path: Path, slot: int, cmap,
-                    header_lines: int) -> tuple[list[ArmorRow], list[str]]:
+def load_armor_file(
+    path: Path, slot: int, cmap, header_lines: int
+) -> tuple[list[ArmorRow], list[str]]:
     """One armor CSV. Returns (rows, skipped duplicate names).
 
     Duplicates: the legacy loader drops later rows sharing (name, gender)
@@ -243,27 +255,29 @@ def load_armor_file(path: Path, slot: int, cmap,
             if "max_defense" in cols:
                 max_def = int(fields[cols["max_defense"]])
 
-            rows.append(ArmorRow(
-                slot=slot,
-                name_en=name,
-                name_ja=name_ja,
-                gender=gender,
-                hunter_type=cmap.parse_hunter_type(fields[cols["hunter_type"]]),
-                rarity=int(fields[cols["rarity"]]),
-                slots=cmap.parse_slots(fields[cols["slots"]]),
-                hr_required=cmap.parse_level_requirement(fields[cols["hr"]]),
-                village_stars=cmap.parse_level_requirement(fields[cols["village"]]),
-                defense=int(fields[cols["defense"]]),
-                max_defense=max_def,
-                res_fire=int(fields[cols["res_fire"]]),
-                res_water=int(fields[cols["res_water"]]),
-                res_ice=int(fields[cols["res_ice"]]),
-                res_thunder=int(fields[cols["res_thunder"]]),
-                res_dragon=int(fields[cols["res_dragon"]]),
-                torso_inc=torso_inc,
-                is_dummy=getattr(cmap, "DUMMY_MARK", "(dummy)").lower() in name.lower(),
-                skills=tuple(skills),
-            ))
+            rows.append(
+                ArmorRow(
+                    slot=slot,
+                    name_en=name,
+                    name_ja=name_ja,
+                    gender=gender,
+                    hunter_type=cmap.parse_hunter_type(fields[cols["hunter_type"]]),
+                    rarity=int(fields[cols["rarity"]]),
+                    slots=cmap.parse_slots(fields[cols["slots"]]),
+                    hr_required=cmap.parse_level_requirement(fields[cols["hr"]]),
+                    village_stars=cmap.parse_level_requirement(fields[cols["village"]]),
+                    defense=int(fields[cols["defense"]]),
+                    max_defense=max_def,
+                    res_fire=int(fields[cols["res_fire"]]),
+                    res_water=int(fields[cols["res_water"]]),
+                    res_ice=int(fields[cols["res_ice"]]),
+                    res_thunder=int(fields[cols["res_thunder"]]),
+                    res_dragon=int(fields[cols["res_dragon"]]),
+                    torso_inc=torso_inc,
+                    is_dummy=getattr(cmap, "DUMMY_MARK", "(dummy)").lower() in name.lower(),
+                    skills=tuple(skills),
+                )
+            )
     return rows, skipped
 
 
@@ -276,8 +290,10 @@ def load_decorations(path: Path, cmap) -> list[DecorationRow]:
             if not fields or _is_comment_row(fields) or not fields[cols["name"]].strip():
                 continue
             skills: list[tuple[str, int]] = []
-            for points_key, tree_key in (("skill1_points", "skill1_tree"),
-                                         ("skill2_points", "skill2_tree")):
+            for points_key, tree_key in (
+                ("skill1_points", "skill1_tree"),
+                ("skill2_points", "skill2_tree"),
+            ):
                 tree = fields[cols[tree_key]].strip() if cols[tree_key] < len(fields) else ""
                 points = fields[cols[points_key]].strip() if cols[points_key] < len(fields) else ""
                 if tree and points:
@@ -288,15 +304,17 @@ def load_decorations(path: Path, cmap) -> list[DecorationRow]:
             rarity = 1
             if "rarity" in cols:
                 rarity = int(fields[cols["rarity"]])
-            rows.append(DecorationRow(
-                name_en=fields[cols["name"]].strip(),
-                name_ja=name_ja,
-                rarity=rarity,
-                size=cmap.parse_slots(fields[cols["slots"]]),
-                hr_required=cmap.parse_level_requirement(fields[cols["hr"]]),
-                village_stars=cmap.parse_level_requirement(fields[cols["village"]]),
-                skills=tuple(skills),
-            ))
+            rows.append(
+                DecorationRow(
+                    name_en=fields[cols["name"]].strip(),
+                    name_ja=name_ja,
+                    rarity=rarity,
+                    size=cmap.parse_slots(fields[cols["slots"]]),
+                    hr_required=cmap.parse_level_requirement(fields[cols["hr"]]),
+                    village_stars=cmap.parse_level_requirement(fields[cols["village"]]),
+                    skills=tuple(skills),
+                )
+            )
     return rows
 
 
@@ -314,7 +332,8 @@ def _read_locale_names(path: Path) -> list[str]:
 
 
 def _read_skill_overlay(
-    path: Path, expected_trees: int | None = None,
+    path: Path,
+    expected_trees: int | None = None,
 ) -> tuple[list[str], list[str]]:
     """English skills.txt: tree names, then ``;Resulting Skills`` threshold names.
 
@@ -322,7 +341,11 @@ def _read_skill_overlay(
     section marker (100 trees + 209 thresholds = 309 lines).
     """
     raw = path.read_bytes()
-    text = raw.decode("utf-16") if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else raw.decode("utf-8-sig")
+    text = (
+        raw.decode("utf-16")
+        if raw.startswith((b"\xff\xfe", b"\xfe\xff"))
+        else raw.decode("utf-8-sig")
+    )
     trees: list[str] = []
     resulting: list[str] = []
     in_resulting = False
@@ -420,15 +443,15 @@ def apply_official_english_overlay(
     mark = getattr(cmap, "DUMMY_MARK", "(dummy)")
     unmapped = 0
     tree_names, skill_names = _read_skill_overlay(
-        locale_dir / "skills.txt", expected_trees=len(skill_trees),
+        locale_dir / "skills.txt",
+        expected_trees=len(skill_trees),
     )
     _require_len("skill trees", len(tree_names), len(skill_trees))
     n_thresholds = sum(len(block.thresholds) for block in skill_trees)
     _require_len("resulting skills", len(skill_names), n_thresholds)
 
     tree_map = {
-        block.name: official
-        for block, official in zip(skill_trees, tree_names, strict=True)
+        block.name: official for block, official in zip(skill_trees, tree_names, strict=True)
     }
     remapped_trees: list[SkillTreeBlock] = []
     cursor = 0
@@ -450,7 +473,9 @@ def apply_official_english_overlay(
         pieces = [row for row in armor if row.slot == slot]
         if len(names) != len(pieces):
             kept = _armor_keep_indices(
-                data_dir / f"{stem}.{armor_ext}", cmap, header_lines,
+                data_dir / f"{stem}.{armor_ext}",
+                cmap,
+                header_lines,
             )
             names = [names[i] for i in kept]
         _require_len(stem, len(names), len(pieces))
@@ -492,7 +517,8 @@ def apply_official_english_overlay(
 
 
 def _remap_charm_trees(
-    charm_types: tuple[CharmTypeData, ...], tree_map: dict[str, str],
+    charm_types: tuple[CharmTypeData, ...],
+    tree_map: dict[str, str],
 ) -> tuple[CharmTypeData, ...]:
     if not tree_map:
         return charm_types
@@ -500,8 +526,7 @@ def _remap_charm_trees(
         replace(
             kind,
             ranges=tuple(
-                replace(rng, tree=tree_map.get(rng.tree, rng.tree))
-                for rng in kind.ranges
+                replace(rng, tree=tree_map.get(rng.tree, rng.tree)) for rng in kind.ranges
             ),
         )
         for kind in charm_types
@@ -519,20 +544,26 @@ def load_charm_generation(pack_dir: Path) -> tuple[CharmTypeData, ...]:
         ranges: list[CharmSkillRange] = []
         with skill1.open(encoding="utf-8", newline="") as fh:
             for row in csv.DictReader(fh):
-                ranges.append(CharmSkillRange(
-                    tree=row["skill_tree"], skill_slot=1,
-                    min_points=int(row["min_points"]),
-                    max_points=int(row["max_points"]),
-                ))
+                ranges.append(
+                    CharmSkillRange(
+                        tree=row["skill_tree"],
+                        skill_slot=1,
+                        min_points=int(row["min_points"]),
+                        max_points=int(row["max_points"]),
+                    )
+                )
         skill2 = root / f"{code}_skill2.csv"
         if skill2.is_file():
             with skill2.open(encoding="utf-8", newline="") as fh:
                 for row in csv.DictReader(fh):
-                    ranges.append(CharmSkillRange(
-                        tree=row["skill_tree"], skill_slot=2,
-                        min_points=int(row["min_points"]),
-                        max_points=int(row["max_points"]),
-                    ))
+                    ranges.append(
+                        CharmSkillRange(
+                            tree=row["skill_tree"],
+                            skill_slot=2,
+                            min_points=int(row["min_points"]),
+                            max_points=int(row["max_points"]),
+                        )
+                    )
         slots_path = root / f"{code}_slots.csv"
         slot_thresholds: list[tuple[int, int]] = []
         if slots_path.is_file():
@@ -550,10 +581,14 @@ def load_charm_generation(pack_dir: Path) -> tuple[CharmTypeData, ...]:
                         if cut < 99:
                             max_slots = i
                     slot_thresholds.append((fulfillment, max_slots))
-        types.append(CharmTypeData(
-            code=code, max_slots=3, ranges=tuple(ranges),
-            slot_thresholds=tuple(slot_thresholds),
-        ))
+        types.append(
+            CharmTypeData(
+                code=code,
+                max_slots=3,
+                ranges=tuple(ranges),
+                slot_thresholds=tuple(slot_thresholds),
+            )
+        )
     return tuple(types)
 
 
@@ -606,8 +641,7 @@ def load_pack(manifest: PackManifest) -> PackData:
     skipped: list[str] = []
     header_lines = int(manifest.formats["armor_header_lines"])
     for slot, stem in enumerate(SLOT_FILES):
-        rows, dupes = load_armor_file(data_dir / f"{stem}.{ext}", slot, cmap,
-                                      header_lines)
+        rows, dupes = load_armor_file(data_dir / f"{stem}.{ext}", slot, cmap, header_lines)
         armor.extend(rows)
         skipped.extend(dupes)
 
@@ -616,17 +650,15 @@ def load_pack(manifest: PackManifest) -> PackData:
     else:
         raw_trees = tuple(load_skill_blocks(data_dir / "skills.txt"))
 
-    skill_trees, armor_rows, decorations, tree_map, unmapped = (
-        apply_official_english_overlay(
-            raw_trees,
-            tuple(armor),
-            tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
-            data_dir,
-            manifest.english_locale_path,
-            cmap,
-            header_lines=header_lines,
-            armor_ext=ext,
-        )
+    skill_trees, armor_rows, decorations, tree_map, unmapped = apply_official_english_overlay(
+        raw_trees,
+        tuple(armor),
+        tuple(load_decorations(data_dir / f"decorations.{ext}", cmap)),
+        data_dir,
+        manifest.english_locale_path,
+        cmap,
+        header_lines=header_lines,
+        armor_ext=ext,
     )
     return PackData(
         manifest=manifest,
@@ -635,7 +667,8 @@ def load_pack(manifest: PackManifest) -> PackData:
         decorations=decorations,
         duplicates_skipped=tuple(skipped),
         charm_types=_remap_charm_trees(
-            load_charm_generation(manifest.pack_dir), tree_map,
+            load_charm_generation(manifest.pack_dir),
+            tree_map,
         ),
         english_overlay_unmapped=unmapped,
     )

@@ -33,9 +33,7 @@ class Gate:
     def __init__(self, repo: GameDataRepository, game_id: int) -> None:
         self._repo = repo
         self._game_id = game_id
-        self._tree_ids = {
-            row["name_en"]: row["id"] for row in repo.list_skill_trees(game_id)
-        }
+        self._tree_ids = {row["name_en"]: row["id"] for row in repo.list_skill_trees(game_id)}
 
     def run(self, suite: dict[str, Any]) -> list[GateResult]:
         results: list[GateResult] = []
@@ -45,8 +43,9 @@ class Gate:
         for query in suite.get("queries", []):
             handler = getattr(self, f"_check_{query['type']}", None)
             if handler is None:
-                results.append(GateResult(query["name"], False,
-                                          f"unknown query type {query['type']!r}"))
+                results.append(
+                    GateResult(query["name"], False, f"unknown query type {query['type']!r}")
+                )
             else:
                 results.append(handler(query))
         return results
@@ -62,8 +61,9 @@ class Gate:
             for table, want in expected.items()
             if actual.get(table) != want
         }
-        return GateResult("row_counts", not mismatches,
-                          "" if not mismatches else f"mismatches: {mismatches}")
+        return GateResult(
+            "row_counts", not mismatches, "" if not mismatches else f"mismatches: {mismatches}"
+        )
 
     def _check_skill_threshold(self, query: dict[str, Any]) -> GateResult:
         tree_id = self._tree_ids.get(query["tree"])
@@ -72,20 +72,25 @@ class Gate:
         for skill in self._repo.list_skills_for_tree(tree_id):
             if skill["name_en"] == query["skill"]:
                 expect = query["expect"]
-                ok = (skill["points"] == expect["points"]
-                      and bool(skill["is_negative"]) == expect["is_negative"])
-                return GateResult(query["name"], ok,
-                                  "" if ok else f"got {skill}")
-        return GateResult(query["name"], False,
-                          f"skill {query['skill']!r} not found under {query['tree']!r}")
+                ok = (
+                    skill["points"] == expect["points"]
+                    and bool(skill["is_negative"]) == expect["is_negative"]
+                )
+                return GateResult(query["name"], ok, "" if ok else f"got {skill}")
+        return GateResult(
+            query["name"], False, f"skill {query['skill']!r} not found under {query['tree']!r}"
+        )
 
     def _check_armor_piece(self, query: dict[str, Any]) -> GateResult:
-        pieces = [p for p in self._repo.list_armor_pieces(
-            self._game_id, slot=SLOT[query["slot"]], allow_event=True)
-            if p["name_en"] == query["name_en"]]
+        pieces = [
+            p
+            for p in self._repo.list_armor_pieces(
+                self._game_id, slot=SLOT[query["slot"]], allow_event=True
+            )
+            if p["name_en"] == query["name_en"]
+        ]
         if not pieces:
-            return GateResult(query["name"], False,
-                              f"piece {query['name_en']!r} not found")
+            return GateResult(query["name"], False, f"piece {query['name_en']!r} not found")
         piece = pieces[0]
         expect = query["expect"]
         problems = _diff_scalar_fields(piece, expect)
@@ -99,11 +104,13 @@ class Gate:
         return GateResult(query["name"], not problems, "; ".join(problems))
 
     def _check_decoration(self, query: dict[str, Any]) -> GateResult:
-        decos = [d for d in self._repo.list_decorations(self._game_id, allow_event=True)
-                 if d["name_en"] == query["name_en"]]
+        decos = [
+            d
+            for d in self._repo.list_decorations(self._game_id, allow_event=True)
+            if d["name_en"] == query["name_en"]
+        ]
         if not decos:
-            return GateResult(query["name"], False,
-                              f"decoration {query['name_en']!r} not found")
+            return GateResult(query["name"], False, f"decoration {query['name_en']!r} not found")
         deco = decos[0]
         expect = query["expect"]
         problems = _diff_scalar_fields(deco, expect)
@@ -126,12 +133,16 @@ class Gate:
         hunter_type = HUNTER_TYPE[query.get("hunter_type", "both")]
         gender = GENDER.get(query.get("gender", "both"), 2)
         pieces = self._repo.list_armor_pieces(
-            self._game_id, hunter_type=hunter_type, gender=gender,
-            max_hr=query.get("hr"), max_village_stars=query.get("village_stars"))
+            self._game_id,
+            hunter_type=hunter_type,
+            gender=gender,
+            max_hr=query.get("hr"),
+            max_village_stars=query.get("village_stars"),
+        )
         piece_by_id = {p["id"]: p for p in pieces}
         decos = self._repo.list_decorations(
-            self._game_id, max_hr=query.get("hr"),
-            max_village_stars=query.get("village_stars"))
+            self._game_id, max_hr=query.get("hr"), max_village_stars=query.get("village_stars")
+        )
         deco_ids = {d["id"] for d in decos}
 
         problems = []
@@ -147,15 +158,19 @@ class Gate:
                     slot = piece["slot"]
                     per_slot_max[slot] = max(per_slot_max[slot], grant["points"])
             best_deco = max(
-                (g["points"] for g in self._repo.list_decorations_granting_tree(tree_id)
-                 if g["decoration_id"] in deco_ids and g["points"] > 0),
+                (
+                    g["points"]
+                    for g in self._repo.list_decorations_granting_tree(tree_id)
+                    if g["decoration_id"] in deco_ids and g["points"] > 0
+                ),
                 default=0,
             )
             achievable = sum(per_slot_max) + DECO_SLOT_BUDGET * best_deco
             if achievable < threshold:
                 problems.append(
                     f"{tree_name}: needs {threshold}, data reaches {achievable} "
-                    f"(per-slot max {per_slot_max}, best jewel {best_deco})")
+                    f"(per-slot max {per_slot_max}, best jewel {best_deco})"
+                )
         return GateResult(query["name"], not problems, "; ".join(problems))
 
     def _check_solver_set(self, query: dict[str, Any]) -> GateResult:
@@ -205,7 +220,8 @@ class Gate:
             pts = actual.get(tree_id, 0)
             if pts > cap:
                 return GateResult(
-                    query["name"], False,
+                    query["name"],
+                    False,
                     f"{tree_name} charm points {pts} exceed envelope {cap}",
                 )
         return GateResult(query["name"], True)
@@ -234,8 +250,9 @@ def _diff_scalar_fields(row: dict[str, Any], expect: dict[str, Any]) -> list[str
     return problems
 
 
-def run_gate(repo: GameDataRepository, game_id: int,
-             pack_dir: Path) -> tuple[bool, list[GateResult]]:
+def run_gate(
+    repo: GameDataRepository, game_id: int, pack_dir: Path
+) -> tuple[bool, list[GateResult]]:
     suite_path = pack_dir / "known_queries.yaml"
     suite = yaml.safe_load(suite_path.read_text(encoding="utf-8"))
     results = Gate(repo, game_id).run(suite)

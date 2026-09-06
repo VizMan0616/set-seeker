@@ -21,15 +21,15 @@ from app.repository.game_data import GameDataRepository
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_dockerfile_and_dockerignore_ship_mhp3():
+def test_dockerfile_dependency_only_image_and_vendored_packs():
+    """ADR 0013: image installs deps only; MHFU/MHP3 data lives under packs/."""
     dockerfile = (REPO_ROOT / "Dockerfile").read_text()
     dockerignore = (REPO_ROOT / ".dockerignore").read_text()
-    assert "COPY sources/MHFU-ASS" in dockerfile
-    assert "COPY sources/MHP3-ASS" in dockerfile
-    assert "--pack mhfu" in dockerfile
-    assert "--pack mhp3" in dockerfile
-    assert "!sources/MHFU-ASS" in dockerignore
-    assert "!sources/MHP3-ASS" in dockerignore
+    assert "COPY pyproject.toml" in dockerfile
+    assert "COPY docker/entrypoint.sh" in dockerfile
+    assert "packs" in dockerignore
+    assert (REPO_ROOT / "packs/mhfu/vendor/data/head.csv").is_file()
+    assert (REPO_ROOT / "packs/mhp3/vendor/data/head.txt").is_file()
 
 
 @pytest.fixture(scope="module")
@@ -39,9 +39,11 @@ def dual_pack_db(tmp_path_factory):
     url = f"sqlite:///{db_path}"
     for pack in ("mhfu", "mhp3"):
         proc = subprocess.run(
-            [sys.executable, "-m", "app.etl", "--pack", pack,
-             "--database-url", url],
-            cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+            [sys.executable, "-m", "app.etl", "--pack", pack, "--database-url", url],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=600,
             check=False,
         )
         assert proc.returncode == 0, proc.stderr + proc.stdout
@@ -71,7 +73,8 @@ def test_picker_lists_mhp3(dual_pack_db, monkeypatch):
     # MHFU dummy pieces exist; MHP3 catalog must not claim them.
     import json
     import re
-    raw = re.search(r'id="ss-catalogs">(.+?)</script>', html, re.S)
+
+    raw = re.search(r'id="ss-catalogs">(.+?)</script>', html, re.DOTALL)
     catalogs = json.loads(raw.group(1))
     assert catalogs["mhfu"]["has_dummy"] is True
     assert catalogs["mhp3"]["has_dummy"] is False
@@ -90,8 +93,7 @@ def test_stale_mhfu_search_url_follows_game_picker(dual_pack_db, monkeypatch):
         repo = GameDataRepository(create_engine(dual_pack_db))
         game = repo.get_game_by_code("mhp3")
         skill = next(
-            s for s in repo.list_skills_for_game(game["id"])
-            if s["name_en"] == "Attack Up (S)"
+            s for s in repo.list_skills_for_game(game["id"]) if s["name_en"] == "Attack Up (S)"
         )
         response = client.post(
             "/games/mhfu/search",
@@ -117,9 +119,9 @@ def test_stale_mhfu_search_url_follows_game_picker(dual_pack_db, monkeypatch):
 def test_one_real_mhp3_query(dual_pack_db):
     repo = GameDataRepository(create_engine(dual_pack_db))
     pack = PackLoader(repo)("mhp3")
-    trees = {t["name_en"]: t["id"] for t in repo.list_skill_trees(
-        repo.get_game_by_code("mhp3")["id"]
-    )}
+    trees = {
+        t["name_en"]: t["id"] for t in repo.list_skill_trees(repo.get_game_by_code("mhp3")["id"])
+    }
     query = Query(
         game="mhp3",
         skills=(
@@ -135,17 +137,18 @@ def test_one_real_mhp3_query(dual_pack_db):
         charm_mode="two_skill",
     )
     outcome = solve_one(
-        pack=pack, pruned=prune(pack, query), query=query,
-        exclusions=[], time_limit_ms=5000,
+        pack=pack,
+        pruned=prune(pack, query),
+        query=query,
+        exclusions=[],
+        time_limit_ms=5000,
     )
     assert outcome.status == "optimal"
     result = outcome.result
     assert result is not None
     assert result.charm_id is not None
     tree_of_skill = {sk.id: sk.tree_id for sk in pack.skills}
-    achieved = {
-        tree_of_skill[skill_id]: pts for skill_id, pts in result.active_skills
-    }
+    achieved = {tree_of_skill[skill_id]: pts for skill_id, pts in result.active_skills}
     assert achieved[trees["Attack"]] >= 20
     assert achieved[trees["Sharpness"]] >= 10
 

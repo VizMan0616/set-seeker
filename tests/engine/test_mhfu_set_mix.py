@@ -45,7 +45,8 @@ def _hardest(n: int) -> list[dict]:
 
 def _positive_skills(record: dict) -> list[dict]:
     return [
-        s for s in record["skills"]
+        s
+        for s in record["skills"]
         if s["mapped"] and s["min_points"] is not None and s["min_points"] > 0
     ]
 
@@ -130,8 +131,7 @@ def _combo_points_and_slots(record: dict, piece_rows: list[dict], ctx: dict):
         return None
 
     for slot, key in enumerate(SLOTS):
-        err = place(record["pieces"][key]["jewels"], engine_pieces[slot].slots,
-                    body=slot == BODY)
+        err = place(record["pieces"][key]["jewels"], engine_pieces[slot].slots, body=slot == BODY)
         if err:
             return None, err
     err = place(record["weapon_jewels"], record["weapon_slots"] or 0, body=False)
@@ -199,9 +199,9 @@ def _pass_b(record: dict, mhfu_pack, gender: str):
         skills=tuple(reqs),
         weapon_slots=record["weapon_slots"] or 0,
         gender=gender,
-        hunter_type=record["hunter_type"] if record["hunter_type"] in (
-            "blademaster", "gunner"
-        ) else "blademaster",
+        hunter_type=record["hunter_type"]
+        if record["hunter_type"] in ("blademaster", "gunner")
+        else "blademaster",
         hr=None,
         village_stars=None,
         allow_event=True,

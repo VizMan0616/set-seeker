@@ -1,0 +1,19 @@
+# Traefik static config — HTTP-first (no domain required).
+# When a domain is ready, add websecure entrypoint + ACME resolver here.
+# See docker/README.md § Production deployment.
+
+api:
+  dashboard: false
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: setseeker-public
+
+log:
+  level: INFO

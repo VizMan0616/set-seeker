@@ -40,24 +40,18 @@ ALIASES_PATH = REPO / "packs" / "mhfu" / "name_aliases.yaml"
 SLOTS = ("head", "body", "arms", "waist", "legs")
 WORD_NUM = {"one": 1, "two": 2, "three": 3}
 
-WEAPON_RE = re.compile(
-    r"^(?:(\d+)|(one|two|three))[-\s]+slot\s+weapons?$", re.I
-)
-GEM_RE = re.compile(
-    r"\[Gem\s*:?\s*\d+\s*:?\s*([^\]]+?)\]", re.I
-)
-GEM_LOOSE_RE = re.compile(
-    r"\[Gem\s*:?\s*\d+\s*:?\s*(.+)$", re.I
-)
-HR_RE = re.compile(r"\bHR\s*(\d+)\b", re.I)
-BBCODE_RE = re.compile(r"\[/?[bi]\]", re.I)
+WEAPON_RE = re.compile(r"^(?:(\d+)|(one|two|three))[-\s]+slot\s+weapons?$", re.IGNORECASE)
+GEM_RE = re.compile(r"\[Gem\s*:?\s*\d+\s*:?\s*([^\]]+?)\]", re.IGNORECASE)
+GEM_LOOSE_RE = re.compile(r"\[Gem\s*:?\s*\d+\s*:?\s*(.+)$", re.IGNORECASE)
+HR_RE = re.compile(r"\bHR\s*(\d+)\b", re.IGNORECASE)
+BBCODE_RE = re.compile(r"\[/?[bi]\]", re.IGNORECASE)
 SEP_RE = re.compile(r"^_+$")
-POST_RE = re.compile(r"^(?:post|posted)\s+by\b", re.I)
-NO_GEM_RE = re.compile(r"^\[no gems?\]?$", re.I)
+POST_RE = re.compile(r"^(?:post|posted)\s+by\b", re.IGNORECASE)
+NO_GEM_RE = re.compile(r"^\[no gems?\]?$", re.IGNORECASE)
 PROSE_RE = re.compile(
     r"^(note:|i |this |alternatively|quite simply|after gemming|"
     r"it can |works |looks |has about|i made|i do |i use |the auto)",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -175,7 +169,9 @@ class NameMaps:
         for src, dst in (extra.get("armor") or {}).items():
             canon = self.armor.get(norm(dst), dst)
             if canon not in official_armor:
-                raise SystemExit(f"name_aliases.yaml armor target not in pack: {dst!r} -> {canon!r}")
+                raise SystemExit(
+                    f"name_aliases.yaml armor target not in pack: {dst!r} -> {canon!r}"
+                )
             self.armor[norm(src)] = canon
         for src, dst in (extra.get("decorations") or {}).items():
             canon = self.deco.get(norm(dst), dst)
@@ -200,7 +196,7 @@ class NameMaps:
         self.armor_by_slot[slot][k] = canonical
 
     def map_armor(self, source: str, slot: int | None = None) -> str | None:
-        source = re.sub(r"\s*\((?:gunner|blademaster|blade)\)\s*$", "", source, flags=re.I)
+        source = re.sub(r"\s*\((?:gunner|blademaster|blade)\)\s*$", "", source, flags=re.IGNORECASE)
         k = norm(source)
         if slot is not None:
             hit = self.armor.get(k) or self.armor_by_slot[slot].get(k)
@@ -289,7 +285,9 @@ def parse_mix(text: str) -> list[dict]:
         current.append(line)
     if current:
         blocks.append((hunter, start_line, current))
-    return [_parse_block(h, sl, body, lines) for h, sl, body in blocks if any(x.strip() for x in body)]
+    return [
+        _parse_block(h, sl, body, lines) for h, sl, body in blocks if any(x.strip() for x in body)
+    ]
 
 
 def _parse_block(hunter: str, start_line: int, body: list[str], all_lines: list[str]) -> dict:
@@ -413,12 +411,14 @@ def _jewel_entries(names: list[str], maps: NameMaps) -> list[dict]:
         name_en = maps.map_deco(src)
         if name_en is None:
             maps.unmapped_deco.add(src)
-        out.append({
-            "source_name": src,
-            "name_en": name_en,
-            "count": counts[src],
-            "mapped": name_en is not None,
-        })
+        out.append(
+            {
+                "source_name": src,
+                "name_en": name_en,
+                "count": counts[src],
+                "mapped": name_en is not None,
+            }
+        )
     return out
 
 
@@ -451,22 +451,26 @@ def _skill_entries(names: list[str], maps: NameMaps) -> list[dict]:
         name_en = maps.map_skill(src)
         if name_en is None:
             maps.unmapped_skill.add(src)
-            out.append({
-                "source_name": src,
-                "skill_name_en": None,
-                "tree_name": None,
-                "min_points": None,
-                "mapped": False,
-            })
+            out.append(
+                {
+                    "source_name": src,
+                    "skill_name_en": None,
+                    "tree_name": None,
+                    "min_points": None,
+                    "mapped": False,
+                }
+            )
             continue
         meta = maps.skill_meta.get(name_en, {})
-        out.append({
-            "source_name": src,
-            "skill_name_en": name_en,
-            "tree_name": meta.get("tree_name"),
-            "min_points": meta.get("min_points"),
-            "mapped": True,
-        })
+        out.append(
+            {
+                "source_name": src,
+                "skill_name_en": name_en,
+                "tree_name": meta.get("tree_name"),
+                "min_points": meta.get("min_points"),
+                "mapped": True,
+            }
+        )
     return out
 
 
@@ -511,8 +515,7 @@ def _pass_a_against_pack(record: dict, pack) -> str | None:
         return None
 
     for slot, key in enumerate(SLOTS):
-        err = place(record["pieces"][key]["jewels"], pieces[slot].slots,
-                    body=slot == 1)
+        err = place(record["pieces"][key]["jewels"], pieces[slot].slots, body=slot == 1)
         if err:
             return err
     err = place(record["weapon_jewels"], record["weapon_slots"] or 0, body=False)
@@ -558,8 +561,7 @@ def build() -> dict:
         weapon_jewels = _jewel_entries(p["weapon_jewels_src"], maps)
         skills = _skill_entries(p["skills_src"], maps)
         piece_mapped = all(
-            pieces_out[s].get("mapped") and not pieces_out[s].get("missing")
-            for s in SLOTS
+            pieces_out[s].get("mapped") and not pieces_out[s].get("missing") for s in SLOTS
         )
         jewel_lists = [weapon_jewels] + [pieces_out[s]["jewels"] for s in SLOTS]
         jewels_mapped = all(j["mapped"] for lst in jewel_lists for j in lst)
@@ -592,8 +594,7 @@ def build() -> dict:
             "pieces": pieces_out,
             "weapon_jewels": weapon_jewels,
             "jewels": _jewel_entries(
-                p["weapon_jewels_src"]
-                + [g for _, gems in src_pieces for g in gems],
+                p["weapon_jewels_src"] + [g for _, gems in src_pieces for g in gems],
                 maps,
             ),
             "skills": skills,

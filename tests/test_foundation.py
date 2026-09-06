@@ -26,7 +26,7 @@ def test_app_fails_clearly_when_no_pack_is_loaded(tmp_path, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/empty.db")
     get_settings.cache_clear()
     get_engine.cache_clear()
-    with pytest.raises(RuntimeError, match="python -m app.etl"):
+    with pytest.raises(RuntimeError, match="python -m app.bootstrap"):
         create_app()
 
 
@@ -36,17 +36,36 @@ def test_bulk_insert_and_delete_game_data(packed_db):
     assert len(base_rows) == 3
 
     def bulk_helm(piece_id: int, name: str) -> dict:
-        return {"id": piece_id, "game_id": GAME_ID, "slot": 0, "name_en": name,
-                "rarity": 1, "slots": 0, "gender": 2, "hunter_type": 2,
-                "hr_required": 0, "village_stars": 0, "defense": 1, "max_defense": 1,
-                "res_fire": 0, "res_water": 0, "res_ice": 0, "res_thunder": 0,
-                "res_dragon": 0, "torso_inc": False, "is_event": False,
-                "is_dummy": False}
+        return {
+            "id": piece_id,
+            "game_id": GAME_ID,
+            "slot": 0,
+            "name_en": name,
+            "rarity": 1,
+            "slots": 0,
+            "gender": 2,
+            "hunter_type": 2,
+            "hr_required": 0,
+            "village_stars": 0,
+            "defense": 1,
+            "max_defense": 1,
+            "res_fire": 0,
+            "res_water": 0,
+            "res_ice": 0,
+            "res_thunder": 0,
+            "res_dragon": 0,
+            "torso_inc": False,
+            "is_event": False,
+            "is_dummy": False,
+        }
 
-    repo.bulk_insert(t.armor_pieces, [
-        bulk_helm(9001, "Bulk Helm A"),
-        bulk_helm(9002, "Bulk Helm B"),
-    ])
+    repo.bulk_insert(
+        t.armor_pieces,
+        [
+            bulk_helm(9001, "Bulk Helm A"),
+            bulk_helm(9002, "Bulk Helm B"),
+        ],
+    )
     assert len(repo.list_armor_pieces(GAME_ID, slot=0, allow_event=True)) == 5
 
     repo.delete_game_data(GAME_ID)

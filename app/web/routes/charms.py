@@ -29,12 +29,11 @@ def _tree_options(request: Request, game: str) -> list[dict]:
     row = request.app.state.game_data.get_game_by_code(game)
     skip = (
         torso_inc_display_name(request.app.state.game_data, row["id"], row.get("features"))
-        if row is not None else None
+        if row is not None
+        else None
     )
     return [
-        tree
-        for tree in request.app.state.catalog.list_skill_trees(game)
-        if tree["name"] != skip
+        tree for tree in request.app.state.catalog.list_skill_trees(game) if tree["name"] != skip
     ]
 
 

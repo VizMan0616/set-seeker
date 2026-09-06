@@ -82,8 +82,11 @@ def user_data_repo():
     with engine.begin() as conn:
         conn.execute(
             tables.games.insert().values(
-                id=1, code="mhfu", name="Monster Hunter Freedom Unite",
-                generation=2, features="{}",
+                id=1,
+                code="mhfu",
+                name="Monster Hunter Freedom Unite",
+                generation=2,
+                features="{}",
             )
         )
     return UserDataRepository(engine)

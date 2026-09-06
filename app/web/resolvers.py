@@ -11,7 +11,6 @@ from typing import Any
 
 from app.repository.game_data import GameDataRepository
 
-
 DEFAULT_DESIRED_SKILLS_MAX = 5
 DEFAULT_CHARM_POINTS = {
     "skill1_min": 1,
@@ -45,7 +44,9 @@ def desired_skills_max(features_json: str | None) -> int:
 
 
 def torso_inc_display_name(
-    repo: GameDataRepository, game_id: int, features_json: str | None,
+    repo: GameDataRepository,
+    game_id: int,
+    features_json: str | None,
 ) -> str | None:
     """Pack's Torso Inc / Torso Up label, or None if the mechanic is absent.
 
@@ -167,7 +168,9 @@ class RepositoryCatalog:
             "talismans": bool(json.loads(row["features"] or "{}").get("talismans", False)),
             "has_dummy": self._repo.has_dummy_pieces(game_id),
             "torso_inc_name": torso_inc_display_name(
-                self._repo, game_id, row["features"],
+                self._repo,
+                game_id,
+                row["features"],
             ),
             "progression": progression_caps(row["features"]),
             "desired_skills_max": desired_skills_max(row["features"]),

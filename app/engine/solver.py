@@ -88,9 +88,7 @@ def solve_one(
             if pts < 0:
                 live.add(tree_id)
     modeled_bad = tuple(
-        (tree_id, threshold)
-        for tree_id, threshold in pruned.bad_tree_thresholds
-        if tree_id in live
+        (tree_id, threshold) for tree_id, threshold in pruned.bad_tree_thresholds if tree_id in live
     )
     # allow_bad off: hard floors + fixer jewels only for penalties reachable on
     # armor/charms (modeled_bad). allow_bad on: reified penalty tier for every
@@ -98,15 +96,11 @@ def solve_one(
     if query.allow_bad_skills:
         penalty_thresholds = pruned.bad_tree_thresholds
         trees = tuple(
-            dict.fromkeys(
-                [*pruned.requested_trees, *[t for t, _ in pruned.bad_tree_thresholds]]
-            )
+            dict.fromkeys([*pruned.requested_trees, *[t for t, _ in pruned.bad_tree_thresholds]])
         )
     else:
         penalty_thresholds = modeled_bad
-        trees = tuple(
-            dict.fromkeys([*pruned.requested_trees, *[t for t, _ in modeled_bad]])
-        )
+        trees = tuple(dict.fromkeys([*pruned.requested_trees, *[t for t, _ in modeled_bad]]))
 
     # --- one index variable per slot over equivalence-class representatives ---
     x = [
@@ -128,9 +122,7 @@ def solve_one(
         element(s, [r.defense for r in reps[s]], f"defense_{s}") for s in range(SLOT_COUNT)
     ]
     piece_pts = {
-        (s, t): element(
-            s, [dict(r.skills).get(t, 0) for r in reps[s]], f"pts_{s}_{t}"
-        )
+        (s, t): element(s, [dict(r.skills).get(t, 0) for r in reps[s]], f"pts_{s}_{t}")
         for s in range(SLOT_COUNT)
         for t in trees
     }
@@ -152,9 +144,7 @@ def solve_one(
         charm_x, [charm_strength(c.slots, c.skills) for c in charms], "charm_strength"
     )
     charm_pts = {
-        t: element_of(
-            charm_x, [dict(c.skills).get(t, 0) for c in charms], f"charm_pts_{t}"
-        )
+        t: element_of(charm_x, [dict(c.skills).get(t, 0) for c in charms], f"charm_pts_{t}")
         for t in trees
     }
 
@@ -179,12 +169,8 @@ def solve_one(
 
     for s in range(SLOT_COUNT):
         model.add(sum(d.size * place[d.id, s] for d in decos) <= slots_var[s])
-    model.add(
-        sum(d.size * place[d.id, WEAPON_BUCKET] for d in decos) <= query.weapon_slots
-    )
-    model.add(
-        sum(d.size * place[d.id, CHARM_BUCKET] for d in decos) <= charm_slots_var
-    )
+    model.add(sum(d.size * place[d.id, WEAPON_BUCKET] for d in decos) <= query.weapon_slots)
+    model.add(sum(d.size * place[d.id, CHARM_BUCKET] for d in decos) <= charm_slots_var)
 
     # --- points per tracked tree (body piece and body-socketed jewels doubled
     # under Torso Inc) ---
@@ -192,9 +178,7 @@ def solve_one(
         (abs(v) for s in range(SLOT_COUNT) for r in reps[s] for v in dict(r.skills).values()),
         default=0,
     )
-    max_deco = max(
-        (abs(v) for d in decos for v in deco_skills[d.id].values()), default=0
-    )
+    max_deco = max((abs(v) for d in decos for v in deco_skills[d.id].values()), default=0)
     max_charm = max(
         (abs(p) for c in charms for _, p in c.skills),
         default=0,
@@ -240,9 +224,7 @@ def solve_one(
             penalty_terms.append(active)
 
     # --- exclusions (iterate-and-exclude, ADR 0005): representative id tuples ---
-    id_to_idx = [
-        {r.id: i for i, r in enumerate(reps[s])} for s in range(SLOT_COUNT)
-    ]
+    id_to_idx = [{r.id: i for i, r in enumerate(reps[s])} for s in range(SLOT_COUNT)]
     charm_id_to_idx = {c.id: i for i, c in enumerate(charms)}
     for n, excl in enumerate(exclusions):
         padded = tuple(excl) + (NONE_CHARM_ID,) if len(excl) == SLOT_COUNT else tuple(excl)
@@ -280,13 +262,10 @@ def solve_one(
     elif query.sort in _RES_ATTR:
         attr = _RES_ATTR[query.sort]
         res_var = [
-            element(s, [getattr(r, attr) for r in reps[s]], f"res_{s}")
-            for s in range(SLOT_COUNT)
+            element(s, [getattr(r, attr) for r in reps[s]], f"res_{s}") for s in range(SLOT_COUNT)
         ]
         tie = sum(res_var)
-        tie_bound = (
-            sum(max(abs(getattr(r, attr)) for r in reps[s]) for s in range(SLOT_COUNT)) + 1
-        )
+        tie_bound = sum(max(abs(getattr(r, attr)) for r in reps[s]) for s in range(SLOT_COUNT)) + 1
     else:  # "defense" / "slots" are already objective tiers
         tie = 0
         tie_bound = 1
@@ -325,9 +304,7 @@ def solve_one(
     if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         return SolveOutcome("unknown", None)
 
-    result = _extract(
-        solver, pruned, query, x, deco_count, place, points, decos, charms, charm_x
-    )
+    result = _extract(solver, pruned, query, x, deco_count, place, points, decos, charms, charm_x)
     if not rank:
         return SolveOutcome("unranked", result)
     return SolveOutcome("optimal" if status == cp_model.OPTIMAL else "feasible", result)
@@ -395,9 +372,7 @@ def _extract(
         if 1 <= remaining <= 3:
             spare[remaining - 1] += 1
 
-    achieved = _assignment_points(
-        chosen, chosen_charm, query, decos, place, solver
-    )
+    achieved = _assignment_points(chosen, chosen_charm, query, decos, place, solver)
     achieved.update({t: solver.value(v) for t, v in points.items()})
     thresholds_by_tree: dict[int, list] = {}
     for sk in pruned.skills:

@@ -161,13 +161,9 @@ def test_exclusions_include_charm_so_same_armor_can_recur():
         CharmSpec(id=11, slots=0, skills=((ATTACK_TREE, 10),)),
         CharmSpec(id=12, slots=3, skills=((ATTACK_TREE, 10),)),
     )
-    query = make_query(
-        min_points=25, game="mhp3", use_generated_charms=False, user_charms=charms
-    )
+    query = make_query(min_points=25, game="mhp3", use_generated_charms=False, user_charms=charms)
     pruned = prune(pack, query)
-    first = solve_one(
-        pack=pack, pruned=pruned, query=query, exclusions=[], time_limit_ms=2000
-    )
+    first = solve_one(pack=pack, pruned=pruned, query=query, exclusions=[], time_limit_ms=2000)
     assert first.result is not None
     charm = first.result.charm_id if first.result.charm_id is not None else 0
     second = solve_one(

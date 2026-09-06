@@ -11,9 +11,7 @@ from tests.fixtures import tiny_pack
 
 _PIECE_STATS = {
     piece_id: (attack_pts, slots)
-    for rows in (
-        tiny_pack.HEAD, tiny_pack.BODY, tiny_pack.ARMS, tiny_pack.WAIST, tiny_pack.LEGS
-    )
+    for rows in (tiny_pack.HEAD, tiny_pack.BODY, tiny_pack.ARMS, tiny_pack.WAIST, tiny_pack.LEGS)
     for piece_id, attack_pts, slots in rows
 }
 _DECO_STATS = {deco_id: (size, pts) for deco_id, size, pts in tiny_pack.DECORATIONS}
@@ -105,7 +103,12 @@ def test_start_search_persists_inf_rel_snapshot(search_service, user_data_repo):
     state = user_data_repo.get_search_state(page.search_id)
     snapshot = json.loads(state["query_json"])["domain_snapshot"]
     assert set(snapshot["kinds"]) == {
-        "head", "body", "arms", "waist", "legs", "decorations",
+        "head",
+        "body",
+        "arms",
+        "waist",
+        "legs",
+        "decorations",
     }
     waist = snapshot["kinds"]["waist"]
     assert 11 in waist["inf_ids"]
@@ -162,12 +165,8 @@ def test_shown_cap_counts_expanded_units(user_data_repo, tiny_pack_data):
         shown_cap=3,
         page_size=10,
     )
-    grouped = service.start_search(
-        "cap-grp", make_query(min_points=10, expand_equivalents=False)
-    )
-    expanded = service.start_search(
-        "cap-exp", make_query(min_points=10, expand_equivalents=True)
-    )
+    grouped = service.start_search("cap-grp", make_query(min_points=10, expand_equivalents=False))
+    expanded = service.start_search("cap-exp", make_query(min_points=10, expand_equivalents=True))
     assert grouped.shown_count == 3
     assert grouped.exhausted
     assert expanded.shown_count >= 3

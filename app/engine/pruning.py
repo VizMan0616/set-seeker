@@ -26,19 +26,19 @@ _HUNTER_TYPE_CODE = {"blademaster": 0, "gunner": 1}
 @dataclass(frozen=True)
 class EquivalenceClass:
     representative: ArmorPiece
-    members: tuple[ArmorPiece, ...]      # includes the representative, best defense first
+    members: tuple[ArmorPiece, ...]  # includes the representative, best defense first
 
 
 @dataclass(frozen=True)
 class PrunedPack:
-    classes: tuple[tuple[EquivalenceClass, ...], ...]   # per armor slot, len 5
+    classes: tuple[tuple[EquivalenceClass, ...], ...]  # per armor slot, len 5
     decorations: tuple[Decoration, ...]
     requested_trees: tuple[int, ...]
     # (tree_id, threshold) for every negative skill tree. Per tree, the
     # threshold closest to zero (first penalty that activates). Used as a hard
     # floor when allow_bad_skills is off, and as an objective count when on.
     bad_tree_thresholds: tuple[tuple[int, int], ...]
-    skills: tuple[SkillThreshold, ...]   # all pack thresholds, for result reporting
+    skills: tuple[SkillThreshold, ...]  # all pack thresholds, for result reporting
     # Advanced Search: inf = hard + relevance; skyline = dominance rel (Default).
     inf_piece_ids: tuple[tuple[int, ...], ...] = ()
     skyline_piece_ids: tuple[tuple[int, ...], ...] = ()
@@ -126,9 +126,7 @@ def relevance_filter_decorations(
     ]
 
 
-def _negative_skill_trees(
-    pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]
-) -> set[int]:
+def _negative_skill_trees(pieces: list[ArmorPiece], charms: tuple[CharmSpec, ...]) -> set[int]:
     """Trees that can actually go below zero on the solver domain."""
     trees: set[int] = set()
     for piece in pieces:
@@ -247,9 +245,7 @@ def prune(pack: PackData, query: Query) -> PrunedPack:
         skyline = dominance_prune(inf, requested)
         inf_piece_ids.append(tuple(sorted(p.id for p in inf)))
         skyline_piece_ids.append(tuple(sorted(p.id for p in skyline)))
-        rel = _solver_subset(
-            inf, skyline=skyline, excluded=excluded_p, forced=forced_p
-        )
+        rel = _solver_subset(inf, skyline=skyline, excluded=excluded_p, forced=forced_p)
         classes_per_slot.append(equivalence_collapse(rel, requested))
 
     base_charms = charm_candidates(

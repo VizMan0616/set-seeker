@@ -36,9 +36,7 @@ def test_solve_does_not_hold_service_lock(user_data_repo, tiny_pack_data, monkey
         return real(*args, **kwargs)
 
     monkeypatch.setattr(svc_mod, "solve_one", gated)
-    service = CpSatSearchService(
-        user_data_repo, lambda game: tiny_pack_data, time_limit_ms=2000
-    )
+    service = CpSatSearchService(user_data_repo, lambda game: tiny_pack_data, time_limit_ms=2000)
 
     def run():
         return service.start_search("lock-sess", make_query(min_points=10))

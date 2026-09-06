@@ -54,7 +54,7 @@ def test_index_renders_search_form(client: TestClient):
     assert 'name="game"' in html
     assert 'id="advanced-open"' in html
     assert 'id="advanced-modal"' in html
-    assert 'disabled' in html.split('id="advanced-open"')[1].split(">")[0]
+    assert "disabled" in html.split('id="advanced-open"')[1].split(">")[0]
     assert 'name="excluded_piece_id"' not in html
     assert 'name="rel_piece_id"' not in html
     # weapon slots, gender, hunter type, HR/village filters
@@ -214,10 +214,16 @@ def test_search_rejects_six_skills_on_mhfu(packed_db, client: TestClient):
         tree_id = 50 + n
         skill_id = 50 + n
         packed_db.create_skill_tree(
-            id=tree_id, game_id=1, name_en=f"Extra{n}", name_ja=f"Extra{n}",
+            id=tree_id,
+            game_id=1,
+            name_en=f"Extra{n}",
+            name_ja=f"Extra{n}",
         )
         packed_db.create_skill(
-            id=skill_id, tree_id=tree_id, name_en=f"Extra Skill {n}", points=10,
+            id=skill_id,
+            tree_id=tree_id,
+            name_en=f"Extra Skill {n}",
+            points=10,
         )
         ids.append(str(skill_id))
     too_many = client.post(
@@ -302,18 +308,31 @@ def test_torso_inc_checkbox_uses_skill_tree_name(packed_db):
     import json
 
     packed_db.create_skill_tree(
-        id=20, game_id=1, name_en="Torso Inc", name_ja="胴系統倍加",
+        id=20,
+        game_id=1,
+        name_en="Torso Inc",
+        name_ja="胴系統倍加",
     )
     packed_db.create_armor_piece(
-        id=80, game_id=1, slot=4, name_en="Torso Greaves", rarity=1, slots=0,
-        gender=2, hunter_type=2, defense=1, max_defense=1,
-        res_fire=0, res_water=0, res_ice=0, res_thunder=0, res_dragon=0,
+        id=80,
+        game_id=1,
+        slot=4,
+        name_en="Torso Greaves",
+        rarity=1,
+        slots=0,
+        gender=2,
+        hunter_type=2,
+        defense=1,
+        max_defense=1,
+        res_fire=0,
+        res_water=0,
+        res_ice=0,
+        res_thunder=0,
+        res_dragon=0,
         torso_inc=True,
     )
     html = TestClient(create_app()).get("/").text
-    catalogs = json.loads(
-        html.split('id="ss-catalogs">', 1)[1].split("</script>", 1)[0]
-    )
+    catalogs = json.loads(html.split('id="ss-catalogs">', 1)[1].split("</script>", 1)[0])
     assert catalogs["mhfu"]["torso_inc_name"] == "Torso Inc"
     assert "Allow Torso Inc" in html
 
@@ -352,9 +371,7 @@ def test_health_during_inflight_search(packed_db, monkeypatch):
     sock.bind(("127.0.0.1", 0))
     host, port = sock.getsockname()
     sock.close()
-    server = uvicorn.Server(
-        uvicorn.Config(app, host=host, port=port, log_level="error")
-    )
+    server = uvicorn.Server(uvicorn.Config(app, host=host, port=port, log_level="error"))
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     try:

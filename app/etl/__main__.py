@@ -17,9 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _run_one_pack(pack_id: str, *, skip_gate: bool) -> int:
-    from alembic import command
     from alembic.config import Config
 
+    from alembic import command
     from app.config import get_settings
     from app.db import create_engine_from_settings
     from app.etl.gate import run_gate
@@ -42,8 +42,10 @@ def _run_one_pack(pack_id: str, *, skip_gate: bool) -> int:
     print(f"[etl] loading pack {manifest.id!r} from {manifest.source_data_path}")
     data = load_pack(manifest)
     if data.duplicates_skipped:
-        print(f"[etl] skipped legacy (name, gender) duplicates: "
-              f"{sorted(set(data.duplicates_skipped))}")
+        print(
+            f"[etl] skipped legacy (name, gender) duplicates: "
+            f"{sorted(set(data.duplicates_skipped))}"
+        )
 
     counts = PackWriter(repo).rebuild_pack(manifest, data)
     print(f"[etl] database: {settings.DATABASE_URL}")
@@ -73,12 +75,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.etl")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--pack", help="pack id, e.g. mhfu")
-    group.add_argument("--all", action="store_true",
-                       help="load every pack under packs/")
-    parser.add_argument("--database-url", default=None,
-                        help="override DATABASE_URL (default: app config)")
-    parser.add_argument("--skip-gate", action="store_true",
-                        help="load data without running the validation gate")
+    group.add_argument("--all", action="store_true", help="load every pack under packs/")
+    parser.add_argument(
+        "--database-url", default=None, help="override DATABASE_URL (default: app config)"
+    )
+    parser.add_argument(
+        "--skip-gate", action="store_true", help="load data without running the validation gate"
+    )
     args = parser.parse_args(argv)
 
     if args.database_url:

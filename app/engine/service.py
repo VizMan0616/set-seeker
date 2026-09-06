@@ -41,9 +41,7 @@ from app.repository.user_data import UserDataRepository
 class SearchBusyError(Exception):
     """No global solve slot within the queue wait (other users still served)."""
 
-    def __init__(
-        self, message: str = "The search engine is busy. Try again in a moment."
-    ) -> None:
+    def __init__(self, message: str = "The search engine is busy. Try again in a moment.") -> None:
         super().__init__(message)
         self.message = message
 
@@ -80,9 +78,7 @@ def _query_to_json(query: Query) -> str:
     )
 
 
-def _with_tally(
-    query_json: str, *, delivered: int, found_total: int | None = None
-) -> str:
+def _with_tally(query_json: str, *, delivered: int, found_total: int | None = None) -> str:
     payload = json.loads(query_json)
     payload["delivered"] = delivered
     if found_total is not None:
@@ -111,8 +107,7 @@ def _result_to_json(result: ArmorSetResult) -> dict:
         "piece_ids": list(result.piece_ids),
         "alternates": [list(a) for a in result.alternates],
         "decorations": [
-            {"decoration_id": d.decoration_id, "count": d.count}
-            for d in result.decorations
+            {"decoration_id": d.decoration_id, "count": d.count} for d in result.decorations
         ],
         "charm_id": result.charm_id,
         "active_skills": [list(p) for p in result.active_skills],
@@ -128,9 +123,7 @@ def _result_from_json(d: dict) -> ArmorSetResult:
         piece_ids=tuple(d["piece_ids"]),
         alternates=tuple(tuple(a) for a in d["alternates"]),
         decorations=tuple(
-            DecorationAssignment(
-                decoration_id=x["decoration_id"], count=x["count"]
-            )
+            DecorationAssignment(decoration_id=x["decoration_id"], count=x["count"])
             for x in d["decorations"]
         ),
         charm_id=d["charm_id"],
@@ -138,9 +131,7 @@ def _result_from_json(d: dict) -> ArmorSetResult:
         spare_slots=tuple(d["spare_slots"]),
         defense=d["defense"],
         charm_slots=int(d.get("charm_slots") or 0),
-        charm_skills=tuple(
-            (int(a), int(b)) for a, b in d.get("charm_skills") or ()
-        ),
+        charm_skills=tuple((int(a), int(b)) for a, b in d.get("charm_skills") or ()),
     )
 
 
@@ -315,9 +306,7 @@ class CpSatSearchService:
                 )
                 if exact:
                     remaining = extra
-                    tally = _with_tally(
-                        tally, delivered=shown, found_total=shown + extra
-                    )
+                    tally = _with_tally(tally, delivered=shown, found_total=shown + extra)
                 else:
                     remaining = None
                     tally = _with_tally(tally, delivered=shown)
@@ -350,9 +339,7 @@ class CpSatSearchService:
     def load_more(self, session_id: str, search_id: str) -> SearchPage:
         page = self._load_more_body(session_id, search_id)
         if not page.exhausted:
-            self._schedule_prefetch(
-                session_id, search_id, self._session_epoch.get(session_id, 0)
-            )
+            self._schedule_prefetch(session_id, search_id, self._session_epoch.get(session_id, 0))
         return page
 
     def _load_more_body(self, session_id: str, search_id: str) -> SearchPage:
@@ -360,8 +347,12 @@ class CpSatSearchService:
             state = self._user_data.get_search_state(search_id)
             if state is None or state["session_id"] != session_id:
                 return SearchPage(
-                    search_id=search_id, results=(), partial=False, exhausted=True,
-                    shown_count=0, remaining_count=0,
+                    search_id=search_id,
+                    results=(),
+                    partial=False,
+                    exhausted=True,
+                    shown_count=0,
+                    remaining_count=0,
                 )
             if _shown_capped(state["query_json"]):
                 shown = _delivered(state["query_json"], 0)
@@ -379,9 +370,7 @@ class CpSatSearchService:
                 results = [_result_from_json(r) for r in ahead["results"]]
                 partial = bool(ahead.get("partial"))
                 exhausted = bool(ahead.get("exhausted"))
-                return self._commit_load_more(
-                    search_id, state, query, results, partial, exhausted
-                )
+                return self._commit_load_more(search_id, state, query, results, partial, exhausted)
             exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
             shown_so_far = _delivered(state["query_json"], len(exclusions))
             excl_snap = state["exclusions"]
@@ -398,18 +387,17 @@ class CpSatSearchService:
             state = self._user_data.get_search_state(search_id)
             if state is None or state["session_id"] != session_id:
                 return SearchPage(
-                    search_id=search_id, results=(), partial=False, exhausted=True,
-                    shown_count=0, remaining_count=0,
+                    search_id=search_id,
+                    results=(),
+                    partial=False,
+                    exhausted=True,
+                    shown_count=0,
+                    remaining_count=0,
                 )
-            if (
-                state["exclusions"] == excl_snap
-                and not _lookahead_payload(state["query_json"])
-            ):
+            if state["exclusions"] == excl_snap and not _lookahead_payload(state["query_json"]):
                 if new_exclusions:
                     self._user_data.append_exclusions(search_id, new_exclusions)
-                return self._commit_load_more(
-                    search_id, state, query, results, partial, exhausted
-                )
+                return self._commit_load_more(search_id, state, query, results, partial, exhausted)
         return self._load_more_body(session_id, search_id)
 
     def _commit_load_more(
@@ -426,9 +414,7 @@ class CpSatSearchService:
         capped = shown >= self._shown_cap
         if capped:
             exhausted = True
-        remaining = 0 if exhausted else (
-            None if total is None else max(total - shown, 0)
-        )
+        remaining = 0 if exhausted else (None if total is None else max(total - shown, 0))
         tally = _with_tally(
             state["query_json"],
             delivered=shown,
@@ -475,9 +461,7 @@ class CpSatSearchService:
             ),
         )
 
-    def _schedule_prefetch(
-        self, session_id: str, search_id: str, epoch: int
-    ) -> None:
+    def _schedule_prefetch(self, session_id: str, search_id: str, epoch: int) -> None:
         with self._lock:
             if search_id in self._prefetching:
                 return
@@ -510,9 +494,7 @@ class CpSatSearchService:
             state = self._user_data.get_search_state(search_id)
             if state is None or state["session_id"] != session_id:
                 return
-            if _shown_capped(state["query_json"]) or _lookahead_payload(
-                state["query_json"]
-            ):
+            if _shown_capped(state["query_json"]) or _lookahead_payload(state["query_json"]):
                 return
             query = _query_from_json(state["query_json"])
             exclusions = [tuple(e) for e in json.loads(state["exclusions"])]
@@ -531,9 +513,7 @@ class CpSatSearchService:
                 return
             if state["exclusions"] != excl_snap:
                 return
-            if _shown_capped(state["query_json"]) or _lookahead_payload(
-                state["query_json"]
-            ):
+            if _shown_capped(state["query_json"]) or _lookahead_payload(state["query_json"]):
                 return
             if new_exclusions:
                 self._user_data.append_exclusions(search_id, new_exclusions)
@@ -555,11 +535,7 @@ class CpSatSearchService:
         shown_so_far: int,
     ) -> tuple[list[ArmorSetResult], list[list[int]], bool, bool]:
         mode = resolved_charm_mode(query)
-        if (
-            charm_mode_uses_generated(mode)
-            and query.user_charms
-            and not query.forced_charm_ids
-        ):
+        if charm_mode_uses_generated(mode) and query.user_charms and not query.forced_charm_ids:
             inv = replace(
                 query,
                 charm_mode="inventory",
@@ -614,8 +590,7 @@ class CpSatSearchService:
                 break
             next_units = _page_units(query, [outcome.result])
             if (
-                shown_so_far + _page_units(query, results) + next_units
-                > self._shown_cap
+                shown_so_far + _page_units(query, results) + next_units > self._shown_cap
                 and results
             ):
                 exhausted = True
@@ -673,11 +648,7 @@ class CpSatSearchService:
             if outcome.result is None:
                 return extra, False
             working.append(tuple(_exclusion_tuple(outcome.result)))
-            extra += (
-                outcome.result.equivalent_count()
-                if query.expand_equivalents
-                else 1
-            )
+            extra += outcome.result.equivalent_count() if query.expand_equivalents else 1
             if outcome.status == "feasible":
                 return extra, False
         return extra, False

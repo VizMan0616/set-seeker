@@ -39,27 +39,40 @@ class PackWriter:
         for ordinal, block in enumerate(data.skill_trees, start=1):
             tree_id = base + ordinal
             tree_ids[block.name] = tree_id
-            tree_rows.append({
-                "id": tree_id, "game_id": game_id, "name_en": block.name,
-                "name_ja": block.name_ja or block.name, "category_tag": block.tag,
-            })
+            tree_rows.append(
+                {
+                    "id": tree_id,
+                    "game_id": game_id,
+                    "name_en": block.name,
+                    "name_ja": block.name_ja or block.name,
+                    "category_tag": block.tag,
+                }
+            )
             for tag in block.tags:
                 tag_rows.append({"tree_id": tree_id, "tag": tag})
                 if tag not in category_order:
                     category_order.append(tag)
             for points, skill_name in block.thresholds:
-                skill_rows.append({
-                    "id": base + len(skill_rows) + 1, "tree_id": tree_id,
-                    "name_en": skill_name, "name_ja": skill_name,
-                    "points": points, "is_negative": points < 0,
-                })
+                skill_rows.append(
+                    {
+                        "id": base + len(skill_rows) + 1,
+                        "tree_id": tree_id,
+                        "name_en": skill_name,
+                        "name_ja": skill_name,
+                        "points": points,
+                        "is_negative": points < 0,
+                    }
+                )
         self._repo.bulk_insert(t.skill_trees, tree_rows)
         self._repo.bulk_insert(t.skills, skill_rows)
         self._repo.bulk_insert(t.skill_tree_tags, tag_rows)
-        self._repo.bulk_insert(t.skill_categories, [
-            {"game_id": game_id, "tag": tag, "sort_order": i}
-            for i, tag in enumerate(category_order)
-        ])
+        self._repo.bulk_insert(
+            t.skill_categories,
+            [
+                {"game_id": game_id, "tag": tag, "sort_order": i}
+                for i, tag in enumerate(category_order)
+            ],
+        )
         counts["skill_trees"] = len(tree_rows)
         counts["skills"] = len(skill_rows)
         counts["skill_tree_tags"] = len(tag_rows)
@@ -69,19 +82,30 @@ class PackWriter:
         armor_skill_rows: list[dict[str, Any]] = []
         for ordinal, row in enumerate(data.armor, start=1):
             piece_id = base + ordinal
-            armor_rows.append({
-                "id": piece_id, "game_id": game_id, "slot": row.slot,
-                "name_en": row.name_en, "name_ja": row.name_ja or row.name_en,
-                "rarity": row.rarity, "slots": row.slots,
-                "gender": row.gender, "hunter_type": row.hunter_type,
-                "hr_required": row.hr_required, "village_stars": row.village_stars,
-                "defense": row.defense,
-                "max_defense": row.max_defense if row.max_defense is not None else row.defense,
-                "res_fire": row.res_fire, "res_water": row.res_water,
-                "res_ice": row.res_ice, "res_thunder": row.res_thunder,
-                "res_dragon": row.res_dragon, "torso_inc": row.torso_inc,
-                "is_dummy": row.is_dummy,
-            })
+            armor_rows.append(
+                {
+                    "id": piece_id,
+                    "game_id": game_id,
+                    "slot": row.slot,
+                    "name_en": row.name_en,
+                    "name_ja": row.name_ja or row.name_en,
+                    "rarity": row.rarity,
+                    "slots": row.slots,
+                    "gender": row.gender,
+                    "hunter_type": row.hunter_type,
+                    "hr_required": row.hr_required,
+                    "village_stars": row.village_stars,
+                    "defense": row.defense,
+                    "max_defense": row.max_defense if row.max_defense is not None else row.defense,
+                    "res_fire": row.res_fire,
+                    "res_water": row.res_water,
+                    "res_ice": row.res_ice,
+                    "res_thunder": row.res_thunder,
+                    "res_dragon": row.res_dragon,
+                    "torso_inc": row.torso_inc,
+                    "is_dummy": row.is_dummy,
+                }
+            )
             seen_trees: set[int] = set()
             for tree_name, points in row.skills:
                 tree_id = tree_ids[tree_name]
@@ -90,9 +114,13 @@ class PackWriter:
                     # first match, so keep-first (armor_skills PK is (armor, tree)).
                     continue
                 seen_trees.add(tree_id)
-                armor_skill_rows.append({
-                    "armor_id": piece_id, "tree_id": tree_id, "points": points,
-                })
+                armor_skill_rows.append(
+                    {
+                        "armor_id": piece_id,
+                        "tree_id": tree_id,
+                        "points": points,
+                    }
+                )
         self._repo.bulk_insert(t.armor_pieces, armor_rows)
         self._repo.bulk_insert(t.armor_skills, armor_skill_rows)
         counts["armor_pieces"] = len(armor_rows)
@@ -102,18 +130,26 @@ class PackWriter:
         deco_skill_rows: list[dict[str, Any]] = []
         for ordinal, row in enumerate(data.decorations, start=1):
             deco_id = base + ordinal
-            deco_rows.append({
-                "id": deco_id, "game_id": game_id, "name_en": row.name_en,
-                "name_ja": row.name_ja or row.name_en,
-                "rarity": row.rarity,
-                "size": row.size, "hr_required": row.hr_required,
-                "village_stars": row.village_stars,
-            })
+            deco_rows.append(
+                {
+                    "id": deco_id,
+                    "game_id": game_id,
+                    "name_en": row.name_en,
+                    "name_ja": row.name_ja or row.name_en,
+                    "rarity": row.rarity,
+                    "size": row.size,
+                    "hr_required": row.hr_required,
+                    "village_stars": row.village_stars,
+                }
+            )
             for tree_name, points in row.skills:
-                deco_skill_rows.append({
-                    "decoration_id": deco_id, "tree_id": tree_ids[tree_name],
-                    "points": points,
-                })
+                deco_skill_rows.append(
+                    {
+                        "decoration_id": deco_id,
+                        "tree_id": tree_ids[tree_name],
+                        "points": points,
+                    }
+                )
         self._repo.bulk_insert(t.decorations, deco_rows)
         self._repo.bulk_insert(t.decoration_skills, deco_skill_rows)
         counts["decorations"] = len(deco_rows)
@@ -124,21 +160,32 @@ class PackWriter:
         slot_rows: list[dict[str, Any]] = []
         for ordinal, charm in enumerate(data.charm_types, start=1):
             charm_id = base + ordinal
-            charm_type_rows.append({
-                "id": charm_id, "game_id": game_id, "code": charm.code,
-                "max_slots": charm.max_slots,
-            })
+            charm_type_rows.append(
+                {
+                    "id": charm_id,
+                    "game_id": game_id,
+                    "code": charm.code,
+                    "max_slots": charm.max_slots,
+                }
+            )
             for rng in charm.ranges:
-                range_rows.append({
-                    "charm_type_id": charm_id, "tree_id": tree_ids[rng.tree],
-                    "skill_slot": rng.skill_slot,
-                    "min_points": rng.min_points, "max_points": rng.max_points,
-                })
+                range_rows.append(
+                    {
+                        "charm_type_id": charm_id,
+                        "tree_id": tree_ids[rng.tree],
+                        "skill_slot": rng.skill_slot,
+                        "min_points": rng.min_points,
+                        "max_points": rng.max_points,
+                    }
+                )
             for fulfillment, slots in charm.slot_thresholds:
-                slot_rows.append({
-                    "charm_type_id": charm_id, "fulfillment": fulfillment,
-                    "slots": slots,
-                })
+                slot_rows.append(
+                    {
+                        "charm_type_id": charm_id,
+                        "fulfillment": fulfillment,
+                        "slots": slots,
+                    }
+                )
         self._repo.bulk_insert(t.charm_types, charm_type_rows)
         self._repo.bulk_insert(t.charm_skill_ranges, range_rows)
         self._repo.bulk_insert(t.charm_slot_thresholds, slot_rows)
@@ -175,18 +222,23 @@ class PackWriter:
         features = json.dumps(feature_blob, sort_keys=True)
         game = repo.get_game_by_code(manifest.id)
         if game is None:
-            return repo.create_game(code=manifest.id, name=manifest.name,
-                                    generation=manifest.generation,
-                                    features=features)["id"]
+            return repo.create_game(
+                code=manifest.id,
+                name=manifest.name,
+                generation=manifest.generation,
+                features=features,
+            )["id"]
         game_id = game["id"]
         repo.delete_game_data(game_id)
-        repo.update_game(game_id, name=manifest.name,
-                         generation=manifest.generation, features=features)
+        repo.update_game(
+            game_id, name=manifest.name, generation=manifest.generation, features=features
+        )
         return game_id
 
 
-def rebuild_from_sources(repo: GameDataRepository, manifest: PackManifest,
-                         pack_data: PackData) -> dict[str, int]:
+def rebuild_from_sources(
+    repo: GameDataRepository, manifest: PackManifest, pack_data: PackData
+) -> dict[str, int]:
     return PackWriter(repo).rebuild_pack(manifest, pack_data)
 
 

@@ -21,27 +21,27 @@ def charm_mode_uses_generated(mode: str) -> bool:
 @dataclass(frozen=True)
 class SkillRequest:
     tree_id: int
-    min_points: int          # activation threshold from the skills table
+    min_points: int  # activation threshold from the skills table
 
 
 @dataclass(frozen=True)
 class CharmSpec:
     """One inventory or generated talisman (engine-spec.md §2)."""
 
-    id: int                              # 0 = none; >0 user_charms.id; <0 generated
+    id: int  # 0 = none; >0 user_charms.id; <0 generated
     slots: int = 0
     skills: tuple[tuple[int, int], ...] = ()  # (tree_id, signed points)
 
 
 @dataclass(frozen=True)
 class Query:
-    game: str                            # pack id, e.g. "mhfu"
-    skills: tuple[SkillRequest, ...]     # 1..desired_skills_max (pack manifest)
-    weapon_slots: int                    # 0..3
-    gender: str                          # "m" | "f"
-    hunter_type: str                     # "blademaster" | "gunner"
-    hr: int | None                       # None = uncapped
-    village_stars: int | None            # None = uncapped
+    game: str  # pack id, e.g. "mhfu"
+    skills: tuple[SkillRequest, ...]  # 1..desired_skills_max (pack manifest)
+    weapon_slots: int  # 0..3
+    gender: str  # "m" | "f"
+    hunter_type: str  # "blademaster" | "gunner"
+    hr: int | None  # None = uncapped
+    village_stars: int | None  # None = uncapped
     allow_event: bool = False
     allow_bad_skills: bool = False
     # Athena Form1.h: chkTorsoInc defaults checked; chkDummy does not.
@@ -55,7 +55,7 @@ class Query:
     forced_piece_ids: tuple[int, ...] = ()
     forced_decoration_ids: tuple[int, ...] = ()
     forced_charm_ids: tuple[int, ...] = ()
-    sort: str = "defense"                # "defense" | "slots" | "rarity" | res_*
+    sort: str = "defense"  # "defense" | "slots" | "rarity" | res_*
     # Expand equivalence members into separate result cards (Athena-style list).
     expand_equivalents: bool = False
     user_charms: tuple[CharmSpec, ...] = ()
@@ -77,9 +77,9 @@ class ArmorSetResult:
     # Per-slot equivalence-class member ids (includes the representative)
     alternates: tuple[tuple[int, ...], ...]
     decorations: tuple[DecorationAssignment, ...]
-    charm_id: int | None                 # None / 0 when pack flag talismans is false
-    active_skills: tuple[tuple[int, int], ...]   # (skill_id, points achieved)
-    spare_slots: tuple[int, int, int]            # remaining size-1/2/3 slots
+    charm_id: int | None  # None / 0 when pack flag talismans is false
+    active_skills: tuple[tuple[int, int], ...]  # (skill_id, points achieved)
+    spare_slots: tuple[int, int, int]  # remaining size-1/2/3 slots
     defense: int
     charm_slots: int = 0
     charm_skills: tuple[tuple[int, int], ...] = ()
@@ -99,10 +99,10 @@ class ArmorSetResult:
 class SearchPage:
     search_id: str
     results: tuple[ArmorSetResult, ...]  # len <= PAGE_SIZE
-    partial: bool                        # solver hit its time budget
-    exhausted: bool                      # no further solutions exist
-    shown_count: int = 0                 # cards delivered so far (expanded when listing every set)
-    remaining_count: int | None = None   # None = more exist but the tail was not counted
+    partial: bool  # solver hit its time budget
+    exhausted: bool  # no further solutions exist
+    shown_count: int = 0  # cards delivered so far (expanded when listing every set)
+    remaining_count: int | None = None  # None = more exist but the tail was not counted
 
 
 PAGE_SIZE = 10

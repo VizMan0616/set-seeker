@@ -20,15 +20,13 @@ OUT = REPO_ROOT / "packs" / "mhp3" / "charm_generation"
 # FURU1/HIKA1/NAZO1 = in-game skill 1 (modest maxima). FURU2/HIKA2 = skill 2
 # (can reach ±10, elemental res +12/+13). Do not swap these slots.
 TYPES = (
-    ("timeworn", 0, 1),   # FURU1, FURU2
-    ("shining", 2, 3),    # HIKA1, HIKA2
+    ("timeworn", 0, 1),  # FURU1, FURU2
+    ("shining", 2, 3),  # HIKA1, HIKA2
     ("mystery", 4, None),  # NAZO1 only
 )
 
 _INT_TRIPLE = re.compile(r"\{\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\}")
-_TABLEINIT = re.compile(
-    r"const int tableinit\[\s*12\s*\]\s*=\s*\{([^}]+)\}"
-)
+_TABLEINIT = re.compile(r"const int tableinit\[\s*12\s*\]\s*=\s*\{([^}]+)\}")
 
 
 def _ability_order_to_tree() -> dict[int, str]:
@@ -84,10 +82,7 @@ def _extract_skill_tables(text: str) -> list[list[tuple[int, int, int]]]:
     block = _balanced_block(text, "static array< array< array< int >^ >^ >^ SKILL =")
     tables: list[list[tuple[int, int, int]]] = []
     for group in _split_top_groups(block):
-        triples = [
-            (int(a), int(b), int(c))
-            for a, b, c in _INT_TRIPLE.findall(group)
-        ]
+        triples = [(int(a), int(b), int(c)) for a, b, c in _INT_TRIPLE.findall(group)]
         tables.append(triples)
     if len(tables) != 5:
         raise RuntimeError(f"expected 5 SKILL tables, got {len(tables)}")

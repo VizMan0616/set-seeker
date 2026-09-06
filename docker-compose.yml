@@ -27,6 +27,7 @@ services:
         required: false
     environment:
       DATABASE_URL: sqlite:////data/setseeker.db
+      SETSEEKER_VERSION: ${SETSEEKER_VERSION:-0.1.0}
 
 volumes:
   setseeker-data:

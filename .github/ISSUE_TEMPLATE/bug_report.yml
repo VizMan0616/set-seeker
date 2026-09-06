@@ -1,0 +1,85 @@
+name: Bug report
+description: Report incorrect search results, UI problems, or crashes
+title: "[bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Complete reports are fixed faster.
+        See [CONTRIBUTING.md](https://github.com/VizMan0616/set-seeker/blob/main/CONTRIBUTING.md#reporting-bugs).
+
+  - type: dropdown
+    id: pack
+    attributes:
+      label: Game pack
+      description: Which game generation is affected?
+      options:
+        - mhfu
+        - mhp3
+        - other / not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - cosmetic — UI polish, wording, layout
+        - functional — wrong results or broken feature, workaround exists
+        - blocking — app unusable or data loss
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Search query, skill selections, charm settings, or UI clicks
+      placeholder: |
+        1. Select game MHP3, blademaster
+        2. Set desired skills: Attack Up (L), Razor Sharp
+        3. Click Search
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Docker (docker compose)
+        - Local development (venv)
+        - Production site
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Footer version, git tag, or "unknown"
+      placeholder: v0.1.0
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Browser, screenshots, comparison with legacy ASS, etc.

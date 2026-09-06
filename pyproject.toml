@@ -35,11 +35,15 @@ include = ["app*"]
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+extend-exclude = [".worktrees", ".cursor"]
 
 [tool.ruff.lint.per-file-ignores]
 # app/domain/models.py is copied verbatim from docs/specs/phase0-contracts.md §3;
 # do not reformat it.
 "app/domain/models.py" = ["I001"]
+"app/engine/charms.py" = ["SIM114"]
+"scripts/*.py" = ["EXE001"]
+"tests/fixtures/*.py" = ["EXE001"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

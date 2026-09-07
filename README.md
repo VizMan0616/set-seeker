@@ -107,7 +107,7 @@ Copy `.env.example` to `.env` at the **project root** (used by compose and local
 | `SOLVER_NUM_WORKERS` | CP-SAT worker threads |
 | `SETSEEKER_VERSION` | Shown in page footer (set automatically in production deploys) |
 | `MARIADB_*` | MariaDB container credentials (see `.env.example`) |
-| `TRAEFIK_ENABLE_*` | Blue/green traffic routing (production) |
+| `RELEASE_ROOT` | Production release tree path for bind mounts |
 
 **MariaDB (production or local test):** use the `prod` image target via
 `docker-compose.mariadb.yml` — see [docker/README.md](docker/README.md)

@@ -174,8 +174,6 @@ manage infrastructure lifecycle independently from app deploys.
    MARIADB_USER=setseeker
    MARIADB_DATABASE=setseeker
    SETSEEKER_VERSION=v0.1.0
-   TRAEFIK_ENABLE_BLUE=true
-   TRAEFIK_ENABLE_GREEN=false
    RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
    ```
 
@@ -201,15 +199,19 @@ Set `SETSEEKER_DEPLOY_ROOT=/opt/set-seeker` if the runner checkout lives elsewhe
 
 ```bash
 export RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
-export TRAEFIK_ENABLE_BLUE=true
-export TRAEFIK_ENABLE_GREEN=false
 
 docker compose \
   -f docker-compose.yml \
   -f docker-compose.traefik.yml \
   -f docker-compose.mariadb.yml \
   -f docker-compose.prod.yml \
-  up -d set-seeker-blue
+  up -d traefik mariadb set-seeker-blue
+```
+
+Only one app slot should run at a time — stop the other if present:
+
+```bash
+docker compose … stop set-seeker-green
 ```
 
 Open `http://<VPS-public-IP>/`.
@@ -308,13 +310,11 @@ All are defined in `.env.example`. Key groups:
 | Variable | Purpose |
 |----------|---------|
 | `RELEASE_ROOT` | Path to tagged release tree for bind mounts |
-| `TRAEFIK_ENABLE_BLUE` | Route public traffic to blue slot |
-| `TRAEFIK_ENABLE_GREEN` | Route public traffic to green slot |
 | `SETSEEKER_DEPLOY_ROOT` | Base path for `releases/` and `state/` |
 | `DEPLOY_FORCE` | Set to `1` to redeploy an already-live tag |
 
-Deploy scripts export `SETSEEKER_VERSION`, `RELEASE_ROOT`, and `TRAEFIK_*` per
-release; exported shell variables override `.env` for that run.
+Blue/green routing: the deploy script stops the inactive slot. Traefik only
+routes to running containers with `traefik.enable=true` (set in compose).
 
 ---
 
@@ -351,8 +351,9 @@ The `setseeker-data` volume (SQLite path `/data`) is still mounted but unused wh
 | Symptom | Likely cause |
 |---------|--------------|
 | `ModuleNotFoundError: No module named 'pymysql'` | App not built with `target: prod` — add `docker-compose.mariadb.yml` |
-| `Access denied for user 'setseeker'… (1045)` | Stale `mariadb-data` volume from an earlier password — run `docker compose … down -v` and start again, **or** `MARIADB_PASSWORD` changed after first init (MariaDB only applies credentials on empty volume) |
-| Bootstrap connects to SQLite in production | Missing `docker-compose.mariadb.yml` (app still on SQLite `DATABASE_URL` from `.env`) |
+| `Access denied for user 'setseeker'… (1045)` | Stale `mariadb-data` volume — run `docker compose … down -v` and start again |
+| Traefik 404 / no backend | App slot has `traefik.enable=false` (old deploy) — recreate with `--force-recreate`; ensure only the active slot is running |
+| Traefik logs `client version 1.24 is too old` | Docker Engine 29+ vs Traefik &lt; v3.6.1 — upgrade image to `traefik:v3.6.1` (see `docker-compose.traefik.yml`) |
 | App cannot reach MariaDB | Missing `docker-compose.mariadb.yml` or slots not on `setseeker-public` network |
 | `set-seeker-blue` fails health check | Check logs: `docker compose … logs set-seeker-blue` — bootstrap/ETL errors |
 | Empty game picker | Bootstrap did not finish — verify `games` table has rows |

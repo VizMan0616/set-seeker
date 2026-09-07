@@ -11,7 +11,8 @@ networks:
 
 services:
   traefik:
-    image: traefik:v3.2
+    # v3.6.1+ required for Docker Engine 29+ (API min 1.40+); v3.2 defaults to API 1.24.
+    image: traefik:v3.6.1
     container_name: set-seeker-traefik
     restart: unless-stopped
     ports:

@@ -61,15 +61,11 @@ echo "Active slot: $ACTIVE — deploying $TAG to inactive slot: $INACTIVE"
 # Ensure edge proxy and database are running (uses current release config).
 compose up -d traefik mariadb
 
-# Start inactive slot without public traffic.
+# Start inactive slot (no public traffic until health check passes).
 if [[ "$INACTIVE" == "blue" ]]; then
-  export TRAEFIK_ENABLE_BLUE=false
-  export TRAEFIK_ENABLE_GREEN=false
   compose up -d set-seeker-blue
   HEALTH_HOST=set-seeker-blue
 else
-  export TRAEFIK_ENABLE_BLUE=false
-  export TRAEFIK_ENABLE_GREEN=false
   compose up -d set-seeker-green
   HEALTH_HOST=set-seeker-green
 fi
@@ -91,22 +87,15 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-echo "Health check passed — switching Traefik to $INACTIVE"
+echo "Health check passed — switching traffic to $INACTIVE"
 
-if [[ "$INACTIVE" == "blue" ]]; then
-  export TRAEFIK_ENABLE_BLUE=true
-  export TRAEFIK_ENABLE_GREEN=false
-else
-  export TRAEFIK_ENABLE_BLUE=false
-  export TRAEFIK_ENABLE_GREEN=true
-fi
-
-compose up -d set-seeker-blue set-seeker-green
-
+# Stop the previously active slot so Traefik only sees one backend.
 if [[ "$ACTIVE" != "$INACTIVE" ]]; then
   echo "Stopping previous slot: set-seeker-$ACTIVE"
   compose stop "set-seeker-$ACTIVE" || true
 fi
+
+compose up -d "set-seeker-$INACTIVE"
 
 echo "$INACTIVE" >"$STATE_FILE"
 echo "$TAG" >"$DEPLOYED_TAG_FILE"

@@ -1,21 +1,7 @@
 # Production overlay: blue/green app slots (ADR 0015).
 #
-# Requires:
-#   - .env with MARIADB_* credentials
-#   - docker-compose.mariadb.yml (prod image + MariaDB service)
-#   - docker-compose.traefik.yml (public HTTP routing)
-#
-# Usage (from a release checkout):
-#   cp .env.example .env   # configure MariaDB + DATABASE_URL
-#   export RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
-#   docker compose \
-#     -f docker-compose.yml \
-#     -f docker-compose.traefik.yml \
-#     -f docker-compose.mariadb.yml \
-#     -f docker-compose.prod.yml \
-#     up -d
-#
-# Prefer scripts/deploy_release.sh on the self-hosted runner.
+# Traefik routes to whichever slot is running (deploy stops the inactive slot).
+# Requires docker-compose.mariadb.yml + docker-compose.traefik.yml.
 
 networks:
   setseeker-public:
@@ -45,7 +31,8 @@ services:
     networks:
       - setseeker-public
     labels:
-      - traefik.enable=${TRAEFIK_ENABLE_BLUE:-true}
+      - traefik.enable=true
+      - traefik.docker.network=setseeker-public
       - traefik.http.routers.setseeker-blue.rule=PathPrefix(`/`)
       - traefik.http.routers.setseeker-blue.entrypoints=web
       - traefik.http.routers.setseeker-blue.service=setseeker-blue
@@ -74,7 +61,8 @@ services:
     networks:
       - setseeker-public
     labels:
-      - traefik.enable=${TRAEFIK_ENABLE_GREEN:-false}
+      - traefik.enable=true
+      - traefik.docker.network=setseeker-public
       - traefik.http.routers.setseeker-green.rule=PathPrefix(`/`)
       - traefik.http.routers.setseeker-green.entrypoints=web
       - traefik.http.routers.setseeker-green.service=setseeker-green

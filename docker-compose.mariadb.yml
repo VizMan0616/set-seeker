@@ -1,19 +1,32 @@
-# Optional MariaDB backend (ADR 0014). Usage:
+# MariaDB backend (ADR 0014). Usage:
+#   cp .env.example .env
+#   # set DATABASE_URL=mysql+pymysql://setseeker:…@mariadb:3306/setseeker in .env
 #   docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up --build
 #
-# Install pymysql in the image first (one-time) or extend Dockerfile with:
-#   pip install pymysql
+# Production: combine with docker-compose.prod.yml (prod image + blue/green slots).
+
+networks:
+  setseeker-public:
+    name: setseeker-public
 
 services:
   mariadb:
     image: mariadb:11
+    container_name: set-seeker-mariadb
+    restart: unless-stopped
+    env_file:
+      - path: ${RELEASE_ROOT:-.}/.env
+        required: false
     environment:
-      MARIADB_ROOT_PASSWORD: setseeker
-      MARIADB_DATABASE: setseeker
-      MARIADB_USER: setseeker
-      MARIADB_PASSWORD: setseeker
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-setseeker}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-setseeker}
+      MARIADB_USER: ${MARIADB_USER:-setseeker}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-setseeker}
     volumes:
       - mariadb-data:/var/lib/mysql
+    networks:
+      - default
+      - setseeker-public
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
@@ -21,11 +34,11 @@ services:
       retries: 10
 
   set-seeker:
+    build:
+      target: prod
     depends_on:
       mariadb:
         condition: service_healthy
-    environment:
-      DATABASE_URL: mysql+pymysql://setseeker:setseeker@mariadb:3306/setseeker
 
 volumes:
   mariadb-data:

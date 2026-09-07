@@ -17,12 +17,12 @@ app
 packs
 alembic
 alembic.ini
-config
 data
 tests
 docs
 scripts
 sources
+.env
 
 # Compose / local artifacts
 docker-compose*.yml

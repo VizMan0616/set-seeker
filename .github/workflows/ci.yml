@@ -39,5 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build runtime image
+      - name: Build dev runtime image
         run: docker compose build set-seeker
+
+      - name: Build prod runtime image
+        run: docker compose -f docker-compose.yml -f docker-compose.mariadb.yml build set-seeker

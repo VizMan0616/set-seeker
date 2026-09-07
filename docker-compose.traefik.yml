@@ -1,0 +1,24 @@
+# Traefik edge reverse proxy (ADR 0015).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d traefik
+#
+# Combine with docker-compose.prod.yml and docker-compose.mariadb.yml for production.
+
+networks:
+  setseeker-public:
+    name: setseeker-public
+
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: set-seeker-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # - "443:443"   # enable with TLS entrypoint when domain exists
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${RELEASE_ROOT:-.}/docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - setseeker-public

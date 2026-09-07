@@ -173,11 +173,12 @@ mh3u_charm_tables = Table(
 )
 
 # --- User data (runtime-owned, never ETL'd) ---
+# Session/search ids are uuid4().hex (32 chars). String PK/FK — not Text — for MariaDB.
 
 sessions = Table(
     "sessions",
     metadata,
-    Column("id", Text, primary_key=True),
+    Column("id", String(32), primary_key=True),
     Column("created_at", DateTime, nullable=False),
     Column("last_seen_at", DateTime, nullable=False),
 )
@@ -186,7 +187,7 @@ user_charms = Table(
     "user_charms",
     metadata,
     Column("id", Integer, primary_key=True),
-    Column("session_id", Text, ForeignKey("sessions.id"), nullable=False),
+    Column("session_id", String(32), ForeignKey("sessions.id"), nullable=False),
     Column("game_id", Integer, ForeignKey("games.id"), nullable=False),
     Column("slots", Integer, nullable=False),
     Column("skill1_tree", Integer, ForeignKey("skill_trees.id")),
@@ -200,8 +201,8 @@ user_charms = Table(
 search_states = Table(
     "search_states",
     metadata,
-    Column("id", Text, primary_key=True),
-    Column("session_id", Text, ForeignKey("sessions.id"), nullable=False),
+    Column("id", String(32), primary_key=True),
+    Column("session_id", String(32), ForeignKey("sessions.id"), nullable=False),
     Column("game_id", Integer, ForeignKey("games.id"), nullable=False),
     Column("query_json", Text, nullable=False),
     Column("exclusions", Text, nullable=False, default="[]"),

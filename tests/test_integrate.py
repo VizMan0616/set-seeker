@@ -27,6 +27,9 @@ def test_dockerfile_dependency_only_image_and_vendored_packs():
     dockerignore = (REPO_ROOT / ".dockerignore").read_text()
     assert "COPY pyproject.toml" in dockerfile
     assert "COPY docker/entrypoint.sh" in dockerfile
+    assert "AS dev" in dockerfile
+    assert "AS prod" in dockerfile
+    assert "optional-dependencies" in dockerfile
     assert "packs" in dockerignore
     assert (REPO_ROOT / "packs/mhfu/vendor/data/head.csv").is_file()
     assert (REPO_ROOT / "packs/mhp3/vendor/data/head.txt").is_file()

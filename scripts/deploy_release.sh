@@ -50,14 +50,16 @@ fi
 compose() {
   docker compose \
     -f "$RELEASE_DIR/docker-compose.yml" \
+    -f "$RELEASE_DIR/docker-compose.traefik.yml" \
+    -f "$RELEASE_DIR/docker-compose.mariadb.yml" \
     -f "$RELEASE_DIR/docker-compose.prod.yml" \
     "$@"
 }
 
 echo "Active slot: $ACTIVE — deploying $TAG to inactive slot: $INACTIVE"
 
-# Ensure Traefik is running (uses current release config).
-compose up -d traefik
+# Ensure edge proxy and database are running (uses current release config).
+compose up -d traefik mariadb
 
 # Start inactive slot without public traffic.
 if [[ "$INACTIVE" == "blue" ]]; then

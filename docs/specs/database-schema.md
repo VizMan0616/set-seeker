@@ -145,14 +145,14 @@ mh3u_charm_tables (                               -- extracted from hardcoded C+
 
 ```sql
 sessions (
-  id            TEXT PRIMARY KEY,                 -- uuid, issued as long-lived cookie
+  id            String(32) PRIMARY KEY,             -- uuid4().hex cookie id
   created_at    DateTime NOT NULL,
   last_seen_at  DateTime NOT NULL
 );
 
 user_charms (
   id            INTEGER PRIMARY KEY,
-  session_id    TEXT NOT NULL REFERENCES sessions(id),
+  session_id    String(32) NOT NULL REFERENCES sessions(id),
   game_id       INTEGER NOT NULL REFERENCES games(id),
   slots         Integer NOT NULL,                 -- 0..3
   skill1_tree   INTEGER REFERENCES skill_trees(id),
@@ -163,8 +163,8 @@ user_charms (
 );
 
 search_states (                                 -- iterate+exclude pagination state
-  id            TEXT PRIMARY KEY,                 -- search id used by htmx "load more"
-  session_id    TEXT NOT NULL REFERENCES sessions(id),
+  id            String(32) PRIMARY KEY,           -- search id used by htmx "load more"
+  session_id    String(32) NOT NULL REFERENCES sessions(id),
   game_id       INTEGER NOT NULL REFERENCES games(id),
   query_json    Text NOT NULL,
   exclusions    Text NOT NULL DEFAULT '[]',       -- JSON list of shown representative tuples

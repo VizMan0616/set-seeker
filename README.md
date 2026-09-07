@@ -92,27 +92,31 @@ Open http://localhost:8000. The SQLite database file is created at `data/setseek
 ### Dev with auto-reload (Docker)
 
 ```bash
+cp .env.example .env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
 ## Configuration
 
-Copy `config/.env.example` to `config/.env` to override settings:
+Copy `.env.example` to `.env` at the **project root** (used by compose and local runs):
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | SQLite path (default) or MariaDB DSN |
+| `DATABASE_URL` | SQLite path (default dev) or MariaDB DSN (production) |
 | `SOLVER_TIME_LIMIT_MS` | Per-solve CP-SAT wall clock |
 | `SOLVER_NUM_WORKERS` | CP-SAT worker threads |
 | `SETSEEKER_VERSION` | Shown in page footer (set automatically in production deploys) |
+| `MARIADB_*` | MariaDB container credentials (see `.env.example`) |
+| `TRAEFIK_ENABLE_*` | Blue/green traffic routing (production) |
 
-**Optional MariaDB:** add `docker-compose.mariadb.yml` — see [docker/README.md](docker/README.md)
+**MariaDB (production or local test):** use the `prod` image target via
+`docker-compose.mariadb.yml` — see [docker/README.md](docker/README.md)
 and [ADR 0014](docs/adr/0014-optional-mariadb-compose-profile.md).
 
 **Bind-mount model:** the Docker image installs Python dependencies only. Code, packs,
-migrations, and config are bind-mounted from the repo:
+and migrations are bind-mounted from the repo:
 
-- After editing `app/`, `packs/`, `alembic/`, or `config/` → `docker compose restart set-seeker`
+- After editing `app/`, `packs/`, or `alembic/` → `docker compose restart set-seeker`
 - After changing `pyproject.toml` dependencies → `docker compose build`
 
 ## Usage

@@ -1,173 +1,380 @@
 # Docker deployment
 
-## What lives in the image vs bind mounts
+## Images
 
-**In image** (rebuild when `pyproject.toml` changes):
+The `Dockerfile` builds two dependency-only runtime targets (ADR 0013):
 
-- Python runtime dependencies
-- `docker/entrypoint.sh`
+| Target | Use | Database driver |
+|--------|-----|-----------------|
+| `dev` | Local development (`docker-compose.yml`) | SQLite |
+| `prod` | Production + MariaDB overlay | SQLite URL still works; image includes `pymysql` |
 
-**Bind-mounted** (`docker compose restart` after edits):
+Application code, packs, and Alembic migrations are **bind-mounted**, not baked into
+the image. Rebuild only when `pyproject.toml` dependencies change.
 
-- `app/` — application code, Jinja templates, static assets
-- `packs/` — vendored game data + manifests (ETL/bootstrap input)
-- `alembic/` + `alembic.ini` — schema migrations
-- `config/` — `.env` and deployment settings
+## Configuration
 
-**Named volume** (persists across restarts and image rebuilds):
+All environment variables live in **`.env` at the project root** (copy from
+`.env.example`). Compose reads it for `${VAR}` substitution and passes it to
+containers via `env_file`. Local `uvicorn` / `python -m app.bootstrap` also read
+`.env` through pydantic-settings (`app/config.py`).
 
-- `/data` — SQLite database (game + user data)
+Do not duplicate variables in compose files — set them once in `.env`.
 
-See [ADR 0013](../docs/adr/0013-volume-mounted-database.md).
+## Compose file layout
 
-## Default (development and simple self-host)
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Base app service (`dev` image, SQLite) |
+| `docker-compose.dev.yml` | Uvicorn `--reload` overlay |
+| `docker-compose.mariadb.yml` | MariaDB service + `prod` image for the app |
+| `docker-compose.traefik.yml` | Traefik edge proxy (port 80) |
+| `docker-compose.prod.yml` | Blue/green app slots |
+
+Stack files independently:
 
 ```bash
+# Dev + SQLite (default)
 docker compose up --build
+
+# Dev + MariaDB (local MariaDB smoke test)
+docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up --build
+
+# Production (Traefik + MariaDB + blue/green)
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.traefik.yml \
+  -f docker-compose.mariadb.yml \
+  -f docker-compose.prod.yml \
+  up -d
 ```
 
-Port 8000 is published directly. User data survives in the `setseeker-data` volume.
+---
 
-## Development overlay (auto-reload)
+## What happens on container start
+
+Every app container runs bootstrap before Uvicorn (`docker/entrypoint.sh` →
+`python -m app.bootstrap`):
+
+1. **Alembic migrations** — creates/updates all tables.
+2. **Conditional ETL** — loads `packs/mhfu` and `packs/mhp3` when the database is
+   empty or a pack's `data_version` increased.
+
+User data (sessions, charm inventories) is never touched by ETL. The same bootstrap
+runs against SQLite or MariaDB depending on `DATABASE_URL` in `.env`.
+
+---
+
+## Development (SQLite)
+
+```bash
+cp .env.example .env
+# DATABASE_URL=sqlite:////data/setseeker.db  (already set for Docker)
+
+docker compose up --build
+curl -sf http://localhost:8000/health
+```
+
+With auto-reload:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-Uvicorn reloads when files under `app/` change.
+After editing bind-mounted trees: `docker compose restart set-seeker`.
 
-## Optional MariaDB overlay
+---
+
+## Local MariaDB smoke test
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up
+cp .env.example .env
 ```
 
-See [ADR 0014](../docs/adr/0014-optional-mariadb-compose-profile.md).
+Edit `.env`:
 
-## Production overlay (Traefik + blue-green)
+```dotenv
+DATABASE_URL=mysql+pymysql://setseeker:setseeker@mariadb:3306/setseeker
+MARIADB_ROOT_PASSWORD=setseeker
+MARIADB_PASSWORD=setseeker
+```
 
-For the public VPS with zero-downtime deploys. See
-[ADR 0015](../docs/adr/0015-production-blue-green-compose.md).
+Start:
 
-### Components
+```bash
+docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up --build -d
+docker compose -f docker-compose.yml -f docker-compose.mariadb.yml logs -f set-seeker
+```
 
-| Service | Role |
-|---------|------|
-| `traefik` | Edge reverse proxy on port 80 (TLS added when domain exists) |
-| `set-seeker-blue` / `set-seeker-green` | Two app slots; only one receives traffic at a time |
-| Shared `setseeker-data` volume | SQLite DB shared across slots |
+Expect in logs:
 
-### First-time VPS setup
+```
+[bootstrap] database: mysql+pymysql://setseeker:…@mariadb:3306/setseeker
+[bootstrap] empty database — loading all packs
+```
+
+Verify data:
+
+```bash
+docker exec set-seeker-mariadb mariadb -usetseeker -psetseeker setseeker \
+  -e "SELECT code, name FROM games;"
+```
+
+---
+
+## Production VPS (Traefik + MariaDB + blue/green)
+
+### Architecture
+
+```
+                    ┌─────────────┐
+   HTTP :80 ───────►│   Traefik   │
+                    └──────┬──────┘
+                           │ labels (active slot only)
+              ┌────────────┴────────────┐
+              ▼                         ▼
+     ┌─────────────────┐     ┌─────────────────┐
+     │ set-seeker-blue │     │set-seeker-green │
+     │  (prod image)   │     │  (prod image)   │
+     └────────┬────────┘     └────────┬────────┘
+              │                       │
+              └───────────┬───────────┘
+                          ▼
+                 ┌─────────────────┐
+                 │    MariaDB      │
+                 │  (shared DB)    │
+                 └─────────────────┘
+```
+
+Traefik, MariaDB, and the app slots are **separate compose overlays** so you can
+manage infrastructure lifecycle independently from app deploys.
+
+### Server layout
+
+```
+/opt/set-seeker/
+  .env                          # production secrets (not in git)
+  releases/v0.1.0/              # immutable copy per release tag
+  releases/v0.1.1/
+  state/active_slot             # "blue" or "green"
+  state/deployed_tag            # e.g. v0.1.1
+```
+
+### One-time setup
 
 1. Install Docker Engine and Compose v2.
 2. Register a GitHub Actions **self-hosted runner** with label `set-seeker`.
 3. Clone this repository (or let the deploy workflow manage `releases/` trees).
-4. Copy `config/.env.example` to `config/.env` and adjust if needed.
-5. Publish GitHub Release `v0.1.0` — deploy workflow runs `scripts/deploy_release.sh`.
+4. Copy `.env.example` to `.env` at the deploy root and configure:
 
-Recommended layout on the server:
+   ```dotenv
+   DATABASE_URL=mysql+pymysql://setseeker:STRONG_PASSWORD@mariadb:3306/setseeker
+   MARIADB_ROOT_PASSWORD=STRONG_ROOT_PASSWORD
+   MARIADB_PASSWORD=STRONG_PASSWORD
+   SETSEEKER_VERSION=v0.1.0
+   TRAEFIK_ENABLE_BLUE=true
+   TRAEFIK_ENABLE_GREEN=false
+   RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
+   ```
 
-```
-/opt/set-seeker/
-  releases/v0.1.0/    # immutable copy per tag
-  releases/v0.1.1/
-  state/active_slot   # "blue" or "green"
-  state/deployed_tag  # e.g. v0.1.1 — current live release
-```
+   Use the same password in `DATABASE_URL` and `MARIADB_PASSWORD`.
+
+5. Start infrastructure (Traefik + MariaDB — rarely restarted):
+
+   ```bash
+   export RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
+   docker compose \
+     -f docker-compose.yml \
+     -f docker-compose.traefik.yml \
+     -f docker-compose.mariadb.yml \
+     up -d traefik mariadb
+   ```
+
+6. Publish GitHub Release `v0.1.0` — the deploy workflow runs
+   `scripts/deploy_release.sh`.
 
 Set `SETSEEKER_DEPLOY_ROOT=/opt/set-seeker` if the runner checkout lives elsewhere.
 
-### Deploy triggers (no cron)
-
-Production deploy runs **only** when a GitHub Release is published. There is no cron,
-systemd timer, or background task on the VPS that pulls or deploys code.
-
-| Event | Action |
-|-------|--------|
-| Release published | `.github/workflows/deploy.yml` runs on the self-hosted runner |
-| Weekly/monthly release-gate cron | Merges the Release PR — **does not deploy** |
-| Runner offline during release | GitHub queues the deploy job; it runs when the runner returns |
-| Long downtime / missed deploys | Run **Deploy** workflow manually (empty tag → latest release) or `scripts/deploy_latest_release.sh` on the VPS |
-
-### Manual production start (without deploy script)
+### Manual production start (first app slot)
 
 ```bash
 export RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
-export SETSEEKER_VERSION=v0.1.0
 export TRAEFIK_ENABLE_BLUE=true
 export TRAEFIK_ENABLE_GREEN=false
 
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d traefik set-seeker-blue
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.traefik.yml \
+  -f docker-compose.mariadb.yml \
+  -f docker-compose.prod.yml \
+  up -d set-seeker-blue
 ```
 
 Open `http://<VPS-public-IP>/`.
 
+### Deploy triggers
+
+Production deploy runs **only** when a GitHub Release is published.
+
+| Event | Action |
+|-------|--------|
+| Release published | `.github/workflows/deploy.yml` → `scripts/deploy_release.sh` |
+| Weekly/monthly release-gate cron | Merges the Release PR — **does not deploy** |
+| Runner offline during release | GitHub queues the deploy job |
+| Missed deploys | Deploy workflow (`workflow_dispatch`) or `scripts/deploy_latest_release.sh` |
+
+The deploy script merges all four production compose files, ensures Traefik and
+MariaDB are up, starts the inactive slot, health-checks it, then switches Traefik
+labels.
+
 ### HTTP-first (no domain yet)
 
-Traefik listens on **port 80 only**. No Let's Encrypt until you own a domain pointing
-at the VPS.
-
-Static config: `docker/traefik/traefik.yml` — single `web` entrypoint.
+Traefik listens on **port 80 only**. Static config: `docker/traefik/traefik.yml`.
 
 ### Adding TLS when a domain is ready
 
 1. Point DNS `A` record at the VPS.
-2. Add to `docker/traefik/traefik.yml`:
-
-   ```yaml
-   entryPoints:
-     web:
-       address: ":80"
-       http:
-         redirections:
-           entryPoint:
-             to: websecure
-             scheme: https
-     websecure:
-       address: ":443"
-
-   certificatesResolvers:
-     letsencrypt:
-       acme:
-         email: you@example.com
-         storage: /acme/acme.json
-         httpChallenge:
-           entryPoint: web
-   ```
-
-3. Uncomment port `443:443` on the `traefik` service in `docker-compose.prod.yml`.
+2. Add `websecure` entrypoint + ACME to `docker/traefik/traefik.yml` (see below).
+3. Uncomment port `443:443` on the `traefik` service in `docker-compose.traefik.yml`.
 4. Mount an `acme.json` volume for certificate storage.
 5. Change router rules from `PathPrefix('/')` to `Host('your.domain')` on the active slot.
 
-Blue-green deploy logic is unchanged — only Traefik static config and router labels update.
+Blue-green deploy logic is unchanged.
 
-### Deploy script
+Example TLS addition to `docker/traefik/traefik.yml`:
 
-`scripts/deploy_release.sh <tag>` — used by `.github/workflows/deploy.yml`:
+```yaml
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
 
-1. Skip if `state/deployed_tag` already matches (unless `DEPLOY_FORCE=1`)
-2. Stage tagged checkout under `releases/<tag>/`
-3. Start inactive slot (no Traefik traffic)
-4. Poll `/health` on the internal Docker network
-5. Enable Traefik labels on the new slot; disable the old slot
-6. Stop the previous slot; persist active slot and deployed tag
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: you@example.com
+      storage: /acme/acme.json
+      httpChallenge:
+        entryPoint: web
+```
 
-**Catch-up after downtime:** `scripts/deploy_latest_release.sh` (fetches tags, deploys
-latest `v*`). Same as the Deploy workflow with an empty tag input.
+---
 
-### SQLite and migrations
+## External / managed MariaDB
 
-Only the **incoming** slot runs `app.bootstrap` (Alembic + conditional ETL) before taking
-traffic. Migrations must be **expand-only** (add tables/columns; never drop user data).
+If MariaDB runs outside Docker (managed service or host install), omit
+`docker-compose.mariadb.yml` and point `DATABASE_URL` in `.env` at the remote host.
+The database must exist and the user must have DDL privileges. Bootstrap still runs
+migrations + ETL on first app start.
 
-## Environment variables
+Use the `prod` image target so `pymysql` is available.
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
+---
+
+## Environment variables reference
+
+All are defined in `.env.example`. Key groups:
+
+### Application (`app/config.py`)
+
+| Variable | Default (example) | Purpose |
+|----------|-------------------|---------|
 | `DATABASE_URL` | `sqlite:////data/setseeker.db` | Database connection |
+| `SOLVER_TIME_LIMIT_MS` | `2000` | Per-solve CP-SAT wall clock |
+| `SOLVER_NUM_WORKERS` | `8` | OR-Tools threads per solve |
+| `SOLVER_MAX_INFLIGHT` | `1` | Concurrent solve cap |
+| `SOLVER_QUEUE_WAIT_S` | `30.0` | Queue wait before 503 |
 | `SETSEEKER_VERSION` | `0.1.0` | Footer version string |
-| `RELEASE_ROOT` | `.` | Path to tagged release tree (production) |
-| `TRAEFIK_ENABLE_BLUE` | `true` | Route public traffic to blue slot |
-| `TRAEFIK_ENABLE_GREEN` | `false` | Route public traffic to green slot |
-| `SETSEEKER_DEPLOY_ROOT` | repo root | Base path for `releases/` and `state/` |
-| `DEPLOY_FORCE` | `0` | Set to `1` to redeploy an already-live tag |
+
+### MariaDB container
+
+| Variable | Purpose |
+|----------|---------|
+| `MARIADB_ROOT_PASSWORD` | Root password |
+| `MARIADB_DATABASE` | Database name (`setseeker`) |
+| `MARIADB_USER` | Application user |
+| `MARIADB_PASSWORD` | Application password (must match `DATABASE_URL`) |
+
+### Production deploy
+
+| Variable | Purpose |
+|----------|---------|
+| `RELEASE_ROOT` | Path to tagged release tree for bind mounts |
+| `TRAEFIK_ENABLE_BLUE` | Route public traffic to blue slot |
+| `TRAEFIK_ENABLE_GREEN` | Route public traffic to green slot |
+| `SETSEEKER_DEPLOY_ROOT` | Base path for `releases/` and `state/` |
+| `DEPLOY_FORCE` | Set to `1` to redeploy an already-live tag |
+
+Deploy scripts export `SETSEEKER_VERSION`, `RELEASE_ROOT`, and `TRAEFIK_*` per
+release; exported shell variables override `.env` for that run.
+
+---
+
+## What gets installed in MariaDB on first boot
+
+After the `prod` image starts with a MySQL `DATABASE_URL`:
+
+1. Alembic applies all migrations through `0003_skill_tags_and_dummy`.
+2. Empty `games` table → ETL runs for **mhfu** and **mhp3**.
+3. Uvicorn serves on port 8000.
+
+Subsequent restarts: migrations are no-ops at head; ETL runs only when a pack's
+`data_version` bumps.
+
+---
+
+## Blue/green with MariaDB
+
+Both slots share one MariaDB server (correct for production). Unlike SQLite on a
+shared volume, there is no file-lock contention.
+
+Rules (ADR 0015):
+
+- Only the **incoming** slot runs bootstrap before taking traffic.
+- Migrations must stay **expand-only** while blue-green is active.
+
+The `setseeker-data` volume (SQLite path `/data`) is still mounted but unused when
+`DATABASE_URL` points at MariaDB.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---------|--------------|
+| `ModuleNotFoundError: No module named 'pymysql'` | App not built with `target: prod` — add `docker-compose.mariadb.yml` |
+| Bootstrap connects to SQLite in production | `DATABASE_URL` in `.env` still set to SQLite |
+| App cannot reach MariaDB | Missing `docker-compose.mariadb.yml` or slots not on `setseeker-public` network |
+| `set-seeker-blue` fails health check | Check logs: `docker compose … logs set-seeker-blue` — bootstrap/ETL errors |
+| Empty game picker | Bootstrap did not finish — verify `games` table has rows |
+
+---
+
+## Quick reference
+
+```bash
+# Dev SQLite
+cp .env.example .env && docker compose up --build
+
+# Dev MariaDB
+# (set DATABASE_URL to mysql+pymysql://… in .env first)
+docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up --build
+
+# Production stack (all overlays)
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.traefik.yml \
+  -f docker-compose.mariadb.yml \
+  -f docker-compose.prod.yml \
+  up -d
+```
+
+See [ADR 0013](../docs/adr/0013-volume-mounted-database.md),
+[ADR 0014](../docs/adr/0014-optional-mariadb-compose-profile.md), and
+[ADR 0015](../docs/adr/0015-production-blue-green-compose.md).

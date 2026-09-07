@@ -57,7 +57,8 @@ Athena’s static combo-box count, not a later add/subtract UI. Full citations:
 - **Deployment must stay simple: one Docker container.** No required external services;
   SQLite on a persistent volume today; MariaDB optional via compose overlay (ADR 0014).
   The Docker image installs Python dependencies only; `app/`, `packs/`, Alembic, and
-  `config/` bind-mount from the repo (ADR 0013). The repository layer must keep a
+  `alembic/` bind-mount from the repo (ADR 0013). Environment variables live in
+  a root `.env` file (see `.env.example`). The repository layer must keep a
   future MariaDB swap cheap.
 - **Open source: AGPLv3** (see `LICENSE`), with upstream MIT attribution in `NOTICE`.
 - **English UI**; game-data names are stored bilingually (English/Japanese) from day one.

@@ -1,11 +1,19 @@
-# Production overlay: Traefik edge proxy + blue/green app slots (ADR 0015).
+# Production overlay: blue/green app slots (ADR 0015).
+#
+# Requires:
+#   - .env with DATABASE_URL pointing at MariaDB
+#   - docker-compose.mariadb.yml (prod image + MariaDB service)
+#   - docker-compose.traefik.yml (public HTTP routing)
 #
 # Usage (from a release checkout):
+#   cp .env.example .env   # configure MariaDB + DATABASE_URL
 #   export RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
-#   export SETSEEKER_VERSION=v0.1.0
-#   export TRAEFIK_ENABLE_BLUE=true
-#   export TRAEFIK_ENABLE_GREEN=false
-#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.traefik.yml \
+#     -f docker-compose.mariadb.yml \
+#     -f docker-compose.prod.yml \
+#     up -d
 #
 # Prefer scripts/deploy_release.sh on the self-hosted runner.
 
@@ -14,38 +22,24 @@ networks:
     name: setseeker-public
 
 services:
-  traefik:
-    image: traefik:v3.2
-    container_name: set-seeker-traefik
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      # - "443:443"   # enable with TLS entrypoint when domain exists
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${RELEASE_ROOT:-.}/docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-    networks:
-      - setseeker-public
-
   set-seeker-blue:
     build:
       context: ${RELEASE_ROOT:-.}
-      dockerfile: Dockerfile
+      target: prod
     container_name: set-seeker-blue
     restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
     volumes:
       - setseeker-data:/data
       - ${RELEASE_ROOT:-.}/app:/srv/setseeker/app:ro
       - ${RELEASE_ROOT:-.}/packs:/srv/setseeker/packs:ro
       - ${RELEASE_ROOT:-.}/alembic:/srv/setseeker/alembic:ro
       - ${RELEASE_ROOT:-.}/alembic.ini:/srv/setseeker/alembic.ini:ro
-      - ${RELEASE_ROOT:-.}/config:/srv/setseeker/config:ro
     env_file:
-      - path: ${RELEASE_ROOT:-.}/config/.env
+      - path: ${RELEASE_ROOT:-.}/.env
         required: false
-    environment:
-      DATABASE_URL: sqlite:////data/setseeker.db
-      SETSEEKER_VERSION: ${SETSEEKER_VERSION:-dev}
     networks:
       - setseeker-public
     labels:
@@ -58,22 +52,21 @@ services:
   set-seeker-green:
     build:
       context: ${RELEASE_ROOT:-.}
-      dockerfile: Dockerfile
+      target: prod
     container_name: set-seeker-green
     restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
     volumes:
       - setseeker-data:/data
       - ${RELEASE_ROOT:-.}/app:/srv/setseeker/app:ro
       - ${RELEASE_ROOT:-.}/packs:/srv/setseeker/packs:ro
       - ${RELEASE_ROOT:-.}/alembic:/srv/setseeker/alembic:ro
       - ${RELEASE_ROOT:-.}/alembic.ini:/srv/setseeker/alembic.ini:ro
-      - ${RELEASE_ROOT:-.}/config:/srv/setseeker/config:ro
     env_file:
-      - path: ${RELEASE_ROOT:-.}/config/.env
+      - path: ${RELEASE_ROOT:-.}/.env
         required: false
-    environment:
-      DATABASE_URL: sqlite:////data/setseeker.db
-      SETSEEKER_VERSION: ${SETSEEKER_VERSION:-dev}
     networks:
       - setseeker-public
     labels:

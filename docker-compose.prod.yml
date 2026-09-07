@@ -1,7 +1,7 @@
 # Production overlay: blue/green app slots (ADR 0015).
 #
 # Requires:
-#   - .env with DATABASE_URL pointing at MariaDB
+#   - .env with MARIADB_* credentials
 #   - docker-compose.mariadb.yml (prod image + MariaDB service)
 #   - docker-compose.traefik.yml (public HTTP routing)
 #
@@ -40,6 +40,8 @@ services:
     env_file:
       - path: ${RELEASE_ROOT:-.}/.env
         required: false
+    environment:
+      DATABASE_URL: mysql+pymysql://${MARIADB_USER:-setseeker}:${MARIADB_PASSWORD:-setseeker}@mariadb:3306/${MARIADB_DATABASE:-setseeker}
     networks:
       - setseeker-public
     labels:
@@ -67,6 +69,8 @@ services:
     env_file:
       - path: ${RELEASE_ROOT:-.}/.env
         required: false
+    environment:
+      DATABASE_URL: mysql+pymysql://${MARIADB_USER:-setseeker}:${MARIADB_PASSWORD:-setseeker}@mariadb:3306/${MARIADB_DATABASE:-setseeker}
     networks:
       - setseeker-public
     labels:

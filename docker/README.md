@@ -91,12 +91,13 @@ After editing bind-mounted trees: `docker compose restart set-seeker`.
 cp .env.example .env
 ```
 
-Edit `.env`:
+Edit `.env` (set `MARIADB_*` only — compose builds `DATABASE_URL` from these):
 
 ```dotenv
-DATABASE_URL=mysql+pymysql://setseeker:setseeker@mariadb:3306/setseeker
 MARIADB_ROOT_PASSWORD=setseeker
 MARIADB_PASSWORD=setseeker
+MARIADB_USER=setseeker
+MARIADB_DATABASE=setseeker
 ```
 
 Start:
@@ -168,16 +169,17 @@ manage infrastructure lifecycle independently from app deploys.
 4. Copy `.env.example` to `.env` at the deploy root and configure:
 
    ```dotenv
-   DATABASE_URL=mysql+pymysql://setseeker:STRONG_PASSWORD@mariadb:3306/setseeker
    MARIADB_ROOT_PASSWORD=STRONG_ROOT_PASSWORD
    MARIADB_PASSWORD=STRONG_PASSWORD
+   MARIADB_USER=setseeker
+   MARIADB_DATABASE=setseeker
    SETSEEKER_VERSION=v0.1.0
    TRAEFIK_ENABLE_BLUE=true
    TRAEFIK_ENABLE_GREEN=false
    RELEASE_ROOT=/opt/set-seeker/releases/v0.1.0
    ```
 
-   Use the same password in `DATABASE_URL` and `MARIADB_PASSWORD`.
+   Compose derives `DATABASE_URL` from `MARIADB_*` — do not set a separate MySQL URL.
 
 5. Start infrastructure (Traefik + MariaDB — rarely restarted):
 
@@ -349,7 +351,8 @@ The `setseeker-data` volume (SQLite path `/data`) is still mounted but unused wh
 | Symptom | Likely cause |
 |---------|--------------|
 | `ModuleNotFoundError: No module named 'pymysql'` | App not built with `target: prod` — add `docker-compose.mariadb.yml` |
-| Bootstrap connects to SQLite in production | `DATABASE_URL` in `.env` still set to SQLite |
+| `Access denied for user 'setseeker'… (1045)` | Stale `mariadb-data` volume from an earlier password — run `docker compose … down -v` and start again, **or** `MARIADB_PASSWORD` changed after first init (MariaDB only applies credentials on empty volume) |
+| Bootstrap connects to SQLite in production | Missing `docker-compose.mariadb.yml` (app still on SQLite `DATABASE_URL` from `.env`) |
 | App cannot reach MariaDB | Missing `docker-compose.mariadb.yml` or slots not on `setseeker-public` network |
 | `set-seeker-blue` fails health check | Check logs: `docker compose … logs set-seeker-blue` — bootstrap/ETL errors |
 | Empty game picker | Bootstrap did not finish — verify `games` table has rows |

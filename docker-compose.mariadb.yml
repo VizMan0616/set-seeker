@@ -1,9 +1,15 @@
 # MariaDB backend (ADR 0014). Usage:
 #   cp .env.example .env
-#   # set DATABASE_URL=mysql+pymysql://setseeker:…@mariadb:3306/setseeker in .env
+#   # set MARIADB_* in .env (DATABASE_URL is derived automatically below)
 #   docker compose -f docker-compose.yml -f docker-compose.mariadb.yml up --build
 #
 # Production: combine with docker-compose.prod.yml (prod image + blue/green slots).
+#
+# MariaDB applies MARIADB_* credentials only on first init of mariadb-data.
+# After changing MARIADB_PASSWORD, reset the volume: docker compose … down -v
+
+x-mariadb-app-env: &mariadb-app-env
+  DATABASE_URL: mysql+pymysql://${MARIADB_USER:-setseeker}:${MARIADB_PASSWORD:-setseeker}@mariadb:3306/${MARIADB_DATABASE:-setseeker}
 
 networks:
   setseeker-public:
@@ -28,10 +34,15 @@ services:
       - default
       - setseeker-public
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb -u\"$$MARIADB_USER\" -p\"$$MARIADB_PASSWORD\" -e 'SELECT 1' \"$$MARIADB_DATABASE\"",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 30s
 
   set-seeker:
     build:
@@ -39,6 +50,8 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+    environment:
+      <<: *mariadb-app-env
 
 volumes:
   mariadb-data:
